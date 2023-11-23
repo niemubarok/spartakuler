@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const useTransaksiStore = defineStore("transaksi", {
   state: () => ({
-    API_URL: process.env.API_URL,
+    API_URL: ref(ls.get("API_URL")) || "-",
     dataCustomer: ref(""),
     transaksi: ref([]),
     lokasiPos: ref(ls.get("lokasiPos") || "-"),
@@ -24,14 +24,11 @@ export const useTransaksiStore = defineStore("transaksi", {
     biayaParkir: ref(0),
     bayar: ref(),
     pic_body_keluar: ref(null),
-
-    // detailTransaksi: ref({
-    //   platNomor: ref(""),
-    //   nomorTiket: ref(""),
-    //   isMember: ref(false),
-    // }),
   }),
   actions: {
+    setAPIURL(url) {
+      ls.get("API_URL", url);
+    },
     setTransaksi(transaksi) {
       this.transaksi = transaksi;
     },
@@ -111,10 +108,6 @@ export const useTransaksiStore = defineStore("transaksi", {
         }
       } catch (error) {}
     },
-    // setPlatNomor(platNomor) {
-    //   this.platNomor.value = platNomor.toUpperCase();
-    // },
-
     setCheckIn(isCheckedIn) {
       this.isCheckedIn = isCheckedIn;
     },
@@ -123,7 +116,7 @@ export const useTransaksiStore = defineStore("transaksi", {
       // if (localData) {
       //   this.jenisKendaraan = JSON.parse(localData);
       // } else {
-      const response = await fetch(process.env.API_URL + "/vehicles/all");
+      const response = await fetch(this.API_URL + "/vehicles/all");
       const data = await response.json();
       // console.log(data);
       this.jenisKendaraan = data;
@@ -132,12 +125,9 @@ export const useTransaksiStore = defineStore("transaksi", {
     },
     async getTransaksiByNopol(no_pol) {
       // console.log(no_pol);
-      const response = await axios.post(
-        process.env.API_URL + "/transactions/nopol",
-        {
-          no_pol: no_pol,
-        }
-      );
+      const response = await axios.post(this.API_URL + "/transactions/nopol", {
+        no_pol: no_pol,
+      });
       const data = response.data;
       // console.log(data);
       this.transaksi.value = data;
@@ -149,7 +139,7 @@ export const useTransaksiStore = defineStore("transaksi", {
       // if (localData) {
       //   this.lokasiPos.value = JSON.parse(localData);
       // } else {
-      const response = await fetch(process.env.API_URL + "/locations/all");
+      const response = await fetch(this.API_URL + "/locations/all");
       const data = await response.json();
       const lokasiPos = data.map((data) => {
         return {
@@ -166,7 +156,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     },
     async getCustomerByNopol() {
       console.log(this.platNomor);
-      const res = await axios.post(process.env.API_URL + "/customers/nopol", {
+      const res = await axios.post(this.API_URL + "/customers/nopol", {
         no_pol: this.platNomor?.toUpperCase(),
       });
 
@@ -183,7 +173,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     },
 
     async getTarifJenisKendaraan() {
-      const response = await axios.post(process.env.API_URL + "/prices/type", {
+      const response = await axios.post(this.API_URL + "/prices/type", {
         id_jenis_kendaraan: this.selectedJenisKendaraan?.value,
       });
       const data = response.data[0];

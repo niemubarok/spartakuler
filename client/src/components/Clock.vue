@@ -1,22 +1,20 @@
 <template>
-  <div>
-    <!-- <q-card flat class="bg-transparent">
+  <!-- <div> -->
+  <!-- <q-card flat class="bg-transparent">
       <q-card-section> -->
-    <q-chip class="col" icon="today">
-      <span class="text-primary text-weight-bolder">
-        {{ day }}, {{ date }}
-      </span>
-    </q-chip>
-    <q-chip icon="schedule" outline class="bg-grey-1 col">
-      <h6 class="text-weight-bolder text-red">
-        {{ hours }}<span class="text-grey">:</span>{{ minutes
-        }}<span class="text-grey">:</span>{{ seconds }}
-      </h6>
-    </q-chip>
-    <!-- </q-card-section>
+  <q-chip icon="today" class="bg-transparent">
+    <span class="text-primary text-weight-bolder"> {{ day }}, {{ date }} </span>
+  </q-chip>
+  <q-chip class="bg-transparent q-mr-md" style="width: 100px">
+    <h4 class="text-weight-bolder text-secondary digital-7">
+      {{ hours }}<span class="text-grey">:</span>{{ minutes
+      }}<span class="text-grey">:</span>{{ seconds }}
+    </h4>
+  </q-chip>
+  <!-- </q-card-section>
     </q-card> -->
-    <!-- {{ dateTime() }} -->
-  </div>
+  <!-- {{ dateTime() }} -->
+  <!-- </div> -->
 </template>
 
 <script setup>

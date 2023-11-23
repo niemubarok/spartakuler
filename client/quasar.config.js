@@ -171,7 +171,7 @@ module.exports = configure(function (/* ctx */) {
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
         // OS X / Mac App Store
-        // appBundleId: '',
+        appBundleId: "com.sparta.app",
         // appCategoryType: '',
         // osxSign: '',
         // protocol: 'myapp://path',
@@ -181,8 +181,7 @@ module.exports = configure(function (/* ctx */) {
 
       builder: {
         // https://www.electron.build/configuration/configuration
-
-        appId: "com.sparta.app",
+        // appId: "com.sparta.app",
         // targets: [
         //   {
         //     target: "AppImage",

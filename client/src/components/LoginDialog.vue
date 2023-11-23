@@ -1,33 +1,36 @@
 <template>
-  <q-dialog ref="dialogRef" no-backdrop-dismiss @hide="onDialogHide">
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card
       class="q-px-md q-pt-sm glass relative"
       style="width: 500px; height: fit-content"
     >
       <q-card-section>
-        <q-form @submit="onSubmit">
-          <q-input
-            v-model="username"
-            label="Username"
-            dense
-            outlined
-            autofocus
-            autocomplete="off"
-          ></q-input>
-          <q-input
-            v-model="password"
-            label="Password"
-            dense
-            outlined
-            type="password"
-            class="q-mt-md"
-            autocomplete="new-password"
-          ></q-input>
-          <q-card-actions align="right">
-            <q-btn flat label="Cancel" @click="onCancel" />
-            <q-btn flat label="Login" type="submit" color="primary" />
-          </q-card-actions>
-        </q-form>
+        <q-input
+          v-model="username"
+          label="Username"
+          dense
+          outlined
+          autofocus
+          autocomplete="off"
+          @keydown.enter="passwordInput.focus()"
+        ></q-input>
+        <!-- <q-form @submit="onSubmit"> -->
+        <q-input
+          ref="passwordInput"
+          v-model="password"
+          label="Password"
+          dense
+          outlined
+          type="password"
+          class="q-mt-md"
+          autocomplete="new-password"
+          @keydown.enter="onSubmit"
+        ></q-input>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn flat label="Login" type="submit" color="primary" />
+        </q-card-actions>
+        <!-- </q-form> -->
       </q-card-section>
 
       <!-- <q-card-actions align="right"> -->
@@ -48,6 +51,7 @@ import ls from "localstorage-slim";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import ApiUrlDialog from "./ApiUrlDialog.vue";
 
 const { dialogRef, onDialogHide } = useDialogPluginComponent();
 const componentStore = useComponentStore();
@@ -59,6 +63,7 @@ const $q = useQuasar();
 const username = ref("");
 const password = ref("");
 const shift = ref("S1");
+const passwordInput = ref(null);
 
 const determineShift = () => {
   const shift1Start = "07:00";
@@ -70,7 +75,7 @@ const determineShift = () => {
     minute: "2-digit",
   });
 
-  if (currentTime < shift1End) {
+  if (currentTime >= shift1Start && currentTime < shift1End) {
     shift.value = "S1";
   } else if (currentTime >= shift2Start && currentTime <= shift2End) {
     shift.value = "S2";
@@ -113,8 +118,6 @@ const onSubmit = async () => {
     }
   }
 };
-
-onMounted(async () => {});
 
 defineEmits([...useDialogPluginComponent.emits]);
 </script>

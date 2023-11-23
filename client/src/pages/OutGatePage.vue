@@ -1,9 +1,11 @@
 <template>
-  <div v-if="$q.platform.is.mobile" class="text-h2">
+  <div v-if="$q.screen.lt.md" class="text-h2">
     <q-card class="fixed-center">
-      <img src="https://cdn.quasar.dev/img/mountains.jpg" />
+      <img src="~assets/logo.png" />
       <q-card-section>
-        <div class="text-h6">Silahkan buka halaman ini di Komputer</div>
+        <div class="text-h6">
+          Silahkan buka halaman ini dengan resolusi di atas 1024px x 768px
+        </div>
         <q-btn
           color="primary"
           icon="home"
@@ -13,42 +15,33 @@
       </q-card-section>
     </q-card>
   </div>
-  <div :key="componentStore.outGateKey" v-else class="relative">
+  <div
+    :key="componentStore.outGateKey"
+    v-else
+    class="relative fixed-top"
+    :class="darkMode ? 'bg-primary' : 'bg-grey-4'"
+  >
     <div
       v-show="!transaksiStore.isCheckedIn"
-      class="flex row justify-between q-pl-lg fixed-top"
+      class="flex row justify-between q-pl-lg no-wrap"
     >
       <q-img
-        src="/logo.png"
+        v-if="$q.screen.gt.sm"
+        src="~assets/logo.png"
         spinner-color="primary"
         spinner-size="82px"
         width="250px"
-        style="margin-top: -40px; margin-left: -30px"
+        style="height: 15vh"
+        class="bg-grey-3 q-ml-sm rounded-corner"
       />
 
-      <div class="q-mt-lg">
+      <div v-if="$q.screen.gt.md" class="q-mt-lg">
         <Quotes />
       </div>
-      <div class="column">
-        <div class="flex row q-mt-md q-mr-sm">
-          <q-chip class="" icon="account_circle" :label="pegawai" />
-          <q-chip class="" icon="clocks" :label="ls.get('shift')" />
-          <q-chip
-            class=""
-            icon="place"
-            :label="
-              '(' +
-              transaksiStore.lokasiPos.value +
-              ') ' +
-              transaksiStore.lokasiPos.label
-            "
-          />
-          <!-- </div> -->
 
-          <Clock />
-        </div>
+      <div class="content-end q-pr-md">
         <!-- v-show="!transaksiStore.isCheckedIn" -->
-        <div class="flex row justify-end q-mt-md q-mr-sm">
+        <div class="flex row justify-end q-mt-md">
           <!-- <ShinyCard class="q-mt-md" title="Total Kendaraan" /> -->
           <ShinyCard
             class="bg-indigo-10"
@@ -70,8 +63,37 @@
           />
         </div>
       </div>
-      <!-- </div> -->
     </div>
+    <div class="window-width flex row justify-end q-mr-sm q-col-gutter-sm">
+      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
+      <q-chip class="bg-transparent" icon="account_circle" :label="pegawai" />
+      <!-- </div> -->
+      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
+      <q-chip
+        class="bg-transparent"
+        icon="work_history"
+        :label="ls.get('shift')"
+      />
+      <!-- </div> -->
+      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
+      <q-chip
+        class="bg-transparent"
+        icon="place"
+        :label="
+          '(' +
+          transaksiStore.lokasiPos.value +
+          ') ' +
+          transaksiStore.lokasiPos.label
+        "
+      />
+      <Clock />
+      <!-- </div> -->
+      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3">
+          </div> -->
+    </div>
+    <!-- </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
 
     <div class="row justify-center items-center" style="height: 100vh">
       <div>
@@ -150,16 +172,23 @@
     >
       <div class="col-8">
         <!-- style="width: 60vw; height: 10vh" -->
+        <!-- input-class="input-box  text-white " -->
         <q-input
           v-show="
             !componentStore.hideInputPlatNomor && !transaksiStore.isCheckedIn
           "
-          class="input-box bg-secondary rounded-corner relative z-top"
-          input-class="input-box text-h3 text-white text-uppercase text-weight-bolder"
-          input-style="height:10vh"
-          label-color="yellow text-h4"
-          color="bg-secondary"
-          outlined
+          class="input-box rounded-corner relative z-top text-uppercase q-pa-md"
+          :class="darkMode ? 'bg-grey-3 text-dark' : 'bg-secondary  text-white'"
+          :input-class="
+            darkMode
+              ? 'input-box  text-dark text-weight-bolder'
+              : 'input-box text-white text-weight-bolder'
+          "
+          input-style="height:10vh;border:0"
+          :label-color="
+            darkMode ? 'secondary text-h4 q-pb-xl' : 'yellow text-h4 q-pb-xl'
+          "
+          :color="darkMode ? 'bg-yellow' : 'bg-secondary '"
           item-aligned
           borderless
           v-model="transaksiStore.platNomor"
@@ -173,35 +202,33 @@
           @update:model-value="() => onInputPlatNomor()"
           @keydown.enter="onPressEnterPlatNomor()"
         >
-          <!-- (val) =>
-          val ? val.length >= 4 || 'Plat nomor masih kurang' : true, -->
-          <!-- @hasError="platNomorModel = ''" -->
-          <!-- @input="(val) => onInputPlatNomor(val)" -->
           <template v-slot:prepend>
-            <!-- <div> -->
-            <q-chip square label="F1" class="glass text-weight-bold q-mt-md" />
-            <!-- </div> -->
+            <q-btn
+              push
+              label="F1"
+              class="text-weight-bold q-mt-md"
+              :class="darkMode ? 'bg-dark text-white' : 'bg-grey-3 text-dark'"
+            />
           </template>
 
           <template v-slot:append>
             <q-btn
               push
               :size="'xl'"
-              class="q-mt-md q-mr-md bg-white text-dark"
+              class="q-mt-md q-mr-md"
+              :class="darkMode ? 'bg-dark text-white' : 'bg-grey-3 text-dark'"
               icon="keyboard_return"
               @click="onPressEnterPlatNomor()"
             />
-            <!-- @click="onSaveSettings(props.type)" -->
           </template>
         </q-input>
       </div>
 
       <q-btn
         flat
-        class="fixed-bottom-left q-mb-md"
+        class="fixed-bottom-right q-mb-xl"
         color="primary"
         icon="logout"
-        label="Log Out"
       >
         <q-badge
           color="primary"
@@ -210,31 +237,30 @@
           class="q-ml-xs"
         />
       </q-btn>
-      <q-btn
+      <!-- <q-btn
         flat
         class="absolute-bottom-right q-mb-lg"
         color="primary"
         size="sm"
         icon="summarize"
-        label="Laporan"
         @click="onClickKendaraanKeluar()"
       >
-        <q-badge
+ <q-badge
           color="primary"
           text-color="white"
           label="shift + R"
           class="q-ml-xs"
         />
-      </q-btn>
+      </q-btn> -->
       <q-btn
         flat
         class="fixed-bottom-right q-mb-md"
         color="primary"
         size="sm"
         icon="settings"
-        label="Settings"
         @click="onClickSettings()"
       >
+        <!-- label="Settings" -->
         <q-badge
           color="primary"
           text-color="white"
@@ -242,6 +268,12 @@
           class="q-ml-xs"
         />
       </q-btn>
+
+      <!-- <q-toggle
+        v-model="darkMode"
+        @update:model-value="darkModeToggle"
+        color="green"
+      /> -->
     </div>
   </div>
 </template>
@@ -280,6 +312,11 @@ const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
 const $q = useQuasar();
 
+const darkMode = ref(ls.get("darkMode")) || ref(false);
+const darkModeToggle = () => {
+  ls.set("darkMode", darkMode.value);
+};
+
 const cardVideo = ref(null);
 const pegawai = ls.get("pegawai").nama;
 
@@ -298,39 +335,19 @@ const inputPlatNomorRef = ref(null);
 const onClickSettings = () => {
   const settingsDialog = $q.dialog({
     component: SettingsDialog,
-    noBackdropDismiss: true,
-    persistent: true,
   });
 
   settingsDialog.update();
 };
 const onClickKendaraanKeluar = () => {
-  const settingsDialog = $q.dialog({
+  const dialog = $q.dialog({
     component: KendaraanKeluarDialog,
     noBackdropDismiss: true,
   });
   // persistent: true,
 
-  settingsDialog.update();
+  dialog.update();
 };
-
-//   // transaksiStore.setCheckIn(true);
-//   const dialog = $q.dialog({
-//     component: TicketDialog,
-//     noBackdropDismiss: true,
-//     persistent: true,
-//     componentProps: {
-//       title: type,
-//     },
-//   });
-
-//   dialog.update();
-//   componentStore.hideInputPlatNomor = true;
-// };
-
-// const onFocusPlatNomor = () => {
-//   console.log("focus");
-// };
 const onInputPlatNomor = () => {
   if (transaksiStore.platNomor.length >= 3) {
     const firstCharacter = transaksiStore.platNomor?.charAt(0);
@@ -393,11 +410,13 @@ const onPressEnterPlatNomor = async () => {
 onMounted(() => {
   if (transaksiStore.lokasiPos === "-") {
     onClickSettings();
-    $q.notify({
-      type: "negative",
-      message: "Silahkan pilih lokasi terlebih dahulu",
-      position: "center",
-    });
+    // $q.notify({
+    //   type: "negative",
+    //   message: "Silahkan pilih lokasi terlebih dahulu",
+    //   position: "center",
+    // });
+  } else if (transaksiStore.API_URL === "-" || !pegawai || !ls.get("shift")) {
+    router.push("/");
   }
   // inputPlatNomorRef ? inputPlatNomorRef.value.focus() : "";
   const handleKeyDown = (event) => {
@@ -416,7 +435,13 @@ onMounted(() => {
       onClickKendaraanKeluar();
     } else if (event.shiftKey === true && event.key === "L") {
       event.preventDefault();
+      ls.remove("pegawai");
+      ls.remove("shift");
       router.push("/");
+    } else if (event.shiftKey === true && event.key === "D") {
+      event.preventDefault();
+      darkMode.value = !darkMode.value;
+      darkModeToggle();
     }
   };
 
@@ -457,7 +482,7 @@ onUnmounted(() => {
 :deep(.input-box .q-field__control),
 :deep(.input-box .q-field__append .q-field__marginal) {
   height: 10vh;
-  width: 80vw;
+  width: 70vw;
   padding-top: 10px;
   font-size: 80px;
   font-family: "Courier New", Courier, monospace;

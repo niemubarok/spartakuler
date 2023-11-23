@@ -109,11 +109,11 @@ export default class TransactionsController {
   public async getPicture({ request, response }: HttpContextContract) {
     const no_pol = request.body().no_pol;
     const pic = await Database.rawQuery(
-      `SELECT pic_body_keluar FROM transaksi_parkir WHERE no_pol = '${no_pol}'`
+      `SELECT pic_body_masuk FROM transaksi_parkir WHERE no_pol = '${no_pol}'`
     );
-    const picBodyMasuk = pic.rows[0].pic_body_keluar;
+    const picBodyMasuk = pic.rows[0].pic_body_masuk;
     // const bufferToString = buffer.toString("base64");
-    return pic.rows[0];
+    // return pic.rows[0];
 
     // response.header("Content-Type", "image/png");
     response.send(picBodyMasuk);

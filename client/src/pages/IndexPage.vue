@@ -26,11 +26,15 @@
 </template>
 
 <script setup>
-import { defineComponent } from "vue";
+import { defineComponent, onMounted } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
+import ApiUrlDialog from "src/components/ApiUrlDialog.vue";
+import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useQuasar } from "quasar";
 
 const $q = useQuasar();
+
+const transaksiStore = useTransaksiStore();
 
 const onClickDemoPage = () => {
   const dialog = $q.dialog({
@@ -40,6 +44,31 @@ const onClickDemoPage = () => {
   });
   dialog.update();
 };
+
+const handleKeyDown = (event) => {
+  if (event.shiftKey && event.key === "D") {
+    onClickDemoPage();
+  }
+};
+
+window.addEventListener("keydown", handleKeyDown);
+
+onMounted(async () => {
+  console.log(transaksiStore.API_URL);
+  if (!transaksiStore.API_URL || transaksiStore.API_URL === "-") {
+    const dialog = $q.dialog({
+      component: ApiUrlDialog,
+      noBackdropDismiss: true,
+    });
+
+    dialog.update();
+    $q.notify({
+      type: "negative",
+      message: "Silahkan Isi URL API terlebih dahulu",
+      position: "top",
+    });
+  }
+});
 
 defineComponent({
   name: "IndexPage",

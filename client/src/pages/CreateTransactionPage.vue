@@ -200,6 +200,7 @@ onMounted(async () => {
       }
     );
     imageUrl.value = response.data;
+    console.log(imageUrl.value);
   } catch (error) {
     console.error(error);
   }

@@ -64,6 +64,14 @@
         </q-select>
       </div>
 
+      <div class="q-mt-md">
+        <q-input
+          v-model="transaksiStore.API_URL"
+          type="text"
+          label="Masukkan URL"
+        />
+      </div>
+
       <q-card-actions align="right">
         <!-- <q-btn flat label="Action 1" /> -->
         <q-btn flat label="Simpan" @click="onSaveSettings" />
@@ -73,7 +81,7 @@
 </template>
 
 <script setup>
-import { useDialogPluginComponent } from "quasar";
+import { useDialogPluginComponent, useQuasar } from "quasar";
 // import SuccessCheckMark from "./SuccessCheckMark.vue";
 import { onMounted, onBeforeUnmount, onBeforeMount, ref } from "vue";
 import { useComponentStore } from "src/stores/component-store";
@@ -92,6 +100,8 @@ const cameraInOptions = ref(cameraOptions.value);
 const cameraOutOptions = ref(cameraOptions.value);
 
 const postLocationOptions = ref([]);
+
+const $q = useQuasar();
 
 const getAvailableCameras = () => {
   navigator.mediaDevices
@@ -119,6 +129,13 @@ const onDialogHide = () => {
       message: "Silahkan pilih lokasi terlebih dahulu",
       position: "center",
     });
+  } else if (transaksiStore.API_URL === "-") {
+    dialogRef.value.show();
+    $q.notify({
+      type: "negative",
+      message: "Silahkan Isi URL API terlebih dahulu",
+      position: "center",
+    });
   }
 };
 onMounted(async () => {
@@ -142,6 +159,7 @@ const onSaveSettings = () => {
   ls.set("cameraIn", cameraIn.value);
   ls.set("cameraOut", cameraOut.value);
   ls.set("lokasiPos", transaksiStore.lokasiPos);
+  ls.set("API_URL", transaksiStore.API_URL);
 
   dialogRef.value.hide();
   window.location.reload();

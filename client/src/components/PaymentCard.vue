@@ -1,5 +1,6 @@
 <template>
-  <div :ref="paymentCardKey">
+  <div :ref="paymentCardKey" class="relative">
+    <Clock class="absolute-top-left q-ma-md" />
     <!-- card untuk transaksi pembayaran -->
     <q-card
       flat
@@ -209,7 +210,6 @@
         </div>
       </div>
     </q-card>
-    <Clock class="fixed-top-left q-ma-md" />
   </div>
 </template>
 
@@ -267,7 +267,7 @@ const onClickBayar = () => {
     context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
 
     const imageBase64 = canvas.toDataURL("image/png");
-    console.log("imageBase64", imageBase64);
+    // console.log("imageBase64", imageBase64);
 
     transaksiStore.pic_body_keluar = imageBase64;
   }
