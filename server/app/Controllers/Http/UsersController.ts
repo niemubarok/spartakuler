@@ -14,7 +14,7 @@ export default class UsersController {
     const username = request.body().username;
     const password = request.body().password;
 
-    if (username == null || password == null) {
+    if (!username || !password) {
       response.status(401).json({
         message: "username atau password tidak boleh kosong",
       });
