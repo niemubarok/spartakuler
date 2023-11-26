@@ -1,19 +1,18 @@
 <template>
-  <!-- :maximized="true" -->
   <q-dialog
+    :maximized="true"
     ref="dialogRef"
-    no-backdrop-dismiss
-    no-route-dismiss
     @hide="onDialogHide"
     class="q-pa-xl"
     content-class="dialog__backdrop"
   >
     <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
-    <q-card
-      style="width: 50vw; height: fit-content"
-      class="q-px-md q-pt-xl q-pb-md glass rounded-corner relative"
-    >
-      <div>
+    <div>
+      <q-card
+        style="width: 70vw; height: fit-content"
+        class="q-px-md q-pt-xl q-pb-md glass rounded-corner relative fixed-center"
+      >
+        <!-- <div>
         <q-avatar
           size="40px"
           class="cursor-pointer z-top absolute-top-right q-ma-sm"
@@ -22,108 +21,50 @@
           icon="close"
           @click="dialogRef.hide()"
         />
-      </div>
-      <!-- <q-icon name="close"  /> -->
-      <!-- <q-item>
-        <q-item-section avatar>
-          <q-icon :name="props.icon" size="xl" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label
-            style="margin-left: -15px"
-            class="q-mt-xs text-weight-bolder text-h5"
-            >{{ props.title }}</q-item-label
-          >
-        </q-item-section>
-      </q-item> -->
-      <div>
-        <q-chip
-          class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left"
-          :label="props.title"
-        />
-      </div>
-      <div class="flex justify-center">
-        <member-card
-          v-if="transaksiStore.isMember"
-          :nama="props.nama"
-          :expiration="props.expiration"
-          :ribbonText="props.ribbonText"
-        />
-        <plat-nomor v-else class="q-ma-md" />
-      </div>
-      <!-- <q-separator class="border-1"></q-separator> -->
-      <!-- input-class="text-white" -->
-
-      <!-- style="height: 10vh"
-      input-class="text-h4 text-white font-bold autofocus"
-      input-style="height:10vh" -->
-      <!-- outlined="bg-primary text-white font-bold" -->
-      <!-- <q-select
-        outlined
-        ref="jenisKendaraanRef"
-        v-model="jenisKendaraanModel"
-        label="Pilih Jenis Kendaraan"
-        :options="jenisKendaraanOptions"
-        style="width: 250px"
-        autofocus
-        behavior="dialog"
-        @keydown="handleKeydownOnJenisKendaraan($event)"
-      >
-        <template v-slot:option="scope">
-          <q-item v-bind="scope.itemProps">
-            <q-item-section avatar>
-              <q-chip
-                square
-                class="bg-dark text-white"
-                :label="scope.opt.value"
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ scope.opt.label }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select> -->
-
-      <!-- <div>
-
       </div> -->
-
-      <q-input
-        borderless
-        class="input-box bg-primary rounded-corner relative q-pa-sm"
-        input-class="input-box text-white"
-        label-color="yellow text-h6"
-        color="teal"
-        v-model="transaksiStore.nomorTiket"
-        label="Scan Nomor Struk"
-        mask="XXXXXXXXXXXXXXXXXXXXX"
-        ref="strukRef"
-        :rules="[
-          (val) => (val ? val.length >= 4 || 'Nomor ticket kurang' : true),
-        ]"
-        @keydown.enter="onSaveSettings(props.type)"
-        autofocus
-      >
-        <template v-slot:append>
-          <q-btn
-            push
-            :size="'xl'"
-            class="q-mt-xl q-mr-lg bg-white text-dark"
-            icon="keyboard_return"
+        <div>
+          <q-chip
+            class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left"
+            :label="props.title"
           />
-          <!-- @click="onSaveSettings(props.type)" -->
-          <!-- @click="
-              [morphStore.nextCarMorph(), transaksiStore.setCheckIn(true)]
-            " -->
-        </template>
-      </q-input>
+        </div>
+        <div class="flex justify-center">
+          <member-card
+            v-if="transaksiStore.isMember"
+            :nama="props.nama"
+            :expiration="props.expiration"
+            :ribbonText="props.ribbonText"
+          />
+          <plat-nomor v-else class="q-ma-md" />
+        </div>
 
-      <!-- <q-card-actions align="right"> -->
-      <!-- <q-btn flat label="Action 1" /> -->
-      <!-- <q-btn flat label="Simpan" @click="onSaveSettings" />
-      </q-card-actions> -->
-    </q-card>
+        <q-input
+          borderless
+          class="input-box bg-primary rounded-corner relative q-pa-sm"
+          input-class="input-box text-white"
+          label-color="yellow text-h6"
+          color="teal"
+          v-model="transaksiStore.nomorTiket"
+          label="Scan Nomor Struk"
+          mask="XXXXXXXXXXXXXXXXXXXXX"
+          ref="strukRef"
+          :rules="[
+            (val) => (val ? val.length >= 4 || 'Nomor ticket kurang' : true),
+          ]"
+          @keydown.enter="onSaveSettings(props.type)"
+          autofocus
+        >
+          <template v-slot:append>
+            <q-btn
+              push
+              :size="'xl'"
+              class="q-mt-xl q-mr-lg bg-white text-dark"
+              icon="keyboard_return"
+            />
+          </template>
+        </q-input>
+      </q-card>
+    </div>
   </q-dialog>
 </template>
 
@@ -201,7 +142,14 @@ const onSaveSettings = async () => {
       const waktuMasuk = new Date(transaksi[0].waktu_masuk);
       const waktuKeluar = new Date();
       const lamaParkir = calculateParkingDuration(waktuMasuk);
-      transaksiStore.durasi = `${lamaParkir.hours} Jam ${lamaParkir.minutes} Menit`;
+      transaksiStore.durasi =
+        lamaParkir.days > 0
+          ? lamaParkir.additionalHourAfter24 !== 0
+            ? `${lamaParkir.days} Hari ${lamaParkir.additionalHourAfter24} Jam ${lamaParkir.minutes} Menit`
+            : `${lamaParkir.days} Hari ${lamaParkir.minutes} Menit`
+          : lamaParkir.hours > 0
+          ? `${lamaParkir.hours} Jam ${lamaParkir.minutes} Menit`
+          : `${lamaParkir.minutes} Menit`;
       await transaksiStore.calculateParkingFee(waktuMasuk, waktuKeluar);
 
       // // const biayaParkir = calculateParkingFee(waktuMasuk, waktuKeluar);
@@ -223,6 +171,7 @@ const onSaveSettings = async () => {
       });
     }
   } catch (error) {
+    console.log(error);
     $q.notify({
       type: "negative",
       message: error,
@@ -258,8 +207,15 @@ const onInputTicket = () => {
   // console.log(platNomorModel.value.toUpperCase());
 };
 
+const handleKeydownOnInputTicket = (event) => {
+  if (event.key === "Escape") {
+    dialogRef.value.hide();
+  }
+};
+
 onMounted(() => {
-  // transaksiStore.nomorTiket = "";
+  transaksiStore.nomorTiket = "";
+  window.addEventListener("keydown", handleKeydownOnInputTicket);
 });
 
 // const jenisKendaraanValue = computed(()=>;

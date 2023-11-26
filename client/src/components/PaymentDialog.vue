@@ -4,6 +4,8 @@
     ref="dialogRef"
     persistent
     maximized
+    no-esc-dismiss
+    no-backdrop-dismiss
     transition-hide="scale"
     transition-show="scale"
     @hide="onDialogHide"
@@ -43,18 +45,10 @@
             />
             <span class="text-subtitle2 q-pb-md">Rp. </span>
             <span class="text-center text-weight-bolder">
-              {{ transaksiStore.biayaParkir }}
+              {{ transaksiStore.biayaParkir.toLocaleString("id-ID") }}
             </span>
           </q-chip>
         </div>
-        <!-- <q-separator class="border-1"></q-separator> -->
-        <!-- input-class="text-white" -->
-
-        <!-- style="height: 10vh"
-        input-class="text-h4 text-white font-bold autofocus"
-        input-style="height:10vh" -->
-        <!-- outlined="bg-primary text-white font-bold" -->
-        <!-- <q-card-section> -->
         <div class="q-pt-xl">
           <q-input
             borderless
@@ -62,20 +56,13 @@
             input-class="input-box text-white text-weight-bolder"
             label-color="yellow text-h6 q-pa-md"
             color="teal"
-            v-model="transaksiStore.bayar"
+            v-model="bayarModel"
             label="Masukkan Jumlah Uang Diterima"
             ref="strukRef"
             autofocus
-            mask="#############"
             @keydown.enter="onSaveSettings()"
+            @update:model-value="() => onInputChange()"
           >
-            <!-- :lazy-rules="[
-        (val) =>
-          parseInt(val) <div parseInt(transaksiStore.biayaParkir)
-            ? 'Jumlah Uang Kurang'
-            : true,
-      ]" -->
-            <!-- type="number" -->
             <template v-slot:prepend>
               <q-chip
                 flat
@@ -90,10 +77,6 @@
                 class="q-mt-xl q-mr-lg bg-white text-dark"
                 icon="keyboard_return"
               />
-              <!-- @click="onSaveSettings()" -->
-              <!-- @click="
-              [morphStore.nextCarMorph(), transaksiStore.setCheckIn(true)]
-              " -->
             </template>
           </q-input>
         </div>
@@ -110,12 +93,14 @@
           >
             <div class="q-mx-md q-mt-md">Uang Kembali</div>
             <q-separator inset light />
-            <!-- <div class="text-6">Uang Masuk</div>
-            <div class="text-h3">Rp. {{ transaksiStore.bayar }}</div> -->
             <div>
               <q-chip
                 class="font-courier bg-transparent q-mt-md text-h2 text-weight-bolder relative"
-                :label="transaksiStore.bayar - transaksiStore.biayaParkir"
+                :label="
+                  (
+                    transaksiStore.bayar - transaksiStore.biayaParkir
+                  ).toLocaleString('id-ID')
+                "
               >
                 <q-badge
                   style="top: 10px; left: 14px"
@@ -129,62 +114,6 @@
         </q-slide-transition>
       </q-card>
     </div>
-    <q-dialog v-model="openGate" :no-esc-dismiss="false">
-      <q-card class="glass full-width q-pt-xl" style="height: 55vh">
-        <q-card-section class="row items-center justify-center">
-          <q-avatar icon="lock_open" color="primary" text-color="white" />
-          <span class="q-ml-sm text-h4 text-primary text-weight-bolder"
-            >BUKA GERBANG?</span
-          >
-        </q-card-section>
-        <q-card-section align="center" class="q-mt-xl">
-          <!-- <q-chip
-            square
-            class="text-center text-h6"
-            style="width: 150px; height: 150px"
-            label="Tidak"
-          />
-          <q-chip
-            square
-            autofocus
-            class="text-center text-h5"
-            style="width: 150px; height: 150px"
-            label="YA"
-          /> -->
-          <q-btn
-            size="xl"
-            push
-            style="width: 100px; height: 100px"
-            label="Tidak"
-            class="text-dark bg-grey-6 text-weight-bolder q-mr-md"
-            @keydown.enter="return"
-          >
-            <!-- class="q-mr-md" -->
-            <!-- color="grey-6 text-dark" -->
-            <q-badge color="transparent">
-              <q-btn push color="primary" label="ESC" />
-            </q-badge>
-          </q-btn>
-          <!-- @keydown.{escape}="onOpenGate()" -->
-          <q-btn
-            autofocus
-            size="xl"
-            push
-            label="Buka"
-            @focus="openGateFocus = true"
-            style="width: 150px; height: 150px"
-            @keydown.enter="onOpenGate()"
-            :class="openGateFocus ? 'bg-yellow text-dark' : 'text-dark'"
-            class="text-dark bg-yellow text-weight-bolder"
-          >
-            <!-- color="bg-primary text-dark" -->
-            <q-badge color="transparent">
-              <q-btn push color="primary" icon="keyboard_return" />
-            </q-badge>
-          </q-btn>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
   </q-dialog>
 </template>
 
@@ -194,6 +123,7 @@ import { useDialogPluginComponent, useQuasar } from "quasar";
 import { onMounted, onBeforeUnmount, onBeforeMount, ref, inject } from "vue";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+import OpenGateDialog from "src/components/OpenGateDialog.vue";
 
 // import ls from "localstorage-slim";
 // ls.config.encrypt = false;
@@ -207,35 +137,18 @@ const props = defineProps({
   type: String,
 });
 
-const openGate = ref(false);
-const openGateFocus = ref(false);
-const isGateOpen = ref(false);
-const onOpenGate = async () => {
-  await componentStore.openGate();
-  isGateOpen.value = true;
-  componentStore.setOutGateKey();
-  transaksiStore.setCheckIn(false);
-  transaksiStore.$reset();
-  dialogRef.value.hide();
-  if (isGateOpen.value == true) {
-    setTimeout(async () => {
-      await componentStore.closeGate();
-      isGateOpen.value = false;
-    }, 10000);
-  }
+const bayarModel = ref();
 
-  // let timeoutId = setTimeout(async () => {
-  // }, 15000);
-  // clearTimeout(timeoutId);
+const onInputChange = () => {
+  let value = bayarModel.value.replace(/\D/g, "");
+  let numberValue = Number(value);
+  value = numberValue.toLocaleString("id-ID");
+
+  bayarModel.value = value;
+
+  transaksiStore.bayar = numberValue;
+  console.log(transaksiStore.bayar);
 };
-
-defineEmits([
-  // REQUIRED; need to specify some events that your
-  // component will emit through useDialogPluginComponent()
-  ...useDialogPluginComponent.emits,
-]);
-
-const { dialogRef, onDialogHide } = useDialogPluginComponent();
 
 let pressedKeys = "";
 const targetKeys = "TABAROKTA";
@@ -243,13 +156,22 @@ const targetKeys = "TABAROKTA";
 onMounted(async () => {
   // console.log(inputPlatNomorRef);
   const handleKeyDown = (event) => {
+    // if (event.key === "Escape") {
+    //   componentStore.setOutGateKey();
+    //   transaksiStore.setCheckIn(false);
+    //   transaksiStore.$reset();
+    //   // openGateRef.value.hide();
+    //   dialogRef.value.hide();
+    // }
     // Add the pressed key to the string of pressed keys
     pressedKeys += event.key.toUpperCase();
 
     // Check if the pressed keys match the target keys
     if (pressedKeys === targetKeys) {
-      // Call the function to execute
-      console.log("tabarokta");
+      componentStore.currentPage = "outgate";
+      componentStore.setOutGateKey();
+      transaksiStore.setCheckIn(false);
+      transaksiStore.$reset();
       dialogRef.value.hide();
     }
 
@@ -266,7 +188,14 @@ const onSaveSettings = async () => {
   if (parseInt(transaksiStore.bayar) >= parseInt(transaksiStore.biayaParkir)) {
     const updateTransaksi = await transaksiStore.updateTableTransaksi();
     if (updateTransaksi == 200) {
-      openGate.value = true;
+      const openGate = $q.dialog({
+        component: OpenGateDialog,
+        noBackdropDismiss: true,
+      });
+
+      openGate.update();
+
+      dialogRef.value.hide();
     }
   } else {
     console.log("kurang");
@@ -282,6 +211,14 @@ const onSaveSettings = async () => {
   // window.location.reload();
 };
 // onDialogHide(() => console.log("athide"))
+
+defineEmits([
+  // REQUIRED; need to specify some events that your
+  // component will emit through useDialogPluginComponent()
+  ...useDialogPluginComponent.emits,
+]);
+
+const { dialogRef, onDialogHide } = useDialogPluginComponent();
 </script>
 
 <style scoped>

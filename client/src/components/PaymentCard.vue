@@ -8,18 +8,16 @@
       class="gradient-primary q-ma-md fixed-top relative"
       style="top: 5vh; width: 95vw; height: 85vh; border-radius: 10px"
     >
-      <div>
+      <!-- <div>
         <q-avatar
           size="40px"
           class="cursor-pointer z-top absolute-top-left q-ma-sm"
           text-color="grey-7"
           color="grey-2"
           icon="close"
-          @click="transaksiStore.isCheckedIn = false"
         >
         </q-avatar>
-        <q-tooltip v-model="buttonBatal"> Batal </q-tooltip>
-      </div>
+      </div> -->
       <q-card-section>
         <q-card
           flat
@@ -48,7 +46,6 @@
                     subtitle="Waktu Masuk"
                     icon="schedule"
                   />
-                  <!-- :body="lokasiPos" -->
 
                   <q-timeline-entry
                     :title="transaksiStore.durasi"
@@ -60,7 +57,6 @@
               <div class="col-6">
                 <div class="column">
                   <div class="col q-mb-md">
-                    <!-- <div class="col"> -->
                     <!-- NOMOR TIKET -->
                     <q-chip
                       square
@@ -109,23 +105,20 @@
       </q-card-section>
       <q-card-section>
         <div class="flex row justify-start">
-          <q-btn
+          <!-- <q-btn
             outline
             class="rounded-corner q-mt-xl text-right text-grey-5 text-h4 bg-transparent"
             label="BUKA MANUAL"
             size="sm"
             style="width: 10vw; height: 5vh"
-          />
+          /> -->
           <!-- TOTAL BAYAR  -->
           <q-card
             flat
             bordered
-            class="glass text-dark q-mx-xl q-px-xl relative"
-            style="width: 34vw"
+            class="glass text-dark q-pr-md q-mr-xl relative"
+            style="width: 40vw"
           >
-            <!-- style="width: 50vw" -->
-            <!-- <div class="ribbon"></div> -->
-            <!-- <div class="ribbon ribbon-top-left"><span>Member</span></div> -->
             <q-card-section>
               <div class="text-h6 text-right">Biaya Parkir</div>
               <div
@@ -135,7 +128,14 @@
                   font-family: 'Courier Prime', monospace;
                 "
               >
-                {{ transaksiStore.biayaParkir }}
+                {{
+                  transaksiStore.biayaParkir
+                    .toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    })
+                    .split(",")[0]
+                }}
               </div>
             </q-card-section>
           </q-card>
@@ -144,16 +144,14 @@
             push
             class="text-right text-dark text-weight-bolder text-h4 bg-yellow"
             label="BAYAR"
-            style="width: 10vw"
+            style="width: 15vw; font-size: clamp(2rem, 1vw, 1rem)"
           >
-            <!-- @click="onClickBayar()" -->
-            <!-- floating -->
             <q-btn
               push
               color="grey-9"
               text-color="white"
-              label="F12"
-              class="q-pa-md text-weight-bolder text-body"
+              icon="keyboard_return"
+              class="q-pa-md text-weight-bolder text-body q-ml-sm"
             />
           </q-btn>
         </div>
@@ -162,23 +160,11 @@
         <div class="column q-mt-lg q-mb-md q-mr-md fixed-top-right">
           <FotoKendaraan title="Foto Masuk" type="image" :url="picBodyMasuk" />
 
-          <!-- <q-card class="bg-transparent text-center q-mt-md justify-center">
-            <div style="top: 5px" class="absolute">
-              <q-chip
-                dense
-                square
-                icon="image"
-                label="Kamera Keluar"
-                class="glass"
-                />
-            </div>
-          </q-card> -->
           <FotoKendaraan
             v-if="!transaksiStore.pic_body_keluar"
             title="Kamera Keluar"
             type="video"
           >
-            <!-- @click="captureCameraOut()" -->
             <template v-slot:video>
               <q-skeleton
                 v-if="cameraOut == null || cameraOut === '-'"
@@ -214,13 +200,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useTransaksiStore } from "src/stores/transaksi-store";
+import { useComponentStore } from "src/stores/component-store";
 import FotoKendaraan from "src/components/FotoKendaraan.vue";
 import { format, useQuasar } from "quasar";
 import CameraOut from "./CameraOut.vue";
 import Clock from "./Clock.vue";
-import PaymentDialog from "./PaymentDialog.vue";
+import PaymentDialogComponent from "./PaymentDialog.vue";
+import OpenGateDialogComponent from "./OpenGateDialog.vue";
 import ls from "localstorage-slim";
 import PlatNomor from "./PlatNomor.vue";
 import MemberRibbon from "./MemberRibbon.vue";
@@ -229,12 +217,13 @@ import axios from "axios";
 
 const $q = useQuasar();
 const transaksiStore = useTransaksiStore();
-const buttonBatal = ref(false);
+const componentStore = useComponentStore();
+// const buttonBatal = ref(false);
 const cameraOut = ls.get("cameraOut") || null;
 const cameraOutRef = ref(null);
-const bayarParkir = () => {
-  // logika bayar parkir
-};
+// const bayarParkir = () => {
+//   // logika bayar parkir
+// };
 
 const waktuMasuk = ref(
   new Date(transaksiStore.waktuMasuk)
@@ -257,7 +246,7 @@ const tanggalMasuk = ref(
 // const lokasiPos = ref(ls.get("lokasiPos")?.label);
 const isPaymentDialogMounted = ref(false);
 
-const onClickBayar = () => {
+const onClickBayar = async () => {
   // const video = videoRef.value;
   const videoRef = cameraOutRef.value?.$refs.videoRef;
 
@@ -267,22 +256,39 @@ const onClickBayar = () => {
     context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
 
     const imageBase64 = canvas.toDataURL("image/png");
-    // console.log("imageBase64", imageBase64);
 
     transaksiStore.pic_body_keluar = imageBase64;
   }
 
-  if (!isPaymentDialogMounted.value) {
-    const dialog = $q.dialog({
-      component: PaymentDialog,
+  if (
+    !isPaymentDialogMounted.value &&
+    !transaksiStore.isMember &&
+    transaksiStore.isMemberExpired &&
+    componentStore.currentPage === "payment"
+  ) {
+    const paymentDialog = $q.dialog({
+      component: PaymentDialogComponent,
       noBackdropDismiss: true,
-      persistent: true,
+      // noEscDismiss: true,
+      // persistent: true,
     });
 
-    dialog.update();
+    paymentDialog.update();
     isPaymentDialogMounted.value = true;
+  } else {
+    if (componentStore.currentPage === "payment") {
+      const updateTransaksi = await transaksiStore.updateTableTransaksi();
+      if (updateTransaksi == 200) {
+        const openGateDialog = $q.dialog({
+          component: OpenGateDialogComponent,
+          noBackdropDismiss: true,
+        });
+
+        openGateDialog.update();
+      }
+      // isPaymentDialogMounted.value = true;
+    }
   }
-  // console.log(imageBase64);
 };
 
 let pressedKeys = "";
@@ -291,39 +297,50 @@ const picBodyMasuk = ref();
 
 const handleKeyDown = (event) => {
   // console.log(event.key);
-  if (event.key === "F12") {
-    event.preventDefault();
-    onClickBayar();
-    pressedKeys = "";
-  } else {
-    // Add the pressed key to the string of pressed keys
-    pressedKeys += event ?? event.key.toUpperCase();
 
-    // Check if the pressed keys match the target keys
-    if (pressedKeys === targetKeys) {
-      // Call the function to execute
-      console.log("Buka Manual");
-    }
-
-    // Reset the pressed keys string if it doesn't match the target keys
-    if (!targetKeys.startsWith(pressedKeys)) {
+  if (componentStore.currentPage === "payment") {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      onClickBayar();
       pressedKeys = "";
+    }
+    if (event.shiftKey === true && event.key === "Escape") {
+      event.preventDefault();
+      onClosePaymentCard();
+      pressedKeys = "";
+    } else {
+      // Add the pressed key to the string of pressed keys
+      pressedKeys += event ?? event.key.toUpperCase();
+
+      // Check if the pressed keys match the target keys
+      if (pressedKeys === targetKeys) {
+        // Call the function to execute
+        console.log("Buka Manual");
+      }
+
+      // Reset the pressed keys string if it doesn't match the target keys
+      if (!targetKeys.startsWith(pressedKeys)) {
+        pressedKeys = "";
+      }
     }
   }
 };
 
 window.addEventListener("keydown", handleKeyDown);
 
-// const captureCameraOut = () => {
-//   // cameraOutRef.value.captureCameraOut();
-//   console.log(cameraOutRef.value);
-//   // console.log("cameraOut");
-// };
+const onClosePaymentCard = () => {
+  componentStore.currentPage = "outgate";
+  componentStore.setOutGateKey();
+  transaksiStore.setCheckIn(false);
+  transaksiStore.$reset();
+};
 onMounted(async () => {
   // console.log(transaksiStore.waktuMasuk);
+  componentStore.currentPage = "payment";
+  console.log(componentStore.currentPage);
   try {
     const getPicBodyMasuk = await axios.post(
-      process.env.API_URL + "/transactions/pic",
+      transaksiStore.API_URL + "/transactions/pic",
       {
         no_pol: transaksiStore.nomorTiket,
       }

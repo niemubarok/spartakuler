@@ -63,6 +63,25 @@
           </template>
         </q-select>
       </div>
+      <div class="q-mt-md">
+        <q-select
+          v-model="transaksiStore.defaultJenisKendaraan"
+          :options="jenisKendaraanOptions"
+          label="Pilih Jenis Kendaraan Default"
+          filled
+        >
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section avatar>
+                <q-chip class="glossy" :label="scope.opt.id" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </div>
 
       <div class="q-mt-md">
         <q-input
@@ -74,7 +93,7 @@
 
       <q-card-actions align="right">
         <!-- <q-btn flat label="Action 1" /> -->
-        <q-btn flat label="Simpan" @click="onSaveSettings" />
+        <q-btn flat icon="save" label="Simpan" @click="onSaveSettings" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -100,6 +119,7 @@ const cameraInOptions = ref(cameraOptions.value);
 const cameraOutOptions = ref(cameraOptions.value);
 
 const postLocationOptions = ref([]);
+const jenisKendaraanOptions = ref([]);
 
 const $q = useQuasar();
 
@@ -141,6 +161,7 @@ const onDialogHide = () => {
 onMounted(async () => {
   // getAvailableCameras();
   postLocationOptions.value = await transaksiStore.getLokasiPos();
+  jenisKendaraanOptions.value = await transaksiStore.getJenisKendaraan();
 
   navigator.mediaDevices
     .getUserMedia({ video: true })
@@ -160,6 +181,7 @@ const onSaveSettings = () => {
   ls.set("cameraOut", cameraOut.value);
   ls.set("lokasiPos", transaksiStore.lokasiPos);
   ls.set("API_URL", transaksiStore.API_URL);
+  ls.set("defaultJenisKendaraan", transaksiStore.defaultJenisKendaraan);
 
   dialogRef.value.hide();
   window.location.reload();

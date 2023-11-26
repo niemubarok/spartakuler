@@ -1,7 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Database, { StrictValues } from "@ioc:Adonis/Lucid/Database";
-
-import { Buffer } from "buffer";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class TransactionsController {
   public async index({}: HttpContextContract) {
@@ -11,7 +9,7 @@ export default class TransactionsController {
     return transactions;
   }
 
-  public async create({ request, response }: HttpContextContract) {
+  public async create({ request }: HttpContextContract) {
     const requestBody = request.body();
 
     const dataToStore = {
@@ -93,8 +91,6 @@ export default class TransactionsController {
 
   public async getDataByNopol({ request, response }: HttpContextContract) {
     const no_pol = request.body().no_pol;
-    // console.log(request.body());
-
     const transaction = await Database.rawQuery(
       `SELECT no_pol, waktu_masuk, pic_body_masuk, pic_body_keluar, pic_driver_masuk,status, id_pintu_masuk, waktu_masuk FROM transaksi_parkir WHERE no_pol = '${no_pol}' Limit 1`
     );
@@ -102,22 +98,13 @@ export default class TransactionsController {
     // return transaction.rows;
     response.status(200).json(transaction.rows);
   }
-
-  // import { Blob, FileReader } from 'fs'
-  // import { Buffer } from 'buffer';
-
   public async getPicture({ request, response }: HttpContextContract) {
     const no_pol = request.body().no_pol;
     const pic = await Database.rawQuery(
       `SELECT pic_body_masuk FROM transaksi_parkir WHERE no_pol = '${no_pol}'`
     );
     const picBodyMasuk = pic.rows[0].pic_body_masuk;
-    // const bufferToString = buffer.toString("base64");
-    // return pic.rows[0];
-
-    // response.header("Content-Type", "image/png");
     response.send(picBodyMasuk);
-    // response.send(picBodyMasuk);
   }
 
   public async update({ request, response }: HttpContextContract) {
@@ -194,5 +181,38 @@ export default class TransactionsController {
     }
   }
 
-  public async destroy({}: HttpContextContract) {}
+  public async countVehicleInToday({}: HttpContextContract) {
+    const today = new Date();
+    const date = today.getDate();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+
+    const count = await Database.rawQuery(
+      `SELECT count(no_pol) FROM transaksi_parkir WHERE EXTRACT(DAY FROM waktu_masuk) = '${date}' AND EXTRACT(MONTH FROM Waktu_masuk) = '${month}' AND EXTRACT(YEAR FROM Waktu_masuk) =  '${year}'`
+    );
+    // return today;
+
+    return count.rows[0];
+  }
+
+  public async countVehicleOutToday({}: HttpContextContract) {
+    const today = new Date();
+    const date = today.getDate();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+
+    const count = await Database.rawQuery(
+      `SELECT count(transaksi_parkir.no_pol), jenis_mobil.nama FROM transaksi_parkir INNER JOIN jenis_mobil ON transaksi_parkir.id_kendaraan = jenis_mobil.id WHERE EXTRACT(DAY FROM waktu_masuk) = '${date}' AND EXTRACT(MONTH FROM Waktu_masuk) = '${month}' AND EXTRACT(YEAR FROM Waktu_masuk) =  '${year}' AND status = '0' GROUP BY jenis_mobil.nama`
+    );
+
+    return count.rows;
+  }
+
+  public async countVehicleInside({}: HttpContextContract) {
+    const count = await Database.rawQuery(
+      `SELECT count(no_pol) FROM transaksi_parkir WHERE status = '1'`
+    );
+
+    return count.rows[0];
+  }
 }

@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
-import { capitalize, ref } from "vue";
-import { format } from "quasar";
+import { ref } from "vue";
 import ls from "localstorage-slim";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
 
 export const useTransaksiStore = defineStore("transaksi", {
   state: () => ({
@@ -13,6 +11,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     lokasiPos: ref(ls.get("lokasiPos") || "-"),
     jenisKendaraan: [],
     selectedJenisKendaraan: ref(""),
+    defaultJenisKendaraan: ref(ls.get("defaultJenisKendaraan") || "-"),
     platNomor: ref(""),
     nomorTiket: ref(""),
     isMember: ref(false),
@@ -38,7 +37,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         // id: uuidv4(),
         nomorTiket: this.nomorTiket,
         no_pol: this.platNomor,
-        id_kendaraan: this.selectedJenisKendaraan.value,
+        id_kendaraan: this.selectedJenisKendaraan.id,
         status: 0,
         // id_pintu_masuk: null,
         // id_pintu_keluar: null,
@@ -118,9 +117,17 @@ export const useTransaksiStore = defineStore("transaksi", {
       // } else {
       const response = await fetch(this.API_URL + "/vehicles/all");
       const data = await response.json();
-      // console.log(data);
-      this.jenisKendaraan = data;
-      ls.set("jenisKendaraan", JSON.stringify(data));
+      const dataJenisKendaraan = data.map((data) => {
+        return {
+          label: data.nama,
+          id: data.id,
+          shortcut: data.short_cut,
+        };
+      });
+      console.log(data);
+      // this.jenisKendaraan = dataJenisKendaraan;
+      ls.set("jenisKendaraan", JSON.stringify(dataJenisKendaraan));
+      return dataJenisKendaraan;
       // }
     },
     async getTransaksiByNopol(no_pol) {
@@ -174,7 +181,7 @@ export const useTransaksiStore = defineStore("transaksi", {
 
     async getTarifJenisKendaraan() {
       const response = await axios.post(this.API_URL + "/prices/type", {
-        id_jenis_kendaraan: this.selectedJenisKendaraan?.value,
+        id_jenis_kendaraan: this.selectedJenisKendaraan.id,
       });
       const data = response.data[0];
       console.log(data);
@@ -191,39 +198,82 @@ export const useTransaksiStore = defineStore("transaksi", {
         const tarifMaksimal = parseInt(tarif?.maksimum);
         const interval = parseInt(tarif?.interval);
 
-        // Calculate the duration in minutes
-        const durationInMinutes = Math.ceil(
-          (waktuKeluar - waktuMasuk) / (1000 * 60)
-        );
-        // console.log("durationInMinutes", durationInMinutes);
+        const currentTime = new Date();
+        const targetTime = new Date(waktuMasuk);
+        const diffInMilliseconds = currentTime - targetTime;
 
-        // Calculate the number of additional hours
-        const additionalHours = Math.round(
-          Math.max(durationInMinutes - interval, 0) / 60
+        const durationInHour = Math.floor(
+          diffInMilliseconds / (1000 * 60 * 60)
         );
-        // console.log("additionalHours", additionalHours);
+
+        const interval24 = Math.round(durationInHour / 24);
+        console.log("durationInHour", durationInHour);
 
         // Calculate the additional fee
-        let additionalFee = additionalHours * tarifBerikutnya;
-        if (additionalFee > tarifMaksimal) {
-          additionalFee = tarifMaksimal;
+        let additionalFee = durationInHour * tarifBerikutnya;
+        let totalFee = 0;
+
+        //jika dibawah 1 jam pakai tarif awal
+        if (durationInHour <= 1) {
+          totalFee = tarifAwal;
         }
-
-        // console.log("additionalFee", additionalFee);
-
-        // Calculate the total fee and round it
-        let totalFee = tarifAwal + additionalFee;
+        //jika diatas 1 jam tarif awal + tarif berikutnya
+        else if (durationInHour > 1) {
+          totalFee += additionalFee;
+        }
+        //jika total tarif lebih dari tarif maksimal
         if (totalFee > tarifMaksimal) {
           totalFee = tarifMaksimal;
         }
 
-        // console.log("maksimal", tarifMaksimal);
-
+        // Calculate the number of 24-hour intervals
+        const additionalHourAfter24 = durationInHour - interval24 * 24;
+        console.log("additionalHourAfter24", additionalHourAfter24);
+        let additionalFeeAfter24 = additionalHourAfter24 * tarifBerikutnya;
+        //jika lebih dari 24 jam tarif maksimal + tarif berikutnya
+        if (interval24 > 0) {
+          if (additionalFeeAfter24 > tarifMaksimal) {
+            additionalFeeAfter24 = tarifMaksimal;
+          }
+          console.log("additionalFeeAfter24", additionalFeeAfter24);
+          totalFee = interval24 * tarifMaksimal + additionalFeeAfter24;
+        }
+        console.log("interval24", interval24);
+        if (this.isMember && !this.isMemberExpired) {
+          totalFee = 0;
+        }
         totalFee = Math.round(totalFee);
+
         this.biayaParkir = totalFee;
-        console.log("totalFee", totalFee);
         return totalFee;
       }
+    },
+
+    async getCountVehicleInToday() {
+      const response = await axios.get(
+        this.API_URL + "/transactions/count/vehicle/in"
+      );
+      const data = response.data;
+      return data.count;
+    },
+    async getCountVehicleOutToday() {
+      const response = await axios.get(
+        this.API_URL + "/transactions/count/vehicle/out"
+      );
+      const data = response.data;
+      const count = data.reduce(
+        (total, item) => total + parseInt(item.count),
+        0
+      );
+      const names = data.map((item) => item.nama);
+      return { count, names };
+    },
+    async getCountVehicleInside() {
+      const response = await axios.get(
+        this.API_URL + "/transactions/count/vehicle/inside"
+      );
+      const data = response.data;
+      return data.count;
     },
   },
 });

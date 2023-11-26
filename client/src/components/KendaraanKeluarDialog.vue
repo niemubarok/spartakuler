@@ -37,7 +37,64 @@
         </div>
         <!-- </div> -->
         <div class="flex justify-center">
-          <q-table
+          <div class="q-pa-md row items-start full-width">
+            <q-card class="full-width q-pa-md" flat bordered>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar>
+                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                  </q-avatar>
+                </q-item-section>
+
+                <q-item-section>
+                  <q-item-label>{{ ls.get("pegawai").nama }}</q-item-label>
+                  <q-item-label caption>
+                    Shift: {{ ls.get("shift") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-separator />
+              <!-- <img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
+
+              <q-list>
+                <q-item clickable>
+                  <q-item-section avatar>
+                    <q-icon color="primary" name="local_bar" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>Bar XYZ</q-item-label>
+                    <q-item-label caption>Have a drink.</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item clickable>
+                  <q-item-section avatar>
+                    <q-icon color="red" name="local_gas_station" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>Gas Station</q-item-label>
+                    <q-item-label caption>Fill your gas tank.</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item clickable>
+                  <q-item-section avatar>
+                    <q-icon color="amber" name="local_movies" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>Cinema XYZ</q-item-label>
+                    <q-item-label caption>Watch a movie.</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+
+          <!-- <q-table
             :rows="tableData"
             :columns="tableColumns"
             row-key="id"
@@ -47,13 +104,13 @@
             style="height: 40vh"
             no-data-label="No data available"
           >
-            <!-- <template #header-cell(no)> No </template>
+            <template #header-cell(no)> No </template>
             <template #header-cell(namaPetugas)> Nama Petugas </template>
             <template #header-cell(shift)> Shift </template>
             <template #header-cell(uangMasuk)> Uang Masuk </template>
             <template #header-cell(jumlahMotor)> Jumlah Motor </template>
             <template #header-cell(mobil)> Mobil </template>
-            <template #header-cell(truck)> Truck </template> -->
+            <template #header-cell(truck)> Truck </template>
 
             <template #body-cell(no)="props">
               {{ props.index + 1 }}
@@ -76,7 +133,7 @@
             <template #body-cell(truck)="props">
               {{ props.value }}
             </template>
-          </q-table>
+          </q-table> -->
         </div>
       </q-card>
     </div>
@@ -91,7 +148,7 @@ import { useTransaksiStore } from "src/stores/transaksi-store";
 import MemberCard from "./MemberCard.vue";
 import PlatNomor from "./PlatNomor.vue";
 import { useComponentStore } from "src/stores/component-store";
-// import ls from "localstorage-slim";
+import ls from "localstorage-slim";
 // import { useClassesStore } from "src/stores/classes-store";
 
 // ls.config.encrypt = false;

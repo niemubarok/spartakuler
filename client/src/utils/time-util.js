@@ -123,13 +123,17 @@ export const calculateParkingDuration = (entryTime) => {
   const targetTime = new Date(entryTime);
   const diffInMilliseconds = currentTime - targetTime;
 
+  const days = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
   const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
   const minutes = Math.floor(
     (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
   );
   const seconds = Math.floor((diffInMilliseconds % (1000 * 60)) / 1000);
 
-  return { hours, minutes, seconds };
+  const interval24 = Math.round(hours / 24);
+  const additionalHourAfter24 = hours - interval24 * 24;
+
+  return { days, hours, minutes, seconds, additionalHourAfter24 };
 };
 
 export const timeRegex24Format =

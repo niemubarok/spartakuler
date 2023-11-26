@@ -21,6 +21,7 @@ export const useComponentStore = defineStore("component", {
     cameraInKey: ref(0),
     cameraOutKey: ref(0),
     outGateDevicePath: ref(ls.get("outGateDevicePath")),
+    currentPage: ref(""),
   }),
   actions: {
     async getAvailableCameras() {

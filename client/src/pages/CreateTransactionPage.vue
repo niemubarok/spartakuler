@@ -181,6 +181,7 @@ const onFilePicked = (event) => {
   // console.log(formData.value.pic_body_masuk);
 };
 const storeData = async () => {
+  console.log(formData.value);
   const store = await axios.post(
     process.env.API_URL + "/transactions/create",
     formData.value
@@ -188,21 +189,21 @@ const storeData = async () => {
   console.log(store);
 };
 
-onMounted(async () => {
-  // componentStore.openGate();
+// onMounted(async () => {
+//   // componentStore.openGate();
 
-  try {
-    const transaksi = await transaksiStore.getTransaksiByNopol("B0987");
-    const response = await axios.post(
-      process.env.API_URL + "/transactions/pic",
-      {
-        no_pol: "G2565AY",
-      }
-    );
-    imageUrl.value = response.data;
-    console.log(imageUrl.value);
-  } catch (error) {
-    console.error(error);
-  }
-});
+//   try {
+//     const transaksi = await transaksiStore.getTransaksiByNopol("B0987");
+//     const response = await axios.post(
+//       process.env.API_URL + "/transactions/pic",
+//       {
+//         no_pol: "G2565AY",
+//       }
+//     );
+//     imageUrl.value = response.data;
+//     console.log(imageUrl.value);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// });
 </script>

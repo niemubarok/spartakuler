@@ -32,7 +32,7 @@
         spinner-size="82px"
         width="250px"
         style="height: 15vh"
-        class="bg-grey-3 q-ml-sm rounded-corner"
+        class="q-ml-sm rounded-corner"
       />
 
       <div v-if="$q.screen.gt.md" class="q-mt-lg">
@@ -46,25 +46,30 @@
           <ShinyCard
             class="bg-indigo-10"
             title="Kendaraan Masuk"
-            shortkey="F3"
-            jumlah="200"
+            :jumlah="vehicleInToday"
           />
+          <!-- shortkey="F3" -->
           <ShinyCard
             class="bg-teal-10 q-mx-md"
             title="Kendaraan Keluar"
             shortkey="F4"
-            jumlah="200"
+            :jumlah="vehicleOutToday"
           />
           <ShinyCard
             class="bg-deep-orange-10"
             title="Kendaraan Parkir"
-            shortkey="F5"
-            jumlah="200"
+            :jumlah="vehicleInside"
           />
+          <!-- shortkey="F5" -->
         </div>
       </div>
     </div>
-    <div class="window-width flex row justify-end q-mr-sm q-col-gutter-sm">
+    <div
+      class="window-width flex row q-pr-lg q-col-gutter-sm"
+      :class="
+        transaksiStore.isCheckedIn ? 'justify-start q-mt-md' : 'justify-end'
+      "
+    >
       <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
       <q-chip class="bg-transparent" icon="account_circle" :label="pegawai" />
       <!-- </div> -->
@@ -279,7 +284,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, onUpdated } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useTransaksiStore } from "src/stores/transaksi-store";
@@ -322,6 +327,10 @@ const pegawai = ls.get("pegawai").nama;
 
 const cameraIn = ls.get("cameraIn") || null;
 const cameraOut = ls.get("cameraOut") || null;
+
+const vehicleInToday = ref(0);
+const vehicleOutToday = ref(0);
+const vehicleInside = ref(0);
 
 const router = useRouter();
 
@@ -372,7 +381,6 @@ const onPressEnterPlatNomor = async () => {
   } else {
     await transaksiStore.getCustomerByNopol();
     const dataCustomer = ref(transaksiStore.dataCustomer);
-    console.log(dataCustomer.value);
 
     // checkSubscriptionExpiration();
     if (dataCustomer.value == "") {
@@ -385,7 +393,7 @@ const onPressEnterPlatNomor = async () => {
       dialog.update();
     } else {
       const jenis_kendaraan = {
-        value: dataCustomer.value?.id_jenis_kendaraan,
+        id: dataCustomer.value?.id_jenis_kendaraan,
         label: dataCustomer.value?.jenis_kendaraan,
       };
       transaksiStore.selectedJenisKendaraan = jenis_kendaraan;
@@ -393,8 +401,8 @@ const onPressEnterPlatNomor = async () => {
       const expiration = checkSubscriptionExpiration(dataCustomer.value?.akhir);
       const dialog = $q.dialog({
         component: TicketDialog,
-        noBackdropDismiss: true,
-        persistent: true,
+        // noBackdropDismiss: true,
+        // persistent: true,
         componentProps: {
           title: jenis_kendaraan?.label,
           nama: dataCustomer.value?.nama,
@@ -407,7 +415,14 @@ const onPressEnterPlatNomor = async () => {
     }
   }
 };
-onMounted(() => {
+onMounted(async () => {
+  componentStore.currentPage = "outgate";
+  vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
+  const { count } = await transaksiStore.getCountVehicleOutToday();
+  vehicleOutToday.value = count;
+  console.log(vehicleOutToday.value);
+  vehicleInside.value = await transaksiStore.getCountVehicleInside();
+
   if (transaksiStore.lokasiPos === "-") {
     onClickSettings();
     // $q.notify({
@@ -421,27 +436,29 @@ onMounted(() => {
   // inputPlatNomorRef ? inputPlatNomorRef.value.focus() : "";
   const handleKeyDown = (event) => {
     // console.log(event.key);
-    if (event.key === "F1") {
-      event.preventDefault();
-      inputPlatNomorRef.value.focus();
-    } else if (event.key === "F4") {
-      event.preventDefault();
-      onClickKendaraanKeluar();
-    } else if (event.shiftKey === true && event.key === "S") {
-      event.preventDefault();
-      onClickSettings();
-    } else if (event.shiftKey === true && event.key === "R") {
-      event.preventDefault();
-      onClickKendaraanKeluar();
-    } else if (event.shiftKey === true && event.key === "L") {
-      event.preventDefault();
-      ls.remove("pegawai");
-      ls.remove("shift");
-      router.push("/");
-    } else if (event.shiftKey === true && event.key === "D") {
-      event.preventDefault();
-      darkMode.value = !darkMode.value;
-      darkModeToggle();
+    if (componentStore.currentPage == "outgate") {
+      if (event.key === "F1") {
+        event.preventDefault();
+        inputPlatNomorRef.value.focus();
+      } else if (event.key === "F4") {
+        event.preventDefault();
+        onClickKendaraanKeluar();
+      } else if (event.shiftKey === true && event.key === "S") {
+        event.preventDefault();
+        onClickSettings();
+      } else if (event.shiftKey === true && event.key === "R") {
+        event.preventDefault();
+        onClickKendaraanKeluar();
+      } else if (event.shiftKey === true && event.key === "L") {
+        event.preventDefault();
+        ls.remove("pegawai");
+        ls.remove("shift");
+        router.push("/");
+      } else if (event.shiftKey === true && event.key === "D") {
+        event.preventDefault();
+        darkMode.value = !darkMode.value;
+        darkModeToggle();
+      }
     }
   };
 
@@ -454,6 +471,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   console.log("unMounted");
+});
+
+onUpdated(() => {
+  console.log("updated");
 });
 // const inputRef = ref(null);
 // const isTransaksi = ref(true);

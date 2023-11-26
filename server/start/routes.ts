@@ -27,6 +27,18 @@ Route.group(() => {
     Route.post("/pic", "TransactionsController.getPicture");
     Route.post("/create", "TransactionsController.create");
     Route.patch("/update", "TransactionsController.update");
+    Route.get(
+      "/count/vehicle/in",
+      "TransactionsController.countVehicleInToday"
+    );
+    Route.get(
+      "/count/vehicle/out",
+      "TransactionsController.countVehicleOutToday"
+    );
+    Route.get(
+      "/count/vehicle/inside",
+      "TransactionsController.countVehicleInside"
+    );
   }).prefix("transactions");
 
   Route.group(() => {

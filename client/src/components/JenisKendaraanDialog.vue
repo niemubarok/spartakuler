@@ -2,12 +2,12 @@
   <!-- :maximized="true" -->
   <q-dialog
     ref="dialogRef"
-    no-backdrop-dismiss
-    no-route-dismiss
     @hide="onDialogHide"
     class="q-pa-xl"
     content-class="dialog__backdrop"
   >
+    <!-- no-backdrop-dismiss
+    no-route-dismiss -->
     <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
     <q-card
       style="width: 50vw; height: fit-content"
@@ -43,9 +43,14 @@
 
       <div
         v-for="jenisKendaraan in jenisKendaraanOptions"
-        :key="jenisKendaraan.value"
+        :key="jenisKendaraan.id"
       >
-        <q-item class="glass q-ma-md rounded-corner">
+        <q-item
+          :class="
+            defaultShortcut === jenisKendaraan.shortcut && 'bg-yellow text-dark'
+          "
+          class="glass q-ma-md rounded-corner"
+        >
           <q-item-section top avatar>
             <!-- <q-avatar color="primary" text-color="white" icon="bluetooth" /> -->
             <q-chip
@@ -74,7 +79,7 @@ import MemberCard from "./MemberCard.vue";
 import PlatNomor from "./PlatNomor.vue";
 import { useComponentStore } from "src/stores/component-store";
 import TicketDialog from "src/components/TicketDialog.vue";
-// import ls from "localstorage-slim";
+import ls from "localstorage-slim";
 // import { useClassesStore } from "src/stores/classes-store";
 
 // ls.config.encrypt = false;
@@ -103,22 +108,18 @@ const onDialogHide = () => {
 const jenisKendaraanOptions = ref([]);
 const jenisKendaraanModel = ref(null);
 const jenisKendaraanRef = ref(null);
+const defaultJenisKendaraan = ref(ls.get("defaultJenisKendaraan"));
+const defaultShortcut = ref("");
+const matchingDefaultOption = ref(null);
 
 const onClickTicket = (type) => {
   // transaksiStore.setCheckIn(true);
   const dialog = $q.dialog({
     component: TicketDialog,
-    noBackdropDismiss: true,
-    persistent: true,
+    // noBackdropDismiss: true,
+    // persistent: true,
     componentProps: {
       title: type,
-      // icon:
-      //   type === "car"
-      //     ? "directions_car"
-      //     : type == "bike"
-      //     ? "two_wheeler"
-      //     : "local_shipping",
-      // type: type === "car" ? "car" : type === "bike" ? "bike" : "bus",
     },
   });
 
@@ -131,9 +132,26 @@ const handleKeydownOnJenisKendaraan = (event) => {
   const matchingOption = jenisKendaraanOptions.value.find(
     (option) => option.shortcut === key.toUpperCase()
   );
-  // (option) => console.log(option.value === key.toUpperCase())
-  if (matchingOption) {
-    jenisKendaraanModel.value = matchingOption.value;
+
+  if (key === "Escape") {
+    dialogRef.value.hide();
+  }
+
+  if (key === "Enter") {
+    // const matchingDefaultOption = jenisKendaraanOptions.value.find(
+    //   (option) => option.shortcut === defaultJenisKendaraan.value.shortcut
+    // );
+
+    console.log("matchingDefaultOption", matchingDefaultOption);
+    console.log("matchingOption", matchingOption);
+    jenisKendaraanModel.value = matchingDefaultOption.value.id;
+    transaksiStore.selectedJenisKendaraan = matchingDefaultOption.value;
+    console.log(transaksiStore.selectedJenisKendaraan);
+    onClickTicket(matchingDefaultOption.value.label);
+    dialogRef.value.hide();
+  } else if (matchingOption) {
+    console.log("matchingOption", matchingOption);
+    jenisKendaraanModel.value = matchingOption.id;
     transaksiStore.selectedJenisKendaraan = matchingOption;
     onClickTicket(matchingOption.label);
     dialogRef.value.hide();
@@ -141,15 +159,14 @@ const handleKeydownOnJenisKendaraan = (event) => {
 };
 
 onMounted(async () => {
-  await transaksiStore.getJenisKendaraan();
+  transaksiStore.jenisKendaraan = await transaksiStore.getJenisKendaraan();
+  jenisKendaraanOptions.value = transaksiStore.jenisKendaraan;
+  matchingDefaultOption.value = jenisKendaraanOptions.value.find(
+    (option) => option.shortcut === defaultJenisKendaraan.value.shortcut
+  );
+  defaultShortcut.value = matchingDefaultOption.value.shortcut;
 
-  jenisKendaraanOptions.value = transaksiStore.jenisKendaraan.map((item) => {
-    return {
-      value: item.id,
-      label: item.nama,
-      shortcut: item.short_cut,
-    };
-  });
+  console.log(transaksiStore.jenisKendaraan);
 
   window.addEventListener("keydown", handleKeydownOnJenisKendaraan);
 });

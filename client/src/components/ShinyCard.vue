@@ -2,6 +2,7 @@
   <div class="bg-primary card">
     <div class="card__info justify-center">
       <q-badge
+        v-if="props.shortkey"
         floating
         color="dark"
         text-color="grey-3"
