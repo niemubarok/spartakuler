@@ -2,19 +2,17 @@
   <!-- :maximized="true" -->
   <q-dialog
     ref="dialogRef"
-    no-backdrop-dismiss
-    no-route-dismiss
     @hide="onDialogHide"
-    :maximized="true"
     content-class="dialog__backdrop relative"
   >
+    <!-- :maximized="true" -->
     <!-- class="q-pa-sm" -->
     <div>
       <q-card
         style="width: 50vw; height: fit-content"
         class="q-pa-sm dark-glass fixed-center relative"
       >
-        <div>
+        <!-- <div>
           <q-avatar
             size="30px"
             class="cursor-pointer z-top absolute-top-right q-ma-sm"
@@ -23,7 +21,7 @@
             icon="close"
             @click="dialogRef.hide()"
           />
-        </div>
+        </div> -->
         <!-- <div class="flex row justify-start">
           <div class="col-2 q-mr-xl"> -->
         <!-- </div> -->
@@ -33,11 +31,11 @@
         >
           <!-- <q-icon name="patient_list" size="md" style="" /> -->
           <!-- class="absolute-top-left" -->
-          .:: Data Kendaraan Keluar ::.
+          .:: Detail Kendaraan Keluar ::.
         </div>
         <!-- </div> -->
         <div class="flex justify-center">
-          <div class="q-pa-md row items-start full-width">
+          <div class="row items-start full-width">
             <q-card class="full-width q-pa-md" flat bordered>
               <q-item>
                 <q-item-section avatar>
@@ -49,48 +47,107 @@
                 <q-item-section>
                   <q-item-label>{{ ls.get("pegawai").nama }}</q-item-label>
                   <q-item-label caption>
-                    Shift: {{ ls.get("shift") }}
+                    <q-chip
+                      dense
+                      class="rounded-corner"
+                      :label="'Shift: ' + ls.get('shift')"
+                    />
                   </q-item-label>
+                </q-item-section>
+
+                <q-item-section side>
+                  <div class="row">
+                    <q-chip
+                      square
+                      class="bg-primary text-white text-weight-bolder q-py-lg q-pr-md"
+                      label="Total"
+                    >
+                      <q-chip
+                        square
+                        class="q-pa-md text-h6 text-weight-bold q-ml-md"
+                        style="margin-right: -10px"
+                        :label="totalUangMasuk"
+                      />
+                    </q-chip>
+                  </div>
                 </q-item-section>
               </q-item>
 
               <q-separator />
-              <!-- <img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
-
-              <q-list>
-                <q-item clickable>
-                  <q-item-section avatar>
-                    <q-icon color="primary" name="local_bar" />
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>Bar XYZ</q-item-label>
-                    <q-item-label caption>Have a drink.</q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable>
-                  <q-item-section avatar>
-                    <q-icon color="red" name="local_gas_station" />
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>Gas Station</q-item-label>
-                    <q-item-label caption>Fill your gas tank.</q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable>
-                  <q-item-section avatar>
-                    <q-icon color="amber" name="local_movies" />
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>Cinema XYZ</q-item-label>
-                    <q-item-label caption>Watch a movie.</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
+              <!-- <div>
+                <q-chip
+                  square
+                  class="q-mt-lg"
+                  label="Detail Per Jenis Kendaraan"
+                />
+              </div> -->
+              <div v-if="!kendaraanKeluar" class="q-mt-md">
+                <q-card flat class="bg-grey-3 text-grey-6">
+                  <q-card-section>
+                    <div class="text-h6">
+                      Belum ada Kendaraan Keluar di shift ini
+                    </div>
+                    <!-- <div class="text-subtitle2">by John Doe</div> -->
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div v-else class="q-mt-md">
+                <q-table
+                  bordered
+                  :rows="kendaraanKeluar"
+                  :columns="tableColumns"
+                  row-key="nama"
+                  class="no-shadow rounded-corner"
+                >
+                  <template v-slot:header="props">
+                    <q-tr
+                      :props="props"
+                      class="text-weight-bolder bg-primary text-white"
+                    >
+                      <q-td>Jenis Kendaraan</q-td>
+                      <q-td align="center">Jumlah</q-td>
+                      <q-td align="center">Uang Masuk</q-td>
+                    </q-tr>
+                  </template>
+                  <template v-slot:body="props">
+                    <q-tr
+                      :props="props"
+                      :class="props.rowIndex % 2 == 0 ? 'bg-grey-2' : ''"
+                      class="text-weight-bolder"
+                    >
+                      <q-td key="nama" :props="props">
+                        <span class="text-h5">
+                          {{ props.row.nama }}
+                        </span>
+                      </q-td>
+                      <q-td
+                        key="count"
+                        :props="props"
+                        align="center"
+                        class="text-h4 row justify-center"
+                      >
+                        <span class="text-h5">
+                          {{ props.row.count }}
+                        </span>
+                        <!-- style="margin-right: -10px; min-width: 50px" -->
+                        <!-- {{  }}
+                        </q-chip> -->
+                      </q-td>
+                      <q-td key="uang_masuk" :props="props">
+                        <div class="row justify-evenly">
+                          <span class="text-h5"> Rp. </span>
+                          <span class="text-h5">
+                            {{ props.row.uang_masuk.toLocaleString("id-ID") }}
+                          </span>
+                        </div>
+                        <!-- style="margin-right: -10px; min-width: 50px" -->
+                        <!-- {{ }}
+                        </q-chip> -->
+                      </q-td>
+                    </q-tr>
+                  </template>
+                </q-table>
+              </div>
             </q-card>
           </div>
 
@@ -154,212 +211,48 @@ import ls from "localstorage-slim";
 // ls.config.encrypt = false;
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
+const totalUangMasuk = ref(0);
 
-const props = defineProps({
-  title: String,
-  icon: String,
-  type: String,
-});
+const kendaraanKeluar = ref();
 
-defineEmits([
-  // REQUIRED; need to specify some events that your
-  // component will emit through useDialogPluginComponent()
-  ...useDialogPluginComponent.emits,
-]);
+defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef } = useDialogPluginComponent();
 
-onMounted(async () => {});
+onMounted(async () => {
+  // const { countPerVehicle, totalUangMasuk } =
+  //   await transaksiStore.getCountVehicleOutToday();
+  // console.log((await transaksiStore.getCountVehicleOutToday()));
+  kendaraanKeluar.value = await transaksiStore.getCountVehicleOutToday();
+  totalUangMasuk.value = kendaraanKeluar.value
+    .reduce((total, item) => total + parseInt(item.uang_masuk), 0)
+    .toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    });
 
-const onSaveSettings = (type) => {
-  transaksiStore.setCheckIn(true);
-  dialogRef.value.hide();
+  // kendaraanKeluar.value = vehicleOutToday;
+  // totalUangMasuk.value = parseInt(totalUangMasuk).toLocaleString("id-ID", {
+  //   style: "currency",
+  //   currency: "IDR",
+  // });
 
-  if (type == "car") {
-    transaksiStore.jenisKendaraan = "Mobil";
-  } else if (type == "bus") {
-    transaksiStore.jenisKendaraan = "Bus";
-  } else if (type == "bike") {
-    transaksiStore.jenisKendaraan = "Motor";
-  }
-  // window.location.reload();
-};
-const onDialogHide = () => {
-  // console.log("at hide");
-  componentStore.hideInputPlatNomor = false;
-};
+  console.log(kendaraanKeluar.value);
 
-const tableColumns = [
-  {
-    name: "No.",
-    required: true,
-    align: "left",
-    field: "no",
-    label: "No.",
-    sortable: true,
-  },
-  {
-    name: "Nama Petugas",
-    required: true,
-    align: "left",
-    field: "namaPetugas",
-    label: "Nama Petugas",
-    sortable: true,
-  },
-  {
-    name: "Shift",
-    required: true,
-    align: "left",
-    field: "shift",
-    label: "Shift",
-    sortable: true,
-  },
-  {
-    name: "Uang Masuk",
-    required: true,
-    align: "left",
-    field: "uangMasuk",
-    label: "Uang Masuk",
-    sortable: true,
-  },
-  {
-    name: "Motor",
-    required: true,
-    align: "center",
-    field: "motor",
-    label: "Motor",
-    sortable: true,
-  },
-  {
-    name: "Mobil",
-    required: true,
-    align: "center",
-    field: "mobil",
-    label: "Mobil",
-    sortable: true,
-  },
-  {
-    name: "Truck",
-    required: true,
-    align: "center",
-    field: "truck",
-    label: "Truck",
-    sortable: true,
-  },
-];
+  const handleKeyDown = (event) => {
+    // console.log(event.key);
+    if (componentStore.currentPage == "outgate") {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        dialogRef.value.hide();
+        componentStore.setOutGateKey();
+      }
+    }
+  };
 
-const tableData = [
-  {
-    id: 1,
-    no: 1,
-    namaPetugas: "John Doe",
-    shift: "Pagi",
-    uangMasuk: "Rp. 200.000",
-    motor: 10,
-    mobil: 5,
-    truck: 2,
-  },
-  {
-    id: 2,
-    no: 2,
-    namaPetugas: "Jane Smith",
-    shift: "Siang",
-    uangMasuk: "Rp. 100.000",
-    motor: 15,
-    mobil: 8,
-    truck: 3,
-  },
-  {
-    id: 3,
-    no: 3,
-    namaPetugas: "Alice Johnson",
-    shift: "Siang",
-    uangMasuk: "Rp. 100.000",
-    motor: 15,
-    mobil: 8,
-    truck: 3,
-  },
-  {
-    id: 4,
-    no: 4,
-    namaPetugas: "Bob Williams",
-    shift: "Siang",
-    uangMasuk: "Rp. 100.000",
-    motor: 15,
-    mobil: 8,
-    truck: 3,
-  },
-  {
-    id: 5,
-    no: 5,
-    namaPetugas: "Eve Davis",
-    shift: "Siang",
-    uangMasuk: "Rp. 100.000",
-    motor: 15,
-    mobil: 8,
-    truck: 3,
-  },
-  {
-    id: 6,
-    no: 6,
-    namaPetugas: "Frank Wilson",
-    shift: "Siang",
-    uangMasuk: "Rp. 100.000",
-    motor: 15,
-    mobil: 8,
-    truck: 3,
-  },
-  {
-    id: 7,
-    no: 7,
-    namaPetugas: "Anita Sari",
-    shift: "Malam",
-    uangMasuk: "Rp. 150.000",
-    motor: 12,
-    mobil: 6,
-    truck: 1,
-  },
-  {
-    id: 8,
-    no: 8,
-    namaPetugas: "Budi Santoso",
-    shift: "Malam",
-    uangMasuk: "Rp. 150.000",
-    motor: 12,
-    mobil: 6,
-    truck: 1,
-  },
-  {
-    id: 9,
-    no: 9,
-    namaPetugas: "Citra Permatasari",
-    shift: "Malam",
-    uangMasuk: "Rp. 150.000",
-    motor: 12,
-    mobil: 6,
-    truck: 1,
-  },
-  {
-    id: 10,
-    no: 10,
-    namaPetugas: "Dian Purnomo",
-    shift: "Malam",
-    uangMasuk: "Rp. 150.000",
-    motor: 12,
-    mobil: 6,
-    truck: 1,
-  },
-  {
-    id: 11,
-    no: 11,
-    namaPetugas: "Eko Prasetio",
-    shift: "Malam",
-    uangMasuk: "Rp. 150.000",
-    motor: 12,
-    mobil: 6,
-    truck: 1,
-  },
-];
+  window.addEventListener("keydown", handleKeyDown);
+});
+const onDialogHide = () => {};
 </script>
 
 <style scoped>

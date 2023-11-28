@@ -257,16 +257,38 @@ export const useTransaksiStore = defineStore("transaksi", {
       return data.count;
     },
     async getCountVehicleOutToday() {
-      const response = await axios.get(
-        this.API_URL + "/transactions/count/vehicle/out"
+      const response = await axios.post(
+        this.API_URL + "/transactions/count/vehicle/out",
+        {
+          shift_id: ls.get("shift"),
+        }
       );
       const data = response.data;
-      const count = data.reduce(
-        (total, item) => total + parseInt(item.count),
-        0
-      );
-      const names = data.map((item) => item.nama);
-      return { count, names };
+      console.log(data);
+      if (data.length) {
+        // const total = data.reduce(
+        //   (total, item) => total + parseInt(item.count),
+        //   0
+        // );
+        // const countPerVehicle = data.map((item) => ({
+        //   nama: item.nama,
+        //   count: item.count,
+        // }));
+
+        // const uangMasuk = data.map((item) => parseInt(item.uang_masuk));
+        // console.log(uangMasuk);
+
+        // const totalUangMasuk = data.reduce(
+        //   (total, item) => total + parseInt(item.uang_masuk),
+        //   0
+        // );
+        return data;
+
+        // // console.log(names);
+        // console.log(uangMasuk);
+        // return { total, countPerVehicle, uangMasuk };
+      }
+      return { count: 0, names: "Belum ada" };
     },
     async getCountVehicleInside() {
       const response = await axios.get(

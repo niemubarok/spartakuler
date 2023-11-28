@@ -195,14 +195,19 @@ export default class TransactionsController {
     return count.rows[0];
   }
 
-  public async countVehicleOutToday({}: HttpContextContract) {
+  public async countVehicleOutToday({ request }: HttpContextContract) {
     const today = new Date();
     const date = today.getDate();
     const month = today.getMonth() + 1;
     const year = today.getFullYear();
+    const shift_id = request.body().shift_id;
 
     const count = await Database.rawQuery(
-      `SELECT count(transaksi_parkir.no_pol), jenis_mobil.nama FROM transaksi_parkir INNER JOIN jenis_mobil ON transaksi_parkir.id_kendaraan = jenis_mobil.id WHERE EXTRACT(DAY FROM waktu_masuk) = '${date}' AND EXTRACT(MONTH FROM Waktu_masuk) = '${month}' AND EXTRACT(YEAR FROM Waktu_masuk) =  '${year}' AND status = '0' GROUP BY jenis_mobil.nama`
+      `SELECT jenis_mobil.nama, COUNT(*) as count, SUM(transaksi_parkir.bayar_keluar) as uang_masuk
+      FROM transaksi_parkir
+      INNER JOIN jenis_mobil ON transaksi_parkir.id_kendaraan = jenis_mobil.id
+      WHERE transaksi_parkir.id_shift_keluar = '${shift_id}' AND EXTRACT(DAY FROM transaksi_parkir.waktu_masuk) = '${date}' AND EXTRACT(MONTH FROM transaksi_parkir.Waktu_masuk) = '${month}' AND EXTRACT(YEAR FROM transaksi_parkir.Waktu_masuk) = '${year}' AND transaksi_parkir.status = '0'
+      GROUP BY jenis_mobil.nama`
     );
 
     return count.rows;

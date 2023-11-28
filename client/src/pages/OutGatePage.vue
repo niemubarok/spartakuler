@@ -351,7 +351,6 @@ const onClickSettings = () => {
 const onClickKendaraanKeluar = () => {
   const dialog = $q.dialog({
     component: KendaraanKeluarDialog,
-    noBackdropDismiss: true,
   });
   // persistent: true,
 
@@ -418,8 +417,8 @@ const onPressEnterPlatNomor = async () => {
 onMounted(async () => {
   componentStore.currentPage = "outgate";
   vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
-  const { count } = await transaksiStore.getCountVehicleOutToday();
-  vehicleOutToday.value = count;
+  const { total } = await transaksiStore.getCountVehicleOutToday();
+  vehicleOutToday.value = total ? total : 0;
   console.log(vehicleOutToday.value);
   vehicleInside.value = await transaksiStore.getCountVehicleInside();
 

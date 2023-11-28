@@ -260,6 +260,17 @@ const onClickBayar = async () => {
     transaksiStore.pic_body_keluar = imageBase64;
   }
 
+  console.log("isPaymentDialogMounted.value:", !isPaymentDialogMounted.value);
+  console.log("transaksiStore.isMember:", !transaksiStore.isMember);
+  console.log(
+    "transaksiStore.isMemberExpired:",
+    transaksiStore.isMemberExpired
+  );
+  console.log(
+    "componentStore.currentPage === 'payment':",
+    componentStore.currentPage === "payment"
+  );
+
   if (
     !isPaymentDialogMounted.value &&
     !transaksiStore.isMember &&

@@ -31,7 +31,7 @@ Route.group(() => {
       "/count/vehicle/in",
       "TransactionsController.countVehicleInToday"
     );
-    Route.get(
+    Route.post(
       "/count/vehicle/out",
       "TransactionsController.countVehicleOutToday"
     );
