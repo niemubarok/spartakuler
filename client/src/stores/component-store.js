@@ -12,7 +12,7 @@ export const useComponentStore = defineStore("component", {
     isHeader: ref(false),
     availableCameras: ref([]),
     hideInputPlatNomor: ref(false),
-    cameraId: ref({
+    camera: ref({
       in: ls.get("cameraIn"),
       out: ls.get("cameraOut"),
     }),
@@ -22,6 +22,8 @@ export const useComponentStore = defineStore("component", {
     cameraOutKey: ref(0),
     outGateDevicePath: ref(ls.get("outGateDevicePath")),
     currentPage: ref(""),
+    paymentDialogRef: ref(false),
+    isPaymentDialogMounted: ref(false),
   }),
   actions: {
     async getAvailableCameras() {

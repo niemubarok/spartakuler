@@ -4,163 +4,104 @@ code {
     monospace;
 }
 
-.nft {
-  user-select: none;
-  max-width: 400px;
-  margin: 2rem auto;
-  border: 1px solid rgba(247, 247, 247, 0.733);
-  background-color: #282c34;
-  background: linear-gradient(
-    0deg,
-    rgba(40, 44, 52, 1) 0%,
-    rgba(17, 0, 32, 0.5) 100%
-  );
-  //   box-shadow: 0 7px 10px 5px #00000088;
-  border-radius: 0.7rem;
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
-  overflow: hidden;
-  transition: 0.5s all;
-  hr {
-    width: 100%;
-    border: none;
-    border-bottom: 1px solid #88888855;
-    margin-top: 0;
-  }
-  ins {
-    text-decoration: none;
-  }
-  .main {
-    display: flex;
-    flex-direction: column;
-    width: 90%;
-    padding: 1rem;
-    .tokenImage {
-      border-radius: 0.5rem;
-      max-width: 100%;
-      height: 350px;
-      object-fit: cover;
-    }
-    .description {
-      margin: 0.5rem 0;
-      color: #a89ec9;
-    }
-    .tokenInfo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      .price {
-        display: flex;
-        align-items: center;
-        color: #ee83e5;
-        font-weight: 700;
-        ins {
-          margin-left: -0.3rem;
-          margin-right: 0.5rem;
-        }
-      }
-      .duration {
-        display: flex;
-        align-items: center;
-        color: #a89ec9;
-        margin-right: 0.2rem;
-        ins {
-          margin: 0.5rem;
-          margin-bottom: 0.4rem;
-        }
-      }
-    }
-    .creator {
-      display: flex;
-      align-items: center;
-      margin-top: 0.2rem;
-      margin-bottom: -0.3rem;
-      ins {
-        color: #a89ec9;
-        text-decoration: none;
-      }
-      .wrapper {
-        display: flex;
-        align-items: center;
-        border: 1px solid #ffffff22;
-        padding: 0.3rem;
-        margin: 0;
-        margin-right: 0.5rem;
-        border-radius: 100%;
-        box-shadow: inset 0 0 0 2px #000000aa;
-        img {
-          border-radius: 100%;
-          border: 1px solid #ffffff22;
-          width: 2rem;
-          height: 2rem;
-          object-fit: cover;
-          margin: 0;
-        }
-      }
-    }
-  }
-  //   ::before {
-  //     position: fixed;
-  //     content: "";
-  //     box-shadow: 0 0 100px 40px #ffffff08;
-  //     top: -10%;
-  //     left: -100%;
-  //     transform: rotate(-45deg);
-  //     height: 60rem;
-  //     transition: 0.7s all;
-  //   }
-  //   &:hover {
-  //     border: 1px solid #ffffff44;
-  //     box-shadow: 0 7px 50px 10px #000000aa;
-  //     transform: scale(1.015);
-  //     filter: brightness(1.3);
-  //     ::before {
-  //       filter: brightness(0.5);
-  //       top: -100%;
-  //       left: 200%;
-  //     }
-  //   }
+.card {
+  // width: 60%;
+  margin-bottom: 1rem;
+  height: 254px;
+  // box-shadow: 1px 5px 60px 0px #100a886b;
 }
 
-// .bg {
-//   position: fixed;
-//   top: 50%;
-//   left: 50%;
-//   transform: translate(-50%, -50%);
-//   h4 {
-//     font-size: 20rem;
-//     filter: opacity(0.5);
-//   }
-// }
+.card .card-border-top {
+  width: 60%;
+  height: 3%;
+  // background: #6b64f3;
+  margin: auto;
+  border-radius: 0px 0px 15px 15px;
+}
 </Style>
 
 <template>
+  <div class="card glass q-mb-lg" style="width: 50vw; height: 35vh">
+    <MemberRibbon />
+    <div class="card-border-top bg-primary"></div>
+    <div class="column q-pa-md text-dark flex items-center">
+      <PlatNomor style="transform: scale(1.2)" />
+    </div>
+    <!-- <q-separator spaced light /> -->
+    <div class="bg-grey-4 column items-start q-pa-lg">
+      <!-- <q-chip
+        square
+        class="bg-transparent text-primary text-h5 text-weight-bolder"
+      > -->
+      <div class="text-subtitle2">
+        <q-chip style="width: 150px" label="Nama Pelanggan " />
+        <span class="text-h6"> : {{ props.nama }}</span>
+      </div>
+      <div class="text-subtitle2">
+        <q-chip style="width: 150px" label="Alamat " />
+        <span class="text-h6"> : </span
+        ><span class="text-subtitle2"> {{ props.alamat || "-" }}</span>
+      </div>
+      <div class="text-subtitle2">
+        <q-chip style="width: 150px" label="Masa Berlaku " />
+
+        <span class="text-h6"> : </span
+        ><span
+          class="text-subtitle"
+          :class="transaksiStore.isMemberExpired ? 'text-red' : ''"
+        >
+          {{ props.expiration }}</span
+        >
+      </div>
+      <!-- </q-chip
+      > -->
+    </div>
+  </div>
+
   <!-- <div class="bg">
     <h1>Kiberbash</h1>
   </div> -->
-  <div class="nft">
+  <!-- <div
+    class="nft relative"
+    style="height: 40vh; width: 100%"
+    :class="$q.screen.lt.md ? 'full-width' : ''"
+  >
     <MemberRibbon />
     <div class="main">
-      <h4 class="text-white text-weight-bol flex justify-start">
+      <h4 class="text-white text-weight-bold flex justify-start">
         {{ props.nama }}
-        <q-separator />
-        <div class="flex row">
-          <p style="font-size: medium">
-            <q-chip
-              square
-              class="text-grey-10 bg-grey-4"
-              icon="schedule"
-              :label="props.expiration"
-            />
-            <!-- <span class="text-h6">◷</span> {{ props.expiration }} -->
-          </p>
+        <q-separator spaced />
+        <div class="">
+          <q-card
+            tag="div"
+            bordered
+            class="no-shadow bg-transparent rounded-corner q-pa-md text-subtitle2 text-grey-3"
+            style="
+              width: 60%;
+              overflow-x: visible;
+              overflow-wrap: break-word;
+              border-color: grey;
+            "
+          >
+            label="lorem kadhkuashdiuagwdhbaskjdghaughdhadha dsagdagdabdhas
+            dasjhgdjagdagduyagd"
+          </q-card>
         </div>
-        <div class="full-width flex justify-end q-mt-lg">
-          <PlatNomor />
+        <div class="flex row absolute-bottom-left">
+          <q-chip
+            square
+            style="border-bottom-left-radius: 7px"
+            class="text-grey-10 bg-grey-4"
+            icon="schedule"
+            :label="props.expiration"
+          />
+        </div>
+        <div class="full-width q-mt-xl flex justify-end">
+          <PlatNomor class="q-ma-lg" style="transform: scale(1.5)" />
         </div>
       </h4>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -170,6 +111,7 @@ import PlatNomor from "./PlatNomor.vue";
 
 const props = defineProps({
   nama: String,
+  alamat: String,
   expiration: String,
 });
 

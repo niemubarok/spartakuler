@@ -8,11 +8,21 @@
       />
 
       <q-btn
+        push
+        style="width: 300px; height: 100px"
         color="primary"
         icon="directions_car"
-        label="Demo Post Keluar"
+        label="Post Keluar"
         @click="onClickDemoPage()"
-      />
+      >
+        <q-btn
+          push
+          class="q-ma-md"
+          color="white"
+          text-color="primary"
+          label="shift + K"
+        />
+      </q-btn>
       <!-- icon="directions_car" -->
       <q-btn
         color="primary"
@@ -46,7 +56,7 @@ const onClickDemoPage = () => {
 };
 
 const handleKeyDown = (event) => {
-  if (event.shiftKey && event.key === "D") {
+  if (event.shiftKey && event.key === "K") {
     onClickDemoPage();
   }
 };
@@ -54,7 +64,7 @@ const handleKeyDown = (event) => {
 window.addEventListener("keydown", handleKeyDown);
 
 onMounted(async () => {
-  console.log(transaksiStore.API_URL);
+  // console.log(transaksiStore.API_URL);
   if (!transaksiStore.API_URL || transaksiStore.API_URL === "-") {
     const dialog = $q.dialog({
       component: ApiUrlDialog,

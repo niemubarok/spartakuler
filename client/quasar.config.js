@@ -8,6 +8,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
+const { AppFullscreen } = require("quasar");
 const { configure } = require("quasar/wrappers");
 
 module.exports = configure(function (/* ctx */) {
@@ -95,7 +96,7 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Notify", "Dialog"],
+      plugins: ["Notify", "Dialog", "AppFullscreen"],
     },
 
     // animations: 'all', // --- includes all animations

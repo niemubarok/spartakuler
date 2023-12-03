@@ -228,21 +228,21 @@
           </template>
         </q-input>
       </div>
-
-      <q-btn
-        flat
-        class="fixed-bottom-right q-mb-xl"
-        color="primary"
-        icon="logout"
-      >
-        <q-badge
+      <div v-if="componentStore.currentPage == 'outgate'">
+        <q-btn
+          flat
+          class="fixed-bottom-right q-mb-xl"
           color="primary"
-          text-color="white"
-          label="shift + L"
-          class="q-ml-xs"
-        />
-      </q-btn>
-      <!-- <q-btn
+          icon="logout"
+        >
+          <q-badge
+            color="primary"
+            text-color="white"
+            label="shift + L"
+            class="q-ml-xs"
+          />
+        </q-btn>
+        <!-- <q-btn
         flat
         class="absolute-bottom-right q-mb-lg"
         color="primary"
@@ -257,28 +257,29 @@
           class="q-ml-xs"
         />
       </q-btn> -->
-      <q-btn
-        flat
-        class="fixed-bottom-right q-mb-md"
-        color="primary"
-        size="sm"
-        icon="settings"
-        @click="onClickSettings()"
-      >
-        <!-- label="Settings" -->
-        <q-badge
+        <q-btn
+          flat
+          class="fixed-bottom-right q-mb-md"
           color="primary"
-          text-color="white"
-          label="shift + S"
-          class="q-ml-xs"
-        />
-      </q-btn>
+          size="sm"
+          icon="settings"
+          @click="onClickSettings()"
+        >
+          <!-- label="Settings" -->
+          <q-badge
+            color="primary"
+            text-color="white"
+            label="shift + S"
+            class="q-ml-xs"
+          />
+        </q-btn>
 
-      <!-- <q-toggle
+        <!-- <q-toggle
         v-model="darkMode"
         @update:model-value="darkModeToggle"
         color="green"
       /> -->
+      </div>
     </div>
   </div>
 </template>
@@ -398,6 +399,7 @@ const onPressEnterPlatNomor = async () => {
       transaksiStore.selectedJenisKendaraan = jenis_kendaraan;
       console.log(jenis_kendaraan);
       const expiration = checkSubscriptionExpiration(dataCustomer.value?.akhir);
+      console.log(transaksiStore.isMemberExpired);
       const dialog = $q.dialog({
         component: TicketDialog,
         // noBackdropDismiss: true,
@@ -405,6 +407,7 @@ const onPressEnterPlatNomor = async () => {
         componentProps: {
           title: jenis_kendaraan?.label,
           nama: dataCustomer.value?.nama,
+          alamat: dataCustomer.value?.alamat,
           expiration: expiration,
         },
       });
@@ -414,6 +417,7 @@ const onPressEnterPlatNomor = async () => {
     }
   }
 };
+
 onMounted(async () => {
   componentStore.currentPage = "outgate";
   vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
@@ -445,6 +449,7 @@ onMounted(async () => {
       } else if (event.shiftKey === true && event.key === "S") {
         event.preventDefault();
         onClickSettings();
+        // window.removeEventListener("keydown", handleKeyDown);
       } else if (event.shiftKey === true && event.key === "R") {
         event.preventDefault();
         onClickKendaraanKeluar();

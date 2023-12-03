@@ -66,6 +66,22 @@
 
   <!-- {{ formData.pic_body_masuk }} -->
 
+  <div id="struk" class="q-ma-lg">
+    <Struk />
+  </div>
+  <q-btn
+    color="primary"
+    icon="check"
+    label="cetakStruk"
+    @click="onClickCetakStruk"
+  />
+  <q-btn
+    color="primary"
+    icon="check"
+    label="Open gate"
+    @click="openGateDialogue"
+  />
+
   <div
     class="q-mt-xl"
     style="border: 1px solid black; width: 400px; height: 400px; margin: 0 auto"
@@ -87,11 +103,15 @@ import { Buffer } from "buffer";
 import axios from "axios";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+import Struk from "src/components/Struk.vue";
+import { useQuasar } from "quasar";
+import OpenGateDialog from "src/components/OpenGateDialog.vue";
 // const picData = ref([
 //   91, 111, 98, 106, 101, 99, 116, 32, 79, 98, 106, 101, 99, 116, 93,
 // ]);
 
 const imageUrl = ref("");
+const $q = useQuasar();
 
 const formData = ref({
   id: "098760",
@@ -154,6 +174,72 @@ const formData = ref({
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
 
+const onClickCetakStruk = () => {
+  // Add logic for printing receipt here
+  const elementToPrint = document.getElementById("struk");
+  if (elementToPrint) {
+    const printWindow = window.open("", "_blank");
+    const printDocument = printWindow.document;
+    printDocument.write(`
+  <html>
+    <head>
+      <style>
+        @media print {
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          #struk {
+            width: 100%;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          table td {
+            padding: 5px;
+            border: 1px solid #000;
+          }
+          .label {
+            font-weight: bold;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <table>
+        <tr>
+          <td class="label">Nomor Struk</td>
+          <td class="value">: ...</td>
+        </tr>
+        <tr>
+          <td class="label">Plat Nomor</td>
+          <td class="value">: ...</td>
+        </tr>
+        <tr>
+          <td class="label">Waktu Masuk</td>
+          <td class="value">: ...</td>
+        </tr>
+        <tr>
+          <td class="label">Waktu Keluar</td>
+          <td class="value">: 16:00:00</td>
+        </tr>
+        <tr>
+          <td class="label">Lama Parkir</td>
+          <td class="value">: 2 Jam</td>
+        </tr>
+        <tr>
+          <td class="label">Biaya Parkir</td>
+          <td class="value">: 0</td>
+        </tr>
+      </table>
+    </body>
+  </html>
+`);
+    printDocument.close();
+    printWindow.print();
+  }
+};
 const onFilePicked = (event) => {
   const files = event.target.files;
   const file = files[0];
@@ -187,6 +273,14 @@ const storeData = async () => {
     formData.value
   );
   console.log(store);
+};
+
+const openGateDialogue = () => {
+  const openGate = $q.dialog({
+    component: OpenGateDialog,
+    noBackdropDismiss: true,
+  });
+  openGate.update();
 };
 
 // onMounted(async () => {

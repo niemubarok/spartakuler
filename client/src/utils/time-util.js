@@ -98,23 +98,25 @@ export const isValidTime = (time) => {
 };
 
 export const checkSubscriptionExpiration = (subscriptionEndDate) => {
-  const currentDate = new Date();
-  const endDate = new Date(subscriptionEndDate);
+  const currentDate = new Date().setHours(0, 0, 0, 0);
+  const endDate = new Date(subscriptionEndDate).setHours(0, 0, 0, 0);
 
   if (currentDate < endDate) {
-    const timeDiff = endDate.getTime() - currentDate.getTime();
-    const daysLeft = Math.floor(timeDiff / (1000 * 3600 * 24));
-    const hoursLeft = Math.floor(
-      (timeDiff % (1000 * 3600 * 24)) / (1000 * 3600)
-    );
-    const minutesLeft = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-    const secondsLeft = Math.floor((timeDiff % (1000 * 60)) / 1000);
+    // const timeDiff = endDate - currentDate;
+    // const daysLeft = Math.floor(timeDiff / (1000 * 3600 * 24));
+    // const hoursLeft = Math.floor((timeDiff % (1000 * 3600 * 24)) / (1000 * 3600));
+    // const minutesLeft = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
     transaksiStore.isMemberExpired = false;
     // return `Berakhir pada ${daysLeft} hari, ${hoursLeft} jam, ${minutesLeft} menit, dan ${secondsLeft} detik.`;
-    return `Berakhir pada ${daysLeft} hari, ${hoursLeft} jam, ${minutesLeft} menit`;
+    return `Berakhir dalam ${daysLeft} hari (${new Date(
+      subscriptionEndDate
+    ).toLocaleDateString("id-ID")})`;
+    return;
   } else {
     transaksiStore.isMemberExpired = true;
-    return "Langganan sudah berakhir.";
+    return `Langganan sudah berakhir pada ${new Date(
+      subscriptionEndDate
+    ).toLocaleDateString("id-ID")}`;
   }
 };
 
@@ -130,7 +132,7 @@ export const calculateParkingDuration = (entryTime) => {
   );
   const seconds = Math.floor((diffInMilliseconds % (1000 * 60)) / 1000);
 
-  const interval24 = Math.round(hours / 24);
+  const interval24 = Math.floor(hours / 24); // Use Math.floor instead of Math.round to get the correct number of 24-hour intervals
   const additionalHourAfter24 = hours - interval24 * 24;
 
   return { days, hours, minutes, seconds, additionalHourAfter24 };

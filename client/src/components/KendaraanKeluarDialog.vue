@@ -1,6 +1,6 @@
 <template>
-  <!-- :maximized="true" -->
   <q-dialog
+    :maximized="true"
     ref="dialogRef"
     @hide="onDialogHide"
     content-class="dialog__backdrop relative"
@@ -9,31 +9,23 @@
     <!-- class="q-pa-sm" -->
     <div>
       <q-card
-        style="width: 50vw; height: fit-content"
+        style="width: 80vw; height: fit-content"
         class="q-pa-sm dark-glass fixed-center relative"
       >
-        <!-- <div>
-          <q-avatar
-            size="30px"
-            class="cursor-pointer z-top absolute-top-right q-ma-sm"
-            text-color="grey-7"
-            color="grey-5"
-            icon="close"
-            @click="dialogRef.hide()"
+        <div class="absolute-top-left q-pl-md q-pt-sm">
+          <q-btn
+            push
+            color="grey-1"
+            text-color="grey-8"
+            label="ESC"
+            class="text-weight-bolder text-subtitle2"
           />
-        </div> -->
-        <!-- <div class="flex row justify-start">
-          <div class="col-2 q-mr-xl"> -->
-        <!-- </div> -->
-
+        </div>
         <div
           class="text-center text-weight-bolder text-grey-2 text-h5 q-ml-md q-mb-md"
         >
-          <!-- <q-icon name="patient_list" size="md" style="" /> -->
-          <!-- class="absolute-top-left" -->
           .:: Detail Kendaraan Keluar ::.
         </div>
-        <!-- </div> -->
         <div class="flex justify-center">
           <div class="row items-start full-width">
             <q-card class="full-width q-pa-md" flat bordered>
@@ -48,8 +40,9 @@
                   <q-item-label>{{ ls.get("pegawai").nama }}</q-item-label>
                   <q-item-label caption>
                     <q-chip
+                      class="q-px-sm"
+                      square
                       dense
-                      class="rounded-corner"
                       :label="'Shift: ' + ls.get('shift')"
                     />
                   </q-item-label>
@@ -74,20 +67,13 @@
               </q-item>
 
               <q-separator />
-              <!-- <div>
-                <q-chip
-                  square
-                  class="q-mt-lg"
-                  label="Detail Per Jenis Kendaraan"
-                />
-              </div> -->
-              <div v-if="!kendaraanKeluar" class="q-mt-md">
+              <!-- {{ kendaraanKeluar }} -->
+              <div v-if="kendaraanKeluar?.count == 0" class="q-mt-md">
                 <q-card flat class="bg-grey-3 text-grey-6">
                   <q-card-section>
                     <div class="text-h6">
                       Belum ada Kendaraan Keluar di shift ini
                     </div>
-                    <!-- <div class="text-subtitle2">by John Doe</div> -->
                   </q-card-section>
                 </q-card>
               </div>
@@ -129,20 +115,18 @@
                         <span class="text-h5">
                           {{ props.row.count }}
                         </span>
-                        <!-- style="margin-right: -10px; min-width: 50px" -->
-                        <!-- {{  }}
-                        </q-chip> -->
                       </q-td>
-                      <q-td key="uang_masuk" :props="props">
-                        <div class="row justify-evenly">
-                          <span class="text-h5"> Rp. </span>
+                      <q-td
+                        key="uang_masuk"
+                        :props="props"
+                        style="width: 200px"
+                      >
+                        <div class="row justify-between">
+                          <span class="text-h5"> Rp </span>
                           <span class="text-h5">
                             {{ props.row.uang_masuk.toLocaleString("id-ID") }}
                           </span>
                         </div>
-                        <!-- style="margin-right: -10px; min-width: 50px" -->
-                        <!-- {{ }}
-                        </q-chip> -->
                       </q-td>
                     </q-tr>
                   </template>
@@ -150,47 +134,6 @@
               </div>
             </q-card>
           </div>
-
-          <!-- <q-table
-            :rows="tableData"
-            :columns="tableColumns"
-            row-key="id"
-            dense
-            virtual-scroll
-            class="sticky-header-table rounded-borders q-pa-md glass full-width"
-            style="height: 40vh"
-            no-data-label="No data available"
-          >
-            <template #header-cell(no)> No </template>
-            <template #header-cell(namaPetugas)> Nama Petugas </template>
-            <template #header-cell(shift)> Shift </template>
-            <template #header-cell(uangMasuk)> Uang Masuk </template>
-            <template #header-cell(jumlahMotor)> Jumlah Motor </template>
-            <template #header-cell(mobil)> Mobil </template>
-            <template #header-cell(truck)> Truck </template>
-
-            <template #body-cell(no)="props">
-              {{ props.index + 1 }}
-            </template>
-            <template #body-cell(namaPetugas)="props">
-              {{ props.value }}
-            </template>
-            <template #body-cell(shift)="props">
-              {{ props.value }}
-            </template>
-            <template #body-cell(uangMasuk)="props">
-              {{ props.value }}
-            </template>
-            <template #body-cell(jumlahMotor)="props">
-              {{ props.value }}
-            </template>
-            <template #body-cell(mobil)="props">
-              {{ props.value }}
-            </template>
-            <template #body-cell(truck)="props">
-              {{ props.value }}
-            </template>
-          </q-table> -->
         </div>
       </q-card>
     </div>
@@ -223,13 +166,16 @@ onMounted(async () => {
   // const { countPerVehicle, totalUangMasuk } =
   //   await transaksiStore.getCountVehicleOutToday();
   // console.log((await transaksiStore.getCountVehicleOutToday()));
-  kendaraanKeluar.value = await transaksiStore.getCountVehicleOutToday();
-  totalUangMasuk.value = kendaraanKeluar.value
-    .reduce((total, item) => total + parseInt(item.uang_masuk), 0)
-    .toLocaleString("id-ID", {
-      style: "currency",
-      currency: "IDR",
-    });
+  try {
+    kendaraanKeluar.value = await transaksiStore.getCountVehicleOutToday();
+    totalUangMasuk.value = kendaraanKeluar.value
+      .reduce((total, item) => total + parseInt(item.uang_masuk), 0)
+      .toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+      })
+      .split(",")[0];
+  } catch (error) {}
 
   // kendaraanKeluar.value = vehicleOutToday;
   // totalUangMasuk.value = parseInt(totalUangMasuk).toLocaleString("id-ID", {
@@ -237,7 +183,7 @@ onMounted(async () => {
   //   currency: "IDR",
   // });
 
-  console.log(kendaraanKeluar.value);
+  // console.log(kendaraanKeluar.value);
 
   const handleKeyDown = (event) => {
     // console.log(event.key);

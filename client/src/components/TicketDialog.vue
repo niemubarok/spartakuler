@@ -35,7 +35,7 @@
             :expiration="props.expiration"
             :ribbonText="props.ribbonText"
           />
-          <plat-nomor v-else class="q-ma-md" />
+          <plat-nomor v-else class="q-ma-md" style="transform: scale(2)" />
         </div>
 
         <q-input
@@ -76,7 +76,10 @@ import MemberCard from "./MemberCard.vue";
 import PlatNomor from "./PlatNomor.vue";
 import { useComponentStore } from "src/stores/component-store";
 
-import { calculateParkingDuration } from "src/utils/time-util";
+import {
+  calculateParkingDuration,
+  checkSubscriptionExpiration,
+} from "src/utils/time-util";
 // import ls from "localstorage-slim";
 
 // ls.config.encrypt = false;
@@ -151,6 +154,8 @@ const onSaveSettings = async () => {
           ? `${lamaParkir.hours} Jam ${lamaParkir.minutes} Menit`
           : `${lamaParkir.minutes} Menit`;
       await transaksiStore.calculateParkingFee(waktuMasuk, waktuKeluar);
+      transaksiStore.waktuKeluar = waktuKeluar.toISOString();
+      // transaksiStore.lamaParkir = lamaParkir;
 
       // // const biayaParkir = calculateParkingFee(waktuMasuk, waktuKeluar);
 
@@ -160,6 +165,7 @@ const onSaveSettings = async () => {
       // console.log(waktuKeluar);
       // console.log(biayaParkir);
       // console.log(transaksiStore.transaksi.value);
+      componentStore.currentPage = "payment";
 
       transaksiStore.setCheckIn(true);
 

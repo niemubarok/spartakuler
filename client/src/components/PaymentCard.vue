@@ -8,16 +8,18 @@
       class="gradient-primary q-ma-md fixed-top relative"
       style="top: 5vh; width: 95vw; height: 85vh; border-radius: 10px"
     >
-      <!-- <div>
-        <q-avatar
-          size="40px"
+      <div>
+        <q-btn
+          push
           class="cursor-pointer z-top absolute-top-left q-ma-sm"
-          text-color="grey-7"
-          color="grey-2"
-          icon="close"
+          text-color="grey-9"
+          color="grey-1"
+          no-caps
+          label="shift + esc"
         >
-        </q-avatar>
-      </div> -->
+          <!-- icon="arrow_upward" -->
+        </q-btn>
+      </div>
       <q-card-section>
         <q-card
           flat
@@ -95,7 +97,10 @@
                   <div class="flex justify-end q-mr-xl q-mt-md">
                     <!-- PLAT NOMOR  -->
 
-                    <PlatNomor style="transform: scale(1.5)" />
+                    <PlatNomor
+                      style="transform: scale(1.5); bottom: 15%; right: 15%"
+                      class="absolute-bottom-right"
+                    />
                   </div>
                 </div>
               </div>
@@ -244,11 +249,12 @@ const tanggalMasuk = ref(
   })
 );
 // const lokasiPos = ref(ls.get("lokasiPos")?.label);
-const isPaymentDialogMounted = ref(false);
+// const componentStore.isPaymentDialogMounted ref(false);
 
 const onClickBayar = async () => {
   // const video = videoRef.value;
   const videoRef = cameraOutRef.value?.$refs.videoRef;
+  // transaksiStore.waktuMasuk = waktuMasuk.value;
 
   if (videoRef !== undefined) {
     const canvas = document.createElement("canvas");
@@ -260,34 +266,43 @@ const onClickBayar = async () => {
     transaksiStore.pic_body_keluar = imageBase64;
   }
 
-  console.log("isPaymentDialogMounted.value:", !isPaymentDialogMounted.value);
-  console.log("transaksiStore.isMember:", !transaksiStore.isMember);
-  console.log(
-    "transaksiStore.isMemberExpired:",
-    transaksiStore.isMemberExpired
-  );
-  console.log(
-    "componentStore.currentPage === 'payment':",
-    componentStore.currentPage === "payment"
-  );
+  // console.log("isPaymentDialogMounted:", !isPaymentDialogMounted);
+  // console.log("transaksiStore.isMember:", transaksiStore.isMember);
+  // console.log(
+  //   "transaksiStore.isMemberExpired:",
+  //   transaksiStore.isMemberExpired
+  // );
+  // console.log(
+  //   "componentStore.currentPage === 'payment':",
+  //   componentStore.currentPage === "payment"
+  // );
 
   if (
-    !isPaymentDialogMounted.value &&
-    !transaksiStore.isMember &&
-    transaksiStore.isMemberExpired &&
-    componentStore.currentPage === "payment"
+    componentStore.currentPage === "payment" &&
+    componentStore.isPaymentDialogMounted === false
   ) {
-    const paymentDialog = $q.dialog({
-      component: PaymentDialogComponent,
-      noBackdropDismiss: true,
-      // noEscDismiss: true,
-      // persistent: true,
-    });
+    if (!transaksiStore.isMember) {
+      const paymentDialog = $q.dialog({
+        component: PaymentDialogComponent,
+        noBackdropDismiss: true,
+        // noEscDismiss: true,
+        // persistent: true,
+      });
 
-    paymentDialog.update();
-    isPaymentDialogMounted.value = true;
-  } else {
-    if (componentStore.currentPage === "payment") {
+      paymentDialog.update();
+      componentStore.isPaymentDialogMounted = true;
+    } else if (transaksiStore.isMember && transaksiStore.isMemberExpired) {
+      const paymentDialog = $q.dialog({
+        component: PaymentDialogComponent,
+        noBackdropDismiss: true,
+        // noEscDismiss: true,
+        // persistent: true,
+      });
+      componentStore.isPaymentDialogMounted = true;
+      paymentDialog.update();
+    } else {
+      // console.log("kesini");
+      // if (componentStore.currentPage === "payment") {
       const updateTransaksi = await transaksiStore.updateTableTransaksi();
       if (updateTransaksi == 200) {
         const openGateDialog = $q.dialog({
@@ -297,7 +312,8 @@ const onClickBayar = async () => {
 
         openGateDialog.update();
       }
-      // isPaymentDialogMounted.value = true;
+      // componentStore.isPaymentDialogMounted = true;
+      // }
     }
   }
 };
@@ -317,7 +333,9 @@ const handleKeyDown = (event) => {
     }
     if (event.shiftKey === true && event.key === "Escape") {
       event.preventDefault();
-      onClosePaymentCard();
+      if (componentStore.isPaymentDialogMounted === false) {
+        onClosePaymentCard();
+      }
       pressedKeys = "";
     } else {
       // Add the pressed key to the string of pressed keys

@@ -16,7 +16,11 @@
         style="height: 55vh; width: 70vw"
       >
         <q-card-section class="row items-center justify-center">
-          <q-card flat class="glass" transition-show="slide-down">
+          <q-card
+            class="bg-white z-top"
+            style="border-radius: 20px"
+            transition-show="slide-down"
+          >
             <q-card-section>
               <q-item class="q-pa-xl">
                 <q-item-section top avatar>
@@ -37,52 +41,75 @@
           </q-card>
         </q-card-section>
         <!-- <q-separator spaced inset dark /> -->
-        <q-card-section class="row items-center justify-center">
+        <q-card-section
+          class="row items-center justify-center"
+          style="margin-top: -70px"
+        >
           <q-card
             flat
             class="glass q-mb-md q-pa-xl"
             transition-show="slide-down"
           >
             <q-card-section align="center">
-              <q-item
-                class="text-h4 bg-primary text-white text-weight-bolder rounded-corner q-pa-lg"
-              >
-                <q-item-section top avatar>
-                  <q-avatar
+              <div>
+                <q-card
+                  flat
+                  class="text-h4 bg-primary text-white text-weight-bolder rounded-corner q-pa-lg"
+                >
+                  <!-- <q-item-section avatar> -->
+                  <!-- <q-avatar
                     color="white"
                     text-color="primary text-weight-bolder"
                     icon="lock_open"
                     size="xl"
-                  />
-                </q-item-section>
-                <q-item-section>
+                  /> -->
+                  <!-- </q-item-section>
+                  <q-item-section> -->
                   <q-item-label>Buka Gate ?</q-item-label>
-                </q-item-section>
-              </q-item>
+                  <!-- </q-item-section> -->
+                </q-card>
+              </div>
             </q-card-section>
             <q-card-section align="center">
               <q-btn
                 size="xl"
                 push
-                style="width: 200px; height: 200px"
+                style="width: 150px; height: 200px"
                 label="Tidak"
-                class="text-dark bg-grey-6 text-weight-bolder q-mr-md"
+                class="text-dark bg-grey-5 text-weight-bolder q-px-lg"
               >
                 <q-badge color="transparent">
                   <q-btn push color="primary" label="ESC" />
                 </q-badge>
               </q-btn>
+              <!-- autofocus -->
               <q-btn
-                autofocus
                 size="xl"
                 push
                 label="Buka"
                 @focus="openGateFocus = true"
                 style="width: 200px; height: 200px"
-                @keydown.enter="onOpenGate()"
+                class="text-dark bg-grey-4 text-weight-bolder q-mx-md"
+              >
+                <!-- :class="openGateFocus ? 'bg-yellow text-dark' : 'text-dark'" -->
+                <!-- @keydown.enter="onOpenGate()" -->
+                <!-- color="bg-primary text-dark" -->
+                <q-badge color="transparent">
+                  <q-btn push color="primary" label="shift + " />
+                  <q-btn push color="primary" icon="keyboard_return" />
+                </q-badge>
+              </q-btn>
+              <!-- autofocus -->
+              <q-btn
+                size="xl"
+                push
+                label="Buka + Cetak Struk"
+                @focus="openGateFocus = true"
+                style="width: 200px; height: 200px"
                 :class="openGateFocus ? 'bg-yellow text-dark' : 'text-dark'"
                 class="text-dark bg-yellow text-weight-bolder"
               >
+                <!-- @keydown.enter="onOpenGate()" -->
                 <!-- color="bg-primary text-dark" -->
                 <q-badge color="transparent">
                   <q-btn push color="primary" icon="keyboard_return" />
@@ -102,6 +129,7 @@ import { useDialogPluginComponent, useQuasar } from "quasar";
 import { onMounted, onBeforeUnmount, onBeforeMount, ref, inject } from "vue";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+// import { ipcRenderer } from "electron";
 
 // import ls from "localstorage-slim";
 // ls.config.encrypt = false;
@@ -113,6 +141,7 @@ const openGateFocus = ref(false);
 const isGateOpen = ref(false);
 const { dialogRef, onDialogHide } = useDialogPluginComponent();
 const onOpenGate = async () => {
+  console.log("open gate");
   await componentStore.openGate();
   componentStore.setOutGateKey();
   transaksiStore.setCheckIn(false);
@@ -126,12 +155,119 @@ const onOpenGate = async () => {
   }
 };
 
+const onClickCetakStruk = () => {
+  // Add logic for printing receipt here
+  const printWindow = window.open("", "_blank");
+  const printDocument = printWindow.document;
+
+  const elementToPrint = printDocument.createElement("div");
+  elementToPrint.id = "struk";
+  printDocument.body.appendChild(elementToPrint);
+
+  const htmlContent = `
+<html>
+  <head>
+    <style>
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        #struk {
+          width: 100%;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        table td {
+          padding: 5px;
+          border: 0;
+        }
+        .label {
+          font-weight: bold;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td class="label">Nomor Struk</td>
+        <td class="value">: ${transaksiStore.nomorTiket}</td>
+      </tr>
+      <tr>
+        <td class="label">Plat Nomor</td>
+        <td class="value">: ${transaksiStore.platNomor}</td>
+      </tr>
+      <tr>
+        <td class="label">Waktu Masuk</td>
+        <td class="value">: ${new Date(
+          transaksiStore.waktuMasuk
+        ).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}</td>
+      </tr>
+      <tr>
+        <td class="label">Waktu Keluar</td>
+        <td class="value">: ${new Date(
+          transaksiStore.waktuKeluar
+        ).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}</td>
+      </tr>
+      <tr>
+        <td class="label">Lama Parkir</td>
+        <td class="value">: ${transaksiStore.durasi}</td>
+      </tr>
+      <tr>
+        <td class="label">Biaya Parkir</td>
+        <td class="value">: ${transaksiStore.biayaParkir}</td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  elementToPrint.innerHTML = htmlContent;
+
+  printDocument.open();
+  printDocument.write(htmlContent);
+  printDocument.close();
+  printWindow.print();
+
+  // Register the onafterprint event listener
+  setTimeout(() => {
+    if (!printWindow.closed) {
+      printWindow.close();
+    }
+  }, 1000);
+};
+
 const handleKeyDown = (event) => {
+  // console.log(event);
   if (event.key === "Escape") {
+    event.preventDefault();
     componentStore.setOutGateKey();
     transaksiStore.setCheckIn(false);
     transaksiStore.$reset();
     dialogRef.value.hide();
+  } else if (event.shiftKey === true && event.key === "Enter") {
+    console.log("shift Enter");
+    event.preventDefault();
+    onOpenGate();
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    console.log("Enter");
+    onClickCetakStruk();
+    onOpenGate();
   }
 };
 
@@ -141,7 +277,9 @@ onMounted(async () => {
 
 const hideDialog = () => {
   console.log("onDialogHide");
-  onDialogHide();
+  // onDialogHide();
+  window.removeEventListener("keydown", handleKeyDown);
+  componentStore.isPaymentDialogMounted = false;
   componentStore.currentPage = "outgate";
 };
 

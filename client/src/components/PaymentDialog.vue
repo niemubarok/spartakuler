@@ -1,5 +1,6 @@
 <template>
   <!-- :maximized="true" -->
+  <!-- v-model="componentStore.dialogRef" -->
   <q-dialog
     ref="dialogRef"
     persistent
@@ -60,9 +61,9 @@
             label="Masukkan Jumlah Uang Diterima"
             ref="strukRef"
             autofocus
-            @keydown.enter="onSaveSettings()"
             @update:model-value="() => onInputChange()"
           >
+            <!-- @keydown.enter="onSaveSettings()" -->
             <template v-slot:prepend>
               <q-chip
                 flat
@@ -138,7 +139,7 @@ const props = defineProps({
 });
 
 const bayarModel = ref();
-
+// const dialogRef = ref(false);
 const onInputChange = () => {
   let value = bayarModel.value.replace(/\D/g, "");
   let numberValue = Number(value);
@@ -152,17 +153,17 @@ const onInputChange = () => {
 
 let pressedKeys = "";
 const targetKeys = "TABAROKTA";
+const { dialogRef, onDialogHide } = useDialogPluginComponent();
 
 onMounted(async () => {
-  // console.log(inputPlatNomorRef);
-  const handleKeyDown = (event) => {
-    // if (event.key === "Escape") {
-    //   componentStore.setOutGateKey();
-    //   transaksiStore.setCheckIn(false);
-    //   transaksiStore.$reset();
-    //   // openGateRef.value.hide();
-    //   dialogRef.value.hide();
-    // }
+  let mounted = 0;
+  mounted++;
+  console.log("mounted", mounted);
+
+  const handleKeyDown = async (event) => {
+    if (event.key === "Enter") {
+      await onSaveSettings();
+    }
     // Add the pressed key to the string of pressed keys
     pressedKeys += event.key.toUpperCase();
 
@@ -185,26 +186,32 @@ onMounted(async () => {
 });
 
 const onSaveSettings = async () => {
-  if (parseInt(transaksiStore.bayar) >= parseInt(transaksiStore.biayaParkir)) {
-    const updateTransaksi = await transaksiStore.updateTableTransaksi();
-    if (updateTransaksi == 200) {
-      const openGate = $q.dialog({
-        component: OpenGateDialog,
-        noBackdropDismiss: true,
-      });
+  if (componentStore.currentPage === "payment") {
+    if (
+      parseInt(transaksiStore.bayar) >= parseInt(transaksiStore.biayaParkir)
+    ) {
+      const updateTransaksi = await transaksiStore.updateTableTransaksi();
+      if (updateTransaksi == 200) {
+        dialogRef.value.hide();
+        const openGate = $q.dialog({
+          component: OpenGateDialog,
+          noBackdropDismiss: true,
+        });
 
-      openGate.update();
-
-      dialogRef.value.hide();
+        openGate.update();
+      }
+    } else {
+      if (!transaksiStore.isMember || transaksiStore.isMember == false) {
+        if (transaksiStore.bayar) {
+          console.log("kurang");
+          $q.notify({
+            type: "negative",
+            message: "Pembayaran Masih Kurang !!",
+          });
+        }
+      }
     }
-  } else {
-    console.log("kurang");
-    $q.notify({
-      type: "negative",
-      message: "Pembayaran Masih Kurang !!",
-    });
   }
-
   // console.log(dialogRef.value.$refs.paymentCardRef);
   // componentStore.setPaymentCardKey();
 
@@ -217,8 +224,6 @@ defineEmits([
   // component will emit through useDialogPluginComponent()
   ...useDialogPluginComponent.emits,
 ]);
-
-const { dialogRef, onDialogHide } = useDialogPluginComponent();
 </script>
 
 <style scoped>

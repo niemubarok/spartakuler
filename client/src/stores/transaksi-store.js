@@ -206,7 +206,7 @@ export const useTransaksiStore = defineStore("transaksi", {
           diffInMilliseconds / (1000 * 60 * 60)
         );
 
-        const interval24 = Math.round(durationInHour / 24);
+        const interval24 = Math.floor(durationInHour / 24);
         console.log("durationInHour", durationInHour);
 
         // Calculate the additional fee
