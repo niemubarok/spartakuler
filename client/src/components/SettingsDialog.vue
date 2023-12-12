@@ -1,5 +1,12 @@
 <template>
-  <q-dialog ref="dialogRef" no-backdrop-dismiss maximized @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    no-backdrop-dismiss
+    no-esc-dismiss
+    maximized
+    @hide="onDialogHide"
+    persistent
+  >
     <div class="row justify-center items-center">
       <q-card
         class="q-px-md q-pt-sm q-pb-md glass relative"
@@ -32,45 +39,49 @@
 
         <div class="q-mt-md">
           <q-item class="glass">
-            <q-item-section top avatar>
+            <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="camera" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Kamera Masuk</q-item-label>
               <q-item-label caption lines="2">
                 <span class="text-h6 text-weight-bolder text-black">{{
-                  componentStore.camera.in.label || "-"
+                  componentStore.camera.in?.label || "-"
                 }}</span></q-item-label
               >
             </q-item-section>
             <q-item-section side>
-              <q-btn push text-color="white" color="black">shift + i</q-btn>
+              <q-btn push text-color="white" style="width: 60px" color="black"
+                >i</q-btn
+              >
               <!-- <q-icon name="star" color="yellow" /> -->
             </q-item-section>
           </q-item>
         </div>
         <div class="q-mt-md">
           <q-item class="glass">
-            <q-item-section top avatar>
+            <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="camera" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Kamera Keluar</q-item-label>
               <q-item-label caption lines="2">
                 <span class="text-h6 text-weight-bolder text-black">{{
-                  componentStore.camera.out.label || "-"
+                  componentStore.camera.out?.label || "-"
                 }}</span></q-item-label
               >
             </q-item-section>
             <q-item-section side>
-              <q-btn push text-color="white" color="black">shift + O</q-btn>
+              <q-btn push text-color="white" style="width: 60px" color="black"
+                >O</q-btn
+              >
               <!-- <q-icon name="star" color="yellow" /> -->
             </q-item-section>
           </q-item>
         </div>
         <div class="q-mt-md">
           <q-item class="glass">
-            <q-item-section top avatar>
+            <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="place" />
             </q-item-section>
             <q-item-section>
@@ -82,13 +93,15 @@
               >
             </q-item-section>
             <q-item-section side>
-              <q-btn push text-color="white" color="black">shift + P</q-btn>
+              <q-btn push text-color="white" style="width: 60px" color="black"
+                >P</q-btn
+              >
             </q-item-section>
           </q-item>
         </div>
         <div class="q-mt-md">
           <q-item class="glass">
-            <q-item-section top avatar>
+            <q-item-section avatar>
               <q-avatar
                 color="primary"
                 text-color="white"
@@ -104,7 +117,34 @@
               </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-btn push text-color="white" color="black">shift + J</q-btn>
+              <q-btn push text-color="white" style="width: 60px" color="black"
+                >J</q-btn
+              >
+            </q-item-section>
+          </q-item>
+        </div>
+
+        <div class="q-mt-md">
+          <q-item class="glass">
+            <q-item-section avatar>
+              <q-avatar
+                color="primary"
+                text-color="white"
+                icon="directions_car"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Default Kode Plat Nomor</q-item-label>
+              <q-item-label caption lines="2">
+                <span class="text-h6 text-weight-bolder text-black">
+                  {{ settingsStore.prefix || "-" }}
+                </span>
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn push text-color="white" style="width: 60px" color="black"
+                >K</q-btn
+              >
             </q-item-section>
           </q-item>
         </div>
@@ -113,24 +153,50 @@
           <q-chip
             text-color="primary"
             label="Simpan"
-            class="q-pa-md q-py-lg text-h6 rounded-corner"
+            style="padding: 2rem 1rem"
+            class="q-mt-lg q-pa-md text-h6 rounded-corner"
           >
             <q-btn push icon="keyboard_return" color="black" class="q-ma-md"
           /></q-chip>
         </q-card-actions>
       </q-card>
     </div>
+
+    <q-dialog v-model="componentStore.selectCameraInDialogModel" persistent>
+      <select-camera-in-dialog />
+    </q-dialog>
+    <q-dialog v-model="componentStore.selectCameraOutDialogModel" persistent>
+      <select-camera-out-dialog />
+    </q-dialog>
+    <q-dialog v-model="componentStore.selectPosDialogModel" persistent>
+      <select-pos-dialog />
+    </q-dialog>
+    <q-dialog
+      v-model="componentStore.selectDefaultJenisKendaraanDialogModel"
+      persistent
+    >
+      <select-default-jenis-kendaraan-dialog />
+    </q-dialog>
   </q-dialog>
 </template>
 
 <script setup>
 import { useDialogPluginComponent, useQuasar } from "quasar";
 // import SuccessCheckMark from "./SuccessCheckMark.vue";
-import { onMounted, computed, onBeforeMount, ref } from "vue";
+import {
+  onMounted,
+  computed,
+  onBeforeMount,
+  ref,
+  onUpdated,
+  onUnmounted,
+} from "vue";
 import { useComponentStore } from "src/stores/component-store";
+import { useSettingsStore } from "src/stores/settings-store";
+import { useTransaksiStore } from "src/stores/transaksi-store";
+import LoginDialog from "src/components/LoginDialog.vue";
 
 import ls from "localstorage-slim";
-import { useTransaksiStore } from "src/stores/transaksi-store";
 import SelectCameraInDialog from "./SelectCameraInDialog.vue";
 import SelectCameraOutDialog from "./SelectCameraOutDialog.vue";
 import SelectPosDialog from "./SelectPosDialog.vue";
@@ -138,36 +204,69 @@ import SelectDefaultJenisKendaraanDialog from "./SelectDefaultJenisKendaraanDial
 
 const componentStore = useComponentStore();
 const transaksiStore = useTransaksiStore();
+const settingsStore = useSettingsStore();
+
 // ls.config.encrypt = false;
-// const cameraIn = computed(() => ls.get("cameraIn"));
-// const cameraOut = ref(ls.get("cameraOut")) || ref("");
-// const cameraOptions = ref(["-"]);
-
-// // const cameraInOptions = ref(cameraOptions.value);
-// // const cameraOutOptions = ref(cameraOptions.value);
-
-// const postLocationOptions = ref([]);
-// const jenisKendaraanOptions = ref([]);
 
 const $q = useQuasar();
+defineEmits([...useDialogPluginComponent.emits]);
 
-// const getAvailableCameras = () => {
-//   navigator.mediaDevices
-//     .enumerateDevices()
-//     .then((devices) => {
-//       devices.forEach((device) => {
-//         if (device.kind === "videoinput") {
-//           cameraOptions.value.push({
-//             label: device.label,
-//             value: device.deviceId,
-//           });
-//         }
-//       });
-//     })
-//     .catch((err) => {
-//       console.log(err.name + ": " + err.message);
-//     });
-// };
+const { dialogRef } = useDialogPluginComponent();
+
+const onSaveSettings = () => {
+  dialogRef.value.hide();
+  window.location.reload();
+};
+
+const handleKeyDownOnSettingDialog = async (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    onSaveSettings();
+  } else if (event.key.toUpperCase() === "I") {
+    // const cameraInDialog = $q.dialog({
+    //   component: SelectCameraInDialog,
+    // });
+    // cameraInDialog.update();
+    event.preventDefault();
+    componentStore.selectCameraInDialogModel = true;
+  } else if (event.key.toUpperCase() === "O") {
+    // const cameraOutDialog = $q.dialog({
+    //   component: SelectCameraOutDialog,
+    // });
+    // cameraOutDialog.update();
+    event.preventDefault();
+    componentStore.selectCameraOutDialogModel = true;
+  } else if (event.key.toUpperCase() === "P") {
+    event.preventDefault();
+    // const posDialog = $q.dialog({
+    //   component: SelectPosDialog,
+    // });
+    // posDialog.update();
+    componentStore.selectPosDialogModel = true;
+  } else if (event.key.toUpperCase() === "J") {
+    // const defaultJenisKendaraan = $q.dialog({
+    //   component: SelectDefaultJenisKendaraanDialog,
+    // });
+    // defaultJenisKendaraan.update();
+    event.preventDefault();
+    componentStore.selectDefaultJenisKendaraanDialogModel = true;
+  } else if (event.key === "Escape") {
+    if (
+      !componentStore.selectCameraInDialogModel &&
+      !componentStore.selectCameraOutDialogModel &&
+      !componentStore.selectPosDialogModel &&
+      !componentStore.selectDefaultJenisKendaraanDialogModel
+    ) {
+      event.preventDefault();
+      dialogRef.value.hide();
+    }
+  }
+};
+
+onMounted(async () => {
+  await settingsStore.getPosConfig();
+  window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+});
 
 const onDialogHide = () => {
   if (transaksiStore.lokasiPos === "-" || transaksiStore.lokasiPos === null) {
@@ -177,7 +276,10 @@ const onDialogHide = () => {
       message: "Silahkan pilih lokasi terlebih dahulu",
       position: "center",
     });
+  } else {
+    window.removeEventListener("keydown", handleKeyDownOnSettingDialog);
   }
+
   // else if (transaksiStore.API_URL === "-") {
   //   dialogRef.value.show();
   //   $q.notify({
@@ -187,66 +289,8 @@ const onDialogHide = () => {
   //   });
   // }
 };
-onMounted(async () => {
-  // getAvailableCameras();
-  // postLocationOptions.value = await transaksiStore.getLokasiPos();
-  // jenisKendaraanOptions.value = await transaksiStore.getJenisKendaraan();
 
-  // navigator.mediaDevices
-  //   .getUserMedia({ video: true })
-  //   .then(() => {
-  //     getAvailableCameras();
-  //   })
-  //   .catch((error) => {
-  //     // Camera permission denied or error occurred
-  //     console.error("Error accessing camera: ", error);
-  //   });
-
-  const handleKeyDown = async (event) => {
-    if (event.key === "Enter") {
-      onSaveSettings();
-    } else if (event.shiftKey && event.key === "I") {
-      const cameraInDialog = $q.dialog({
-        component: SelectCameraInDialog,
-      });
-      cameraInDialog.update();
-    } else if (event.shiftKey && event.key === "O") {
-      const cameraOutDialog = $q.dialog({
-        component: SelectCameraOutDialog,
-      });
-      cameraOutDialog.update();
-    } else if (event.shiftKey && event.key === "P") {
-      const posDialog = $q.dialog({
-        component: SelectPosDialog,
-      });
-      posDialog.update();
-    } else if (event.shiftKey && event.key === "J") {
-      const defaultJenisKendaraan = $q.dialog({
-        component: SelectDefaultJenisKendaraanDialog,
-      });
-      defaultJenisKendaraan.update();
-    }
-  };
-
-  window.addEventListener("keydown", handleKeyDown);
-});
-
-const onSaveSettings = () => {
-  // componentStore.setCameraInKey();
-
-  // ls.set("cameraIn", cameraIn.value);
-  // ls.set("cameraOut", cameraOut.value);
-  // ls.set("lokasiPos", transaksiStore.lokasiPos);
-  ls.set("API_URL", transaksiStore.API_URL);
-  // ls.set("defaultJenisKendaraan", transaksiStore.defaultJenisKendaraan);
-
-  dialogRef.value.hide();
-  window.location.reload();
-};
-
-defineEmits([...useDialogPluginComponent.emits]);
-
-const { dialogRef } = useDialogPluginComponent();
+// const isSubOpen = ref(false);
 </script>
 
 <style scoped>

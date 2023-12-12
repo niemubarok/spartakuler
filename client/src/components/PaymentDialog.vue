@@ -201,8 +201,8 @@ const onSaveSettings = async () => {
         openGate.update();
       }
     } else {
-      if (!transaksiStore.isMember || transaksiStore.isMember == false) {
-        if (transaksiStore.bayar) {
+      if (transaksiStore.isMemberExpired) {
+        if (transaksiStore.bayar > 0) {
           console.log("kurang");
           $q.notify({
             type: "negative",
@@ -248,7 +248,7 @@ defineEmits([
 :deep(.input-box .q-field__append .q-field__marginal) {
   height: 10vh;
   width: 80vw;
-  font-size: 72px;
+  font-size: clamp(2rem, 3rem, 3rem);
   font-family: "Courier New", Courier, monospace;
 }
 </style>

@@ -167,7 +167,7 @@ module.exports = configure(function (/* ctx */) {
 
       inspectPort: 5858,
 
-      bundler: "packager", // 'packager' or 'builder'
+      bundler: "builder", // 'packager' or 'builder'
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
@@ -182,10 +182,32 @@ module.exports = configure(function (/* ctx */) {
 
       builder: {
         // https://www.electron.build/configuration/configuration
-        // appId: "com.sparta.app",
+        appId: "com.sparta.app",
+        productName: "SpartaApp", // Added productName for better identification
         // targets: [
+        // {
+        target: "AppImage",
+        // },
         //   {
-        //     target: "AppImage",
+        //     target: "nsis", // Added Windows target
+        //     arch: ["x64", "ia32"], // Specify architecture
+        //   },
+        //   {
+        //     target: "dmg", // Added macOS target
+        //     arch: "x64", // Specify architecture
+        //   },
+        // ],
+        // files: [
+        //   "dist/electron/**/*", // Specify files to include in the package
+        // ],
+        // extraResources: [
+        //   // Define extra resources to be included in the package
+        // ],
+        // publish: [
+        //   {
+        //     provider: "github", // Define a provider for auto-updates
+        //     owner: "tabarokta",
+        //     repo: "SpartaApp-repo",
         //   },
         // ],
       },

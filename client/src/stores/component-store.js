@@ -24,6 +24,11 @@ export const useComponentStore = defineStore("component", {
     currentPage: ref(""),
     paymentDialogRef: ref(false),
     isPaymentDialogMounted: ref(false),
+    //MODELS
+    selectCameraOutDialogModel: ref(false),
+    selectCameraInDialogModel: ref(false),
+    selectDefaultJenisKendaraanDialogModel: ref(false),
+    selectPosDialogModel: ref(false),
   }),
   actions: {
     async getAvailableCameras() {
@@ -59,6 +64,27 @@ export const useComponentStore = defineStore("component", {
       const key = Date.now();
       this.cameraOutKey = key;
       console.log(this.cameraOutKey);
+    },
+
+    stopCamera() {
+      if (this.camera.in !== "-" || this.camera.out !== "-") {
+        // Attempt to stop the camera and free up resources
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            // Stop all video tracks to ensure camera light is turned off
+            stream.getTracks().forEach((track) => {
+              console.log(track);
+              track.stop();
+              if (track.readyState === "ended") {
+                console.log("Camera track stopped successfully");
+              }
+            });
+          })
+          .catch((error) => {
+            console.error("Error stopping camera stream: ", error);
+          });
+      }
     },
 
     async openGate() {

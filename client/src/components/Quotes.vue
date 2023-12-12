@@ -4,8 +4,8 @@
       <span v-if="typeValue">"</span>{{ typeValue
       }}<span v-if="typeValue">"</span></span
     >
-    <!-- <span class="blinking-cursor">|</span>
-    <span class="cursor" :class="{ typing: typeStatus }">&nbsp;</span> -->
+    <span class="blinking-cursor">|</span>
+    <span class="cursor" :class="{ typing: typeStatus }">&nbsp;</span>
   </div>
 </template>
 
@@ -14,14 +14,7 @@ import { onMounted, ref } from "vue";
 
 const typeValue = ref("");
 const typeStatus = ref(false);
-const displayTextArray = [
-  "Bukannya jadi pelajaran..",
-  "Eh.. Malah dianggap pelanggaran",
-  "Bukannya jadi Evaluasi..",
-  "Eh.. Malah dikasih sanksi",
-  "Susah sih kalo apa - apa pake emosi...",
-  "Minim Solusi.. hihi",
-];
+const displayTextArray = ["Demo", "Aplikasi Parkir", "Buatan Husni Mubarok"];
 const typingSpeed = 50;
 const erasingSpeed = 10;
 const newTextDelay = 1000;

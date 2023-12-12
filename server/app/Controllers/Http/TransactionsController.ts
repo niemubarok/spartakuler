@@ -206,7 +206,7 @@ export default class TransactionsController {
       `SELECT jenis_mobil.nama, COUNT(*) as count, SUM(transaksi_parkir.bayar_keluar) as uang_masuk
       FROM transaksi_parkir
       INNER JOIN jenis_mobil ON transaksi_parkir.id_kendaraan = jenis_mobil.id
-      WHERE transaksi_parkir.id_shift_keluar = '${shift_id}' AND EXTRACT(DAY FROM transaksi_parkir.waktu_masuk) = '${date}' AND EXTRACT(MONTH FROM transaksi_parkir.Waktu_masuk) = '${month}' AND EXTRACT(YEAR FROM transaksi_parkir.Waktu_masuk) = '${year}' AND transaksi_parkir.status = '0'
+      WHERE transaksi_parkir.id_shift_keluar = '${shift_id}' AND EXTRACT(DAY FROM transaksi_parkir.waktu_keluar) = '${date}' AND EXTRACT(MONTH FROM transaksi_parkir.Waktu_keluar) = '${month}' AND EXTRACT(YEAR FROM transaksi_parkir.Waktu_keluar) = '${year}' AND transaksi_parkir.status = '0'
       GROUP BY jenis_mobil.nama`
     );
 
@@ -219,5 +219,24 @@ export default class TransactionsController {
     );
 
     return count.rows[0];
+  }
+
+  public async manualOpenGate({ request, response }: HttpContextContract) {
+    const { petugas, id_shift, id_pos, pic } = request.body();
+    const tanggal = new Date().toISOString();
+
+    try {
+      const insert = await Database.rawQuery(
+        `INSERT INTO manualbot (petugas, id_shift, id_pos,tanggal, pic) VALUES ('${petugas}','${id_shift}','${id_pos}','${tanggal}','${pic}')`
+      );
+
+      if (insert) {
+        response.status(200).json({
+          message: "Insert successful",
+        });
+      }
+    } catch (error) {
+      return error;
+    }
   }
 }

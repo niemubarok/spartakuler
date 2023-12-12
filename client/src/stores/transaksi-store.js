@@ -6,6 +6,7 @@ import axios from "axios";
 export const useTransaksiStore = defineStore("transaksi", {
   state: () => ({
     API_URL: ref(ls.get("API_URL")) || "-",
+    isAdmin: ref(false),
     dataCustomer: ref(""),
     transaksi: ref([]),
     lokasiPos: ref(ls.get("lokasiPos") || "-"),
@@ -23,6 +24,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     biayaParkir: ref(0),
     bayar: ref(),
     pic_body_keluar: ref(null),
+    totalVehicleOut: ref(0),
   }),
   actions: {
     setAPIURL(url) {
@@ -30,6 +32,56 @@ export const useTransaksiStore = defineStore("transaksi", {
     },
     setTransaksi(transaksi) {
       this.transaksi = transaksi;
+    },
+    async setManualOpenGate() {
+      try {
+        const response = await axios.post(
+          this.API_URL + "/transactions/manual-open-gate",
+          {
+            petugas: ls.get("pegawai").nama,
+            id_shift: ls.get("shift"),
+            id_pos: ls.get("lokasiPos").value,
+            pic: this.pic_body_keluar,
+          }
+        );
+
+        console.log(response.data);
+        if (response.data) {
+          $q.notify({
+            type: "positive",
+            message: "Tersimpan",
+            position: "top",
+            timeout: 1000,
+          });
+        }
+      } catch (error) {}
+    },
+    async getUser(username, password) {
+      try {
+        const response = await axios.post(this.API_URL + "/user/login", {
+          username: username,
+          password: password,
+        });
+
+        console.log(response.data);
+        const adminLevels = ["0001", "0002", "0003", "0004"];
+        this.isAdmin = adminLevels.includes(response.data.level_pegawai);
+
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        // if (error.response && error.response.status === 401) {
+        //   // Handle 401 error here
+        //   console.log("Invalid username or password");
+        //   $q.notify({
+        //     type: "negative",
+        //     message: "Cek kembali username dan password anda",
+        //     position: "top",
+        //     timeout: 1000,
+        //   });
+        // }
+        // }
+      }
     },
 
     async updateTableTransaksi() {

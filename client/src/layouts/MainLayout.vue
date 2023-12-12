@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="bg-grey-3">
+  <q-layout view="lHh Lpr lFf" class="bg-grey-4">
     <q-header v-if="$route.meta.isHeader">
       <q-toolbar>
         <q-btn
@@ -36,6 +36,7 @@
 
     <q-page-container>
       <router-view />
+      <KeyboardOverlay class="z-top" />
     </q-page-container>
   </q-layout>
 </template>
@@ -43,6 +44,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import KeyboardOverlay from "src/components/KeyboardOverlay.vue";
 
 const linksList = [
   {

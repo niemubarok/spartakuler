@@ -1,83 +1,53 @@
 <template>
-  <!-- :maximized="true" -->
-  <q-dialog
-    ref="dialogRef"
-    v-model="cameraInRef"
-    @hide="onDialogHide"
-    class="q-pa-xl"
-    content-class="dialog__backdrop"
+  <q-card
+    style="width: 50vw; height: fit-content"
+    class="q-px-md q-pt-xl q-pb-md glass relative"
   >
-    <!-- no-backdrop-dismiss
-      no-route-dismiss -->
-    <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
-    <q-card
-      style="width: 50vw; height: fit-content"
-      class="q-px-md q-pt-xl q-pb-md glass relative"
-    >
-      <div>
-        <q-avatar
-          size="40px"
-          class="cursor-pointer z-top absolute-top-right q-ma-sm"
-          text-color="grey-7"
-          color="grey-5"
-          icon="close"
-          @click="dialogRef.hide()"
-        />
-      </div>
-      <!-- <q-icon name="close"  /> -->
-      <!-- <q-item> -->
-      <!-- <q-item-section avatar>
-            <q-icon :name="props.icon" size="xl" />
-          </q-item-section> -->
-      <!-- <q-item-section> -->
-      <!-- style="margin-left: -15px" -->
-      <div>
-        <q-chip
-          class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left q-pa-md"
-          label="Pilih Kamera Masuk"
-        />
-      </div>
+    <div>
+      <q-chip
+        class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left q-pa-md"
+        label="Pilih Kamera Pintu Masuk"
+      />
+    </div>
 
-      <div v-for="(camera, index) in cameraOptions">
-        <!-- :class="
+    <div v-for="(camera, index) in cameraOptions">
+      <!-- :class="
               defaultShortcut === jenisKendaraan.shortcut && 'bg-yellow text-dark'
             " -->
-        <!-- {{ index }} -->
-        <q-item class="q-ma-md bg-grey-4" style="border-radius: 5px">
-          <q-item-section top avatar>
-            <!-- <q-avatar color="primary" text-color="white" icon="bluetooth" /> -->
-            <q-btn
-              push
-              class="bg-dark text-white text-weight-bolder q-px-md"
-              :label="index + 1"
-            />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="text-h6">{{
-              camera.label || "-"
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </div>
-    </q-card>
-  </q-dialog>
+      <!-- {{ index }} -->
+      <q-item class="q-ma-md bg-grey-4" style="border-radius: 5px">
+        <q-item-section top avatar>
+          <!-- <q-avatar color="primary" text-color="white" icon="bluetooth" /> -->
+          <q-btn
+            push
+            class="bg-dark text-white text-weight-bolder q-px-md"
+            :label="index + 1"
+          />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="text-h6">{{ camera.label || "-" }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </div>
+  </q-card>
+  <!-- </q-dialog> -->
 </template>
 
 <script setup>
 import { useDialogPluginComponent } from "quasar";
-import { onMounted, ref } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import ls from "localstorage-slim";
 import { useComponentStore } from "/src/stores/component-store";
 
-const cameraInRef = ref(false);
+// const cameraInRef = ref(false);
 
-defineEmits([
-  // REQUIRED; need to specify some events that your
-  // component will emit through useDialogPluginComponent()
-  ...useDialogPluginComponent.emits,
-]);
+// defineEmits([
+//   // REQUIRED; need to specify some events that your
+//   // component will emit through useDialogPluginComponent()
+//   ...useDialogPluginComponent.emits,
+// ]);
 
-const { dialogRef } = useDialogPluginComponent();
+// const { dialogRef } = useDialogPluginComponent();
 const onDialogHide = () => {
   window.removeEventListener("keydown", handleKeydownOnCameraIn);
   componentStore.camera.in = cameraIn.value;
@@ -105,10 +75,6 @@ const getAvailableCameras = () => {
 };
 
 onMounted(async () => {
-  // getAvailableCameras();
-  //   postLocationOptions.value = await transaksiStore.getLokasiPos();
-  //   jenisKendaraanOptions.value = await transaksiStore.getJenisKendaraan();
-
   navigator.mediaDevices
     .getUserMedia({ video: true })
     .then(() => {
@@ -118,32 +84,34 @@ onMounted(async () => {
       // Camera permission denied or error occurred
       console.error("Error accessing camera: ", error);
     });
+  window.addEventListener("keydown", handleKeydownOnCameraIn);
 });
 
 const handleKeydownOnCameraIn = (event) => {
   const key = event.key;
 
   if (cameraOptions.value[key - 1] !== undefined) {
-    cameraIn.value = cameraOptions.value[key - 1];
+    componentStore.camera.in = cameraOptions.value[key - 1];
     ls.set("cameraIn", cameraOptions.value[key - 1]);
-    dialogRef.value.hide();
+    componentStore.selectCameraInDialogModel = false;
   }
 
   if (key === "Escape") {
-    dialogRef.value.hide();
+    componentStore.selectCameraInDialogModel = false;
   }
-  //   dialogRef.value.hide();
+  //   componentStore.selectCameraInDialogModel = false
 };
 
-onMounted(async () => {
-  //   console.log(cameraOptions.value.findIndex((index) => index));
+// onUnMount(async () => {
 
-  window.addEventListener("keydown", handleKeydownOnCameraIn);
+// });
+
+onBeforeUnmount(() => {
+  // window.removeEventListener("keydown", handleKeydownOnJenisKendaraan);
+  if (ls.get("cameraIn") === "-") {
+    componentStore.stopCamera();
+  }
 });
-
-// onUnmounted(() => {
-// //   window.removeEventListener("keydown", handleKeydownOnJenisKendaraan);
-// // });
 </script>
 
 <style scoped>

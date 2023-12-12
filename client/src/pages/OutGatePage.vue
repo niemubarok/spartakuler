@@ -67,7 +67,9 @@
     <div
       class="window-width flex row q-pr-lg q-col-gutter-sm"
       :class="
-        transaksiStore.isCheckedIn ? 'justify-start q-mt-md' : 'justify-end'
+        transaksiStore.isCheckedIn
+          ? 'justify-start q-mt-md q-ml-md'
+          : 'justify-end'
       "
     >
       <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
@@ -96,9 +98,6 @@
       <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3">
           </div> -->
     </div>
-    <!-- </div> -->
-    <!-- </div> -->
-    <!-- </div> -->
 
     <div class="row justify-center items-center" style="height: 100vh">
       <div>
@@ -141,6 +140,7 @@
               width="49vw"
             />
             <CaemeraOut
+              ref="cameraOutRef"
               :key="componentStore.cameraOutKey"
               v-else
               :style="{
@@ -202,7 +202,10 @@
           autofocus
           :rules="[
             (val) =>
-              val ? val.length <= 9 || 'Plat nomor terlalu banyak' : true,
+              val
+                ? transaksiStore.platNomor.length <= 9 ||
+                  'Plat nomor terlalu banyak'
+                : true,
           ]"
           @update:model-value="() => onInputPlatNomor()"
           @keydown.enter="onPressEnterPlatNomor()"
@@ -262,14 +265,14 @@
           class="fixed-bottom-right q-mb-md"
           color="primary"
           size="sm"
-          icon="settings"
-          @click="onClickSettings()"
+          @click="onClickBukaManual()"
+          label="Buka Manual"
         >
-          <!-- label="Settings" -->
+          <!-- icon="settings" -->
           <q-badge
             color="primary"
             text-color="white"
-            label="shift + S"
+            label="F12"
             class="q-ml-xs"
           />
         </q-btn>
@@ -302,7 +305,6 @@ import CaemeraOut from "src/components/CameraOut.vue";
 import CaemeraIn from "src/components/CameraIn.vue";
 
 // dialogues
-import SettingsDialog from "src/components/SettingsDialog.vue";
 import TicketDialog from "src/components/TicketDialog.vue";
 import KendaraanKeluarDialog from "src/components/KendaraanKeluarDialog.vue";
 import JenisKendaraanDialog from "src/components/JenisKendaraanDialog.vue";
@@ -324,10 +326,11 @@ const darkModeToggle = () => {
 };
 
 const cardVideo = ref(null);
-const pegawai = ls.get("pegawai").nama;
+const pegawai = ls.get("pegawai") ? ls.get("pegawai").nama : null;
 
 const cameraIn = ls.get("cameraIn") || null;
 const cameraOut = ls.get("cameraOut") || null;
+const cameraOutRef = ref(null);
 
 const vehicleInToday = ref(0);
 const vehicleOutToday = ref(0);
@@ -336,19 +339,13 @@ const vehicleInside = ref(0);
 const router = useRouter();
 
 const inputPlatNomorRef = ref(null);
+const prefix = ref(ls.get("prefix"));
 // defineExpose({
 //   inputPlatNomorRef,
 // });
 
 // nopolInput.register(inputPlatNomorRef)
 
-const onClickSettings = () => {
-  const settingsDialog = $q.dialog({
-    component: SettingsDialog,
-  });
-
-  settingsDialog.update();
-};
 const onClickKendaraanKeluar = () => {
   const dialog = $q.dialog({
     component: KendaraanKeluarDialog,
@@ -362,12 +359,31 @@ const onInputPlatNomor = () => {
     const firstCharacter = transaksiStore.platNomor?.charAt(0);
 
     if (!isNaN(firstCharacter)) {
-      transaksiStore.platNomor = "B" + transaksiStore.platNomor?.toUpperCase();
+      transaksiStore.platNomor =
+        prefix.value + transaksiStore.platNomor?.toUpperCase();
     } else {
       transaksiStore.platNomor = transaksiStore.platNomor?.toUpperCase();
     }
   }
   // console.log(platNomorModel.value.toUpperCase());
+};
+
+const onClickBukaManual = async () => {
+  const videoRef = cameraOutRef.value?.$refs.videoRef;
+  // transaksiStore.waktuMasuk = waktuMasuk.value;
+
+  if (videoRef !== undefined) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
+
+    const imageBase64 = canvas.toDataURL("image/png");
+
+    transaksiStore.pic_body_keluar = imageBase64;
+    // console.log(transaksiStore.pic_body_keluar);
+  }
+  await transaksiStore.setManualOpenGate();
+  componentStore.openGate();
 };
 
 const onPressEnterPlatNomor = async () => {
@@ -418,53 +434,66 @@ const onPressEnterPlatNomor = async () => {
   }
 };
 
+const handleKeyDown = (event) => {
+  // console.log(event.key);
+  if (componentStore.currentPage == "outgate") {
+    if (event.key === "F1") {
+      event.preventDefault();
+      inputPlatNomorRef.value.focus();
+    } else if (event.key === "F4") {
+      event.preventDefault();
+      onClickKendaraanKeluar();
+    } else if (event.shiftKey === true && event.key === "R") {
+      event.preventDefault();
+      onClickKendaraanKeluar();
+    } else if (event.shiftKey === true && event.key === "L") {
+      event.preventDefault();
+      // componentStore.stopCamera();
+      ls.remove("pegawai");
+      ls.remove("shift");
+      // router.push("/");
+      window.location.replace("/");
+    } else if (event.shiftKey === true && event.key === "D") {
+      event.preventDefault();
+      darkMode.value = !darkMode.value;
+      darkModeToggle();
+    } else if (event.key === "F12") {
+      event.preventDefault();
+      onClickBukaManual();
+    }
+  }
+};
+
 onMounted(async () => {
   componentStore.currentPage = "outgate";
   vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
-  const { total } = await transaksiStore.getCountVehicleOutToday();
-  vehicleOutToday.value = total ? total : 0;
-  console.log(vehicleOutToday.value);
-  vehicleInside.value = await transaksiStore.getCountVehicleInside();
+  const vehicleOut = await transaksiStore.getCountVehicleOutToday();
+  const totalVehicleOut = vehicleOut.reduce(
+    (total, count) => Number(total) + Number(count.count),
+    0
+  );
+  console.log(totalVehicleOut);
+  vehicleOutToday.value = totalVehicleOut;
+  // // console.log(vehicleOutToday.value);
+  // vehicleInside.value = await transaksiStore.getCountVehicleInside();
 
-  if (transaksiStore.lokasiPos === "-") {
-    onClickSettings();
-    // $q.notify({
-    //   type: "negative",
-    //   message: "Silahkan pilih lokasi terlebih dahulu",
-    //   position: "center",
-    // });
-  } else if (transaksiStore.API_URL === "-" || !pegawai || !ls.get("shift")) {
+  // if (transaksiStore.lokasiPos === "-") {
+  //   onClickSettings();
+  //   // $q.notify({
+  //   //   type: "negative",
+  //   //   message: "Silahkan pilih lokasi terlebih dahulu",
+  //   //   position: "center",
+  //   // });
+  // } else
+  if (
+    transaksiStore.API_URL === "-" ||
+    !pegawai ||
+    !ls.get("shift") ||
+    transaksiStore.lokasiPos === "-"
+  ) {
     router.push("/");
   }
   // inputPlatNomorRef ? inputPlatNomorRef.value.focus() : "";
-  const handleKeyDown = (event) => {
-    // console.log(event.key);
-    if (componentStore.currentPage == "outgate") {
-      if (event.key === "F1") {
-        event.preventDefault();
-        inputPlatNomorRef.value.focus();
-      } else if (event.key === "F4") {
-        event.preventDefault();
-        onClickKendaraanKeluar();
-      } else if (event.shiftKey === true && event.key === "S") {
-        event.preventDefault();
-        onClickSettings();
-        // window.removeEventListener("keydown", handleKeyDown);
-      } else if (event.shiftKey === true && event.key === "R") {
-        event.preventDefault();
-        onClickKendaraanKeluar();
-      } else if (event.shiftKey === true && event.key === "L") {
-        event.preventDefault();
-        ls.remove("pegawai");
-        ls.remove("shift");
-        router.push("/");
-      } else if (event.shiftKey === true && event.key === "D") {
-        event.preventDefault();
-        darkMode.value = !darkMode.value;
-        darkModeToggle();
-      }
-    }
-  };
 
   window.addEventListener("keydown", handleKeyDown);
 
@@ -474,7 +503,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  console.log("unMounted");
+  window.removeEventListener("keydown", handleKeyDown);
+  // console.log("unMounted");
 });
 
 onUpdated(() => {

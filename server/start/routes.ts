@@ -35,6 +35,7 @@ Route.group(() => {
       "/count/vehicle/out",
       "TransactionsController.countVehicleOutToday"
     );
+    Route.post("/manual-open-gate", "TransactionsController.manualOpenGate");
     Route.get(
       "/count/vehicle/inside",
       "TransactionsController.countVehicleInside"
@@ -68,4 +69,10 @@ Route.group(() => {
     Route.get("/all", "PricesController.index");
     Route.post("/type", "PricesController.tarifPerJenisKendaraan");
   }).prefix("prices");
+
+  Route.group(() => {
+    Route.post("/config-pos", "SettingsController.configPos");
+    Route.post("/config-hardware", "SettingsController.configHardware");
+    // Route.patch("/update", "SettingsController.update");
+  }).prefix("settings");
 }).prefix("api");

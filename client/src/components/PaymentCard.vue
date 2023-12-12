@@ -6,7 +6,7 @@
       flat
       rounded
       class="gradient-primary q-ma-md fixed-top relative"
-      style="top: 5vh; width: 95vw; height: 85vh; border-radius: 10px"
+      style="top: 5vh; width: 95vw; height: 91vh; border-radius: 10px"
     >
       <div>
         <q-btn
@@ -25,7 +25,7 @@
           flat
           bordered
           class="glass q-mt-xl"
-          style="width: 60vw; height: fit-content"
+          style="width: 60vw; height: 55vh"
         >
           <MemberRibbon v-if="transaksiStore.isMember" />
           <div>
@@ -79,7 +79,7 @@
                     <q-chip
                       square
                       outline
-                      class="bg-transparent q-py-lg text-h6 text-dark q-mb-md relative full-width"
+                      class="bg-transparent q-py-lg text-h6 text-dark q-mb-sm relative full-width"
                       :label="transaksiStore.selectedJenisKendaraan?.label"
                     >
                       <!-- style="border-color: ;" -->
@@ -94,11 +94,11 @@
                     </q-chip>
                   </div>
 
-                  <div class="flex justify-end q-mr-xl q-mt-md">
+                  <div class="flex justify-end q-mr-xl">
                     <!-- PLAT NOMOR  -->
 
                     <PlatNomor
-                      style="transform: scale(1.5); bottom: 15%; right: 15%"
+                      style="transform: scale(1.5); bottom: 20%; right: 15%"
                       class="absolute-bottom-right"
                     />
                   </div>

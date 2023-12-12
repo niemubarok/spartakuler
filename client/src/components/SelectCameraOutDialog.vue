@@ -1,66 +1,64 @@
 <template>
   <!-- :maximized="true" -->
-  <q-dialog
+  <!-- <q-dialog
     ref="dialogRef"
     v-model="cameraOutRef"
     @hide="onDialogHide"
     class="q-pa-xl"
     content-class="dialog__backdrop"
-  >
-    <!-- no-backdrop-dismiss
+  > -->
+  <!-- no-backdrop-dismiss
       no-route-dismiss -->
-    <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
-    <q-card
-      style="width: 50vw; height: fit-content"
-      class="q-px-md q-pt-xl q-pb-md glass relative"
-    >
-      <div>
-        <q-avatar
-          size="40px"
-          class="cursor-pointer z-top absolute-top-right q-ma-sm"
-          text-color="grey-7"
-          color="grey-5"
-          icon="close"
-          @click="dialogRef.hide()"
-        />
-      </div>
-      <!-- <q-icon name="close"  /> -->
-      <!-- <q-item> -->
-      <!-- <q-item-section avatar>
+  <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
+  <q-card
+    style="width: 50vw; height: fit-content"
+    class="q-px-md q-pt-xl q-pb-md glass relative"
+  >
+    <!-- <div>
+      <q-avatar
+        size="40px"
+        class="cursor-pointer z-top absolute-top-right q-ma-sm"
+        text-color="grey-7"
+        color="grey-5"
+        icon="close"
+        @click="dialogRef.hide()"
+      />
+    </div> -->
+    <!-- <q-icon name="close"  /> -->
+    <!-- <q-item> -->
+    <!-- <q-item-section avatar>
             <q-icon :name="props.icon" size="xl" />
           </q-item-section> -->
-      <!-- <q-item-section> -->
-      <!-- style="margin-left: -15px" -->
-      <div>
-        <q-chip
-          class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left q-pa-md"
-          label="Pilih Kamera Masuk"
-        />
-      </div>
+    <!-- <q-item-section> -->
+    <!-- style="margin-left: -15px" -->
+    <div>
+      <q-chip
+        class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left q-pa-md"
+        label="Pilih Kamera Pintu Keluar"
+      />
+    </div>
 
-      <div v-for="(camera, index) in cameraOptions">
-        <!-- :class="
+    <div v-for="(camera, index) in cameraOptions">
+      <!-- :class="
               defaultShortcut === jenisKendaraan.shortcut && 'bg-yellow text-dark'
             " -->
-        <!-- {{ index }} -->
-        <q-item class="q-ma-md bg-grey-4" style="border-radius: 5px">
-          <q-item-section top avatar>
-            <!-- <q-avatar color="primary" text-color="white" icon="bluetooth" /> -->
-            <q-btn
-              push
-              class="bg-dark text-white text-weight-bolder q-px-md"
-              :label="index + 1"
-            />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="text-h6">{{
-              camera.label || "-"
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </div>
-    </q-card>
-  </q-dialog>
+      <!-- {{ index }} -->
+      <q-item class="q-ma-md bg-grey-4" style="border-radius: 5px">
+        <q-item-section top avatar>
+          <!-- <q-avatar color="primary" text-color="white" icon="bluetooth" /> -->
+          <q-btn
+            push
+            class="bg-dark text-white text-weight-bolder q-px-md"
+            :label="index + 1"
+          />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="text-h6">{{ camera.label || "-" }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </div>
+  </q-card>
+  <!-- </q-dialog> -->
 </template>
 
 <script setup>
@@ -69,19 +67,19 @@ import { onMounted, ref } from "vue";
 import ls from "localstorage-slim";
 import { useComponentStore } from "/src/stores/component-store";
 
-const cameraOutRef = ref(false);
+// const cameraOutRef = ref(false);
 
-defineEmits([
-  // REQUIRED; need to specify some events that your
-  // component will emit through useDialogPluginComponent()
-  ...useDialogPluginComponent.emits,
-]);
+// defineEmits([
+//   // REQUIRED; need to specify some events that your
+//   // component will emit through useDialogPluginComponent()
+//   ...useDialogPluginComponent.emits,
+// ]);
 
-const { dialogRef } = useDialogPluginComponent();
-const onDialogHide = () => {
-  window.removeEventListener("keydown", handleKeydownOnCameraOut);
-  componentStore.camera.out = cameraOut.value;
-};
+// const { dialogRef } = useDialogPluginComponent();
+// const onDialogHide = () => {
+//   window.removeEventListener("keydown", handleKeydownOnCameraOut);
+//   componentStore.camera.out = cameraOut.value;
+// };
 
 const componentStore = useComponentStore();
 const cameraOptions = ref(["-"]);
@@ -105,10 +103,6 @@ const getAvailableCameras = () => {
 };
 
 onMounted(async () => {
-  // getAvailableCameras();
-  //   postLocationOptions.value = await transaksiStore.getLokasiPos();
-  //   jenisKendaraanOptions.value = await transaksiStore.getJenisKendaraan();
-
   navigator.mediaDevices
     .getUserMedia({ video: true })
     .then(() => {
@@ -124,26 +118,19 @@ const handleKeydownOnCameraOut = (event) => {
   const key = event.key;
 
   if (cameraOptions.value[key - 1] !== undefined) {
-    cameraOut.value = cameraOptions.value[key - 1];
+    componentStore.camera.out = cameraOptions.value[key - 1];
     ls.set("cameraOut", cameraOptions.value[key - 1]);
-    dialogRef.value.hide();
+    componentStore.selectCameraOutDialogModel = false;
   }
 
   if (key === "Escape") {
-    dialogRef.value.hide();
+    componentStore.selectCameraOutDialogModel = false;
   }
-  //   dialogRef.value.hide();
 };
 
 onMounted(async () => {
-  //   console.log(cameraOptions.value.findIndex((index) => index));
-
   window.addEventListener("keydown", handleKeydownOnCameraOut);
 });
-
-// onUnmounted(() => {
-// //   window.removeEventListener("keydown", handleKeydownOnJenisKendaraan);
-// // });
 </script>
 
 <style scoped>
