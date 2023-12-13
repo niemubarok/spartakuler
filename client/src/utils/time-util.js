@@ -1,5 +1,5 @@
 import { useTransaksiStore } from "src/stores/transaksi-store";
-
+import ls from "localstorage-slim";
 const transaksiStore = useTransaksiStore();
 export const zeroPad = (n) => {
   return (n < 10 ? "0" : "") + n;
@@ -102,8 +102,8 @@ export const checkSubscriptionExpiration = (subscriptionEndDate) => {
   const endDate = new Date(subscriptionEndDate).setHours(0, 0, 0, 0);
 
   if (currentDate < endDate) {
-    // const timeDiff = endDate - currentDate;
-    // const daysLeft = Math.floor(timeDiff / (1000 * 3600 * 24));
+    const timeDiff = endDate - currentDate;
+    const daysLeft = Math.floor(timeDiff / (1000 * 3600 * 24));
     // const hoursLeft = Math.floor((timeDiff % (1000 * 3600 * 24)) / (1000 * 3600));
     // const minutesLeft = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
     transaksiStore.isMemberExpired = false;
@@ -138,5 +138,47 @@ export const calculateParkingDuration = (entryTime) => {
   return { days, hours, minutes, seconds, additionalHourAfter24 };
 };
 
+// export const determineShift = () => {
+//   const shift1Start = "07:00";
+//   const shift1End = "14:00";
+//   const shift2Start = "14:01";
+//   const shift2End = "21:00";
+
+//   const is24HourFormat = !new Date().toLocaleTimeString().match(/am|pm/i);
+
+//   let currentTime = new Date().toLocaleTimeString([], {
+//     hour12: is24HourFormat,
+//     hour: "2-digit",
+//     minute: "2-digit",
+//   });
+//   // console.log(!is24HourFormat);
+
+//   if (is24HourFormat) {
+//     const timeParts = currentTime.match(/(\d+):(\d+)(am|pm)/i);
+//     if (timeParts) {
+//       let [_, hour, minute, meridiem] = timeParts;
+//       hour = parseInt(hour, 10);
+//       if (meridiem.toLowerCase() === "pm" && hour < 12) {
+//         hour += 12;
+//       } else if (meridiem.toLowerCase() === "am" && hour === 12) {
+//         hour = 0;
+//       }
+//       currentTime = `${hour.toString().padStart(2, "0")}:${minute}`;
+//       console.log(currentTime);
+//     }
+//   } else {
+//     currentTime = currentTime.replace(/[^0-9:]/g, ""); // Remove AM/PM if present
+//   }
+
+//   if (currentTime >= shift1Start && currentTime <= shift1End) {
+//     shift.value = "S1";
+//   } else if (currentTime >= shift2Start && currentTime <= shift2End) {
+//     shift.value = "S2";
+//   } else {
+//     shift.value = "S3";
+//   }
+
+//   ls.set("shift", shift.value);
+// };
 export const timeRegex24Format =
   /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/gm;

@@ -20,6 +20,7 @@ export const useComponentStore = defineStore("component", {
     outGateKey: ref(0),
     cameraInKey: ref(0),
     cameraOutKey: ref(0),
+    vehicleOutKey: ref(0),
     outGateDevicePath: ref(ls.get("outGateDevicePath")),
     currentPage: ref(""),
     paymentDialogRef: ref(false),

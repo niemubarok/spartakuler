@@ -25,6 +25,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     bayar: ref(),
     pic_body_keluar: ref(null),
     totalVehicleOut: ref(0),
+    totalVehicleInside: ref(0),
   }),
   actions: {
     setAPIURL(url) {
@@ -56,14 +57,19 @@ export const useTransaksiStore = defineStore("transaksi", {
         }
       } catch (error) {}
     },
-    async getUser(username, password) {
+    async login(username, password) {
       try {
+        const lokasiPos = ls.get("lokasiPos")?.value || null;
         const response = await axios.post(this.API_URL + "/user/login", {
           username: username,
           password: password,
+          id_pos: lokasiPos,
         });
 
-        console.log(response.data);
+        // console.log(response);set
+        ls.set("timeLogin", response.data.time_login);
+        ls.set("shift", response.data.shift);
+        ls.set("tanggal", response.data.tanggal);
         const adminLevels = ["0001", "0002", "0003", "0004"];
         this.isAdmin = adminLevels.includes(response.data.level_pegawai);
 
@@ -82,6 +88,23 @@ export const useTransaksiStore = defineStore("transaksi", {
         // }
         // }
       }
+    },
+    async logout() {
+      const id_petugas = ls.get("pegawai")?.id_pegawai;
+      const id_shift = ls.get("shift");
+      const pos = ls.get("lokasiPos")?.value;
+      const time_login = ls.get("timeLogin");
+      const tanggal = ls.get("tanggal");
+
+      const res = await axios.post(this.API_URL + "/user/logout", {
+        id_petugas,
+        id_shift,
+        pos,
+        time_login,
+        tanggal,
+      });
+
+      console.log(res);
     },
 
     async updateTableTransaksi() {
@@ -334,6 +357,10 @@ export const useTransaksiStore = defineStore("transaksi", {
         //   (total, item) => total + parseInt(item.uang_masuk),
         //   0
         // );
+
+        this.totalVehicleOut = Array.isArray(data)
+          ? data.reduce((total, count) => total + Number(count.count), 0)
+          : 0;
         return data;
 
         // // console.log(names);
@@ -347,6 +374,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         this.API_URL + "/transactions/count/vehicle/inside"
       );
       const data = response.data;
+      this.totalVehicleInside = data.count;
       return data.count;
     },
   },

@@ -1,30 +1,32 @@
 <template>
   <div class="container">
     <span class="typed-text text-primary text-center">
-      <span v-if="typeValue">"</span>{{ typeValue
-      }}<span v-if="typeValue">"</span></span
-    >
-    <span class="blinking-cursor">|</span>
+      <span v-if="typeValue">"</span>{{ typeValue }}
+      <span class="blinking-cursor">|</span>
+      <span v-if="typeValue">" </span>
+    </span>
     <span class="cursor" :class="{ typing: typeStatus }">&nbsp;</span>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { useSettingsStore } from "src/stores/settings-store";
 
 const typeValue = ref("");
 const typeStatus = ref(false);
-const displayTextArray = ["Demo", "Aplikasi Parkir", "Buatan Husni Mubarok"];
+// const settingsStore.pesan = ["Demo", "Aplikasi Parkir", "Buatan Husni Mubarok"];
 const typingSpeed = 50;
 const erasingSpeed = 10;
 const newTextDelay = 1000;
 const indexText = ref(0);
 const charIndex = ref(0);
+const settingsStore = useSettingsStore();
 
 const typeText = () => {
-  if (charIndex.value < displayTextArray[indexText.value].length) {
+  if (charIndex.value < settingsStore.pesan[indexText.value].length) {
     if (!typeStatus.value) typeStatus.value = true;
-    typeValue.value += displayTextArray[indexText.value].charAt(
+    typeValue.value += settingsStore.pesan[indexText.value].charAt(
       charIndex.value
     );
     charIndex.value += 1;
@@ -37,7 +39,7 @@ const typeText = () => {
 const eraseText = () => {
   if (charIndex.value > 0) {
     if (!typeStatus.value) typeStatus.value = true;
-    typeValue.value = displayTextArray[indexText.value].substring(
+    typeValue.value = settingsStore.pesan[indexText.value].substring(
       0,
       charIndex.value - 1
     );
@@ -46,12 +48,13 @@ const eraseText = () => {
   } else {
     typeStatus.value = false;
     indexText.value += 1;
-    if (indexText.value >= displayTextArray.length) indexText.value = 0;
+    if (indexText.value >= settingsStore.pesan.length) indexText.value = 0;
     setTimeout(typeText, typingSpeed + 1000);
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await settingsStore.getPesan();
   setTimeout(typeText(), newTextDelay + 200);
 });
 </script>
@@ -59,7 +62,7 @@ onMounted(() => {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 .container {
-  width: 30vw;
+  // width: 30vw;
   height: 10vh;
   display: flex;
   justify-content: center;
@@ -69,7 +72,7 @@ onMounted(() => {
 // h1 {
 
 span.typed-text {
-  font-size: 2rem;
+  font-size: 1rem;
   font-weight: normal;
   color: #d59e46;
   overflow-wrap: normal;
@@ -79,7 +82,7 @@ span.typed-text {
 
 // Cursor blinking CSS Starts...
 .blinking-cursor {
-  font-size: 2rem;
+  font-size: 1rem;
   color: #2c3e50;
   -webkit-animation: 1s blink step-end infinite;
   -moz-animation: 1s blink step-end infinite;

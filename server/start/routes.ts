@@ -54,6 +54,7 @@ Route.group(() => {
   Route.group(() => {
     Route.get("/all", "UsersController.index");
     Route.post("/login", "UsersController.login");
+    Route.post("/logout", "UsersController.logOut");
   }).prefix("user");
 
   Route.group(() => {
@@ -73,6 +74,9 @@ Route.group(() => {
   Route.group(() => {
     Route.post("/config-pos", "SettingsController.configPos");
     Route.post("/config-hardware", "SettingsController.configHardware");
+    Route.get("/soft-setting", "SettingsController.softSetting");
+    Route.get("/logo", "SettingsController.logo");
+    Route.get("/pesan", "SettingsController.pesan");
     // Route.patch("/update", "SettingsController.update");
   }).prefix("settings");
 }).prefix("api");

@@ -26,8 +26,13 @@
           @keydown.enter="onSubmit"
         ></q-input>
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn flat label="Login" type="submit" color="primary" />
+          <q-btn
+            push
+            icon="keyboard_return"
+            type="submit"
+            color="primary"
+            class="q-pa-xl"
+          />
         </q-card-actions>
       </q-card-section>
     </q-card>
@@ -65,55 +70,12 @@ const passwordInput = ref(null);
 
 defineEmits([...useDialogPluginComponent.emits]);
 
-const determineShift = () => {
-  const shift1Start = "07:00";
-  const shift1End = "14:00";
-  const shift2Start = "14:01";
-  const shift2End = "21:00";
-
-  const is24HourFormat = !new Date().toLocaleTimeString().match(/am|pm/i);
-
-  let currentTime = new Date().toLocaleTimeString([], {
-    hour12: is24HourFormat,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  // console.log(!is24HourFormat);
-
-  if (is24HourFormat) {
-    const timeParts = currentTime.match(/(\d+):(\d+)(am|pm)/i);
-    if (timeParts) {
-      let [_, hour, minute, meridiem] = timeParts;
-      hour = parseInt(hour, 10);
-      if (meridiem.toLowerCase() === "pm" && hour < 12) {
-        hour += 12;
-      } else if (meridiem.toLowerCase() === "am" && hour === 12) {
-        hour = 0;
-      }
-      currentTime = `${hour.toString().padStart(2, "0")}:${minute}`;
-      console.log(currentTime);
-    }
-  } else {
-    currentTime = currentTime.replace(/[^0-9:]/g, ""); // Remove AM/PM if present
-  }
-
-  if (currentTime >= shift1Start && currentTime <= shift1End) {
-    shift.value = "S1";
-  } else if (currentTime >= shift2Start && currentTime <= shift2End) {
-    shift.value = "S2";
-  } else {
-    shift.value = "S3";
-  }
-
-  ls.set("shift", shift.value);
-};
-
 const onSubmit = async () => {
-  const user = await transaksiStore.getUser(username.value, password.value);
+  const user = await transaksiStore.login(username.value, password.value);
   console.log(user);
   if (user) {
     if (props.type == "login") {
-      determineShift();
+      // determineShift();
       ls.set("pegawai", user);
       router.push(props.url);
     } else if (props.type === "check" && props.component === "SettingsDialog") {
@@ -129,7 +91,7 @@ const onSubmit = async () => {
       } else {
         $q.notify({
           type: "negative",
-          message: "Anda Bukan Admin",
+          message: "Anda tidak memilik akses",
           position: "top",
           timeout: 1000,
         });
@@ -151,6 +113,7 @@ const handleKeyDownOnLoginDialog = async (event) => {
     dialogRef.value.hide();
   }
 };
+
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDownOnLoginDialog);
 });

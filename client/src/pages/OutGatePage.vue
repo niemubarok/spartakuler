@@ -22,27 +22,26 @@
     :class="darkMode ? 'bg-primary' : 'bg-grey-4'"
   >
     <div
-      v-show="!transaksiStore.isCheckedIn"
-      class="flex row justify-between q-pl-lg no-wrap"
+      v-if="!transaksiStore.isCheckedIn"
+      class="flex row justify-between items-center q-pl-lg no-wrap q-pt-md"
+      style="height: 150px"
     >
       <q-img
         v-if="$q.screen.gt.sm"
         src="~assets/logo.png"
         spinner-color="primary"
-        spinner-size="82px"
-        width="250px"
-        style="height: 15vh"
+        fit="fill"
         class="q-ml-sm rounded-corner"
+        width="150px"
+        height="150px"
+        style="transform: scale(1.5)"
       />
 
-      <div v-if="$q.screen.gt.md" class="q-mt-lg">
-        <Quotes />
-      </div>
+      <CompanyName />
+      <!-- style="height: 150px" -->
 
       <div class="content-end q-pr-md">
-        <!-- v-show="!transaksiStore.isCheckedIn" -->
-        <div class="flex row justify-end q-mt-md">
-          <!-- <ShinyCard class="q-mt-md" title="Total Kendaraan" /> -->
+        <div class="flex row no-wrap justify-end">
           <ShinyCard
             class="bg-indigo-10"
             title="Kendaraan Masuk"
@@ -50,15 +49,16 @@
           />
           <!-- shortkey="F3" -->
           <ShinyCard
+            :key="componentStore.vehicleOutKey"
             class="bg-teal-10 q-mx-md"
             title="Kendaraan Keluar"
             shortkey="F4"
-            :jumlah="vehicleOutToday"
+            :jumlah="transaksiStore.totalVehicleOut"
           />
           <ShinyCard
             class="bg-deep-orange-10"
             title="Kendaraan Parkir"
-            :jumlah="vehicleInside"
+            :jumlah="transaksiStore.totalVehicleInside"
           />
           <!-- shortkey="F5" -->
         </div>
@@ -72,17 +72,13 @@
           : 'justify-end'
       "
     >
-      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
       <q-chip class="bg-transparent" icon="account_circle" :label="pegawai" />
-      <!-- </div> -->
-      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
+
       <q-chip
         class="bg-transparent"
         icon="work_history"
         :label="ls.get('shift')"
       />
-      <!-- </div> -->
-      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3"> -->
       <q-chip
         class="bg-transparent"
         icon="place"
@@ -94,18 +90,20 @@
         "
       />
       <Clock />
-      <!-- </div> -->
-      <!-- <div class="q-col-xs-6 q-col-sm-4 q-col-md-3">
-          </div> -->
     </div>
 
+    <div v-if="$q.screen.gt.sm" class="q-mb-md full-width">
+      <Quotes />
+    </div>
+
+    <!-- KAMERA -->
     <div class="row justify-center items-center" style="height: 100vh">
       <div>
         <div
           v-show="!transaksiStore.isCheckedIn"
           ref="cardVideo"
           class="row justify-evenly items-center q-mt-lg q-py-sm fixed-center relative bg-transparent"
-          style="width: 100vw; height: 100vh"
+          style="width: 100vw; height: 100vh; max-height: 600px"
         >
           <div class="relative">
             <q-chip
@@ -153,22 +151,12 @@
         </div>
       </div>
 
-      <!-- <q-space /> -->
       <div
         :class="!transaksiStore.isCheckedIn ? 'col-12' : ''"
         class="col-8 justify-center items-start"
       >
         <PaymentCard v-if="transaksiStore.isCheckedIn" />
       </div>
-      <!-- <div
-        v-show="transaksiStore.isCheckedIn"
-        class="col-4 q-mt-lg fixed-top-right"
-      >
-        <div class="column q-mb-md q-mr-md">
-          <FotoKendaraan title="Foto Masuk" />
-          <FotoKendaraan title="Foto Keluar" />
-        </div>
-      </div> -->
     </div>
 
     <div
@@ -176,8 +164,6 @@
       style="bottom: 20px"
     >
       <div class="col-8">
-        <!-- style="width: 60vw; height: 10vh" -->
-        <!-- input-class="input-box  text-white " -->
         <q-input
           v-show="
             !componentStore.hideInputPlatNomor && !transaksiStore.isCheckedIn
@@ -303,6 +289,7 @@ import Quotes from "src/components/Quotes.vue";
 import ShinyCard from "src/components/ShinyCard.vue";
 import CaemeraOut from "src/components/CameraOut.vue";
 import CaemeraIn from "src/components/CameraIn.vue";
+import CompanyName from "src/components/CompanyName.vue";
 
 // dialogues
 import TicketDialog from "src/components/TicketDialog.vue";
@@ -434,6 +421,10 @@ const onPressEnterPlatNomor = async () => {
   }
 };
 
+const logout = async () => {
+  await transaksiStore.logout();
+};
+
 const handleKeyDown = (event) => {
   // console.log(event.key);
   if (componentStore.currentPage == "outgate") {
@@ -448,9 +439,11 @@ const handleKeyDown = (event) => {
       onClickKendaraanKeluar();
     } else if (event.shiftKey === true && event.key === "L") {
       event.preventDefault();
+      logout();
       // componentStore.stopCamera();
       ls.remove("pegawai");
       ls.remove("shift");
+      ls.remove("timeLogin");
       // router.push("/");
       window.location.replace("/");
     } else if (event.shiftKey === true && event.key === "D") {
@@ -467,13 +460,13 @@ const handleKeyDown = (event) => {
 onMounted(async () => {
   componentStore.currentPage = "outgate";
   vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
-  const vehicleOut = await transaksiStore.getCountVehicleOutToday();
-  const totalVehicleOut = vehicleOut.reduce(
-    (total, count) => Number(total) + Number(count.count),
-    0
-  );
-  console.log(totalVehicleOut);
-  vehicleOutToday.value = totalVehicleOut;
+  await transaksiStore.getCountVehicleOutToday();
+  await transaksiStore.getCountVehicleInside();
+  // const totalVehicleOut = Array.isArray(vehicleOut)
+  //   ? vehicleOut.reduce((total, count) => total + Number(count.count), 0)
+  //   : 0;
+  // console.log(totalVehicleOut);
+  // vehicleOutToday.value = totalVehicleOut;
   // // console.log(vehicleOutToday.value);
   // vehicleInside.value = await transaksiStore.getCountVehicleInside();
 

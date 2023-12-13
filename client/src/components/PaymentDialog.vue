@@ -211,6 +211,7 @@ const onSaveSettings = async () => {
         }
       }
     }
+    componentStore.vehicleOutKey = +1;
   }
   // console.log(dialogRef.value.$refs.paymentCardRef);
   // componentStore.setPaymentCardKey();
