@@ -189,8 +189,22 @@ module.exports = configure(function (/* ctx */) {
         target: "AppImage",
         // },
         //   {
-        //     target: "nsis", // Added Windows target
-        //     arch: ["x64", "ia32"], // Specify architecture
+        // target: "nsis", // Added Windows target
+        // nsis: {
+        //   differentialPackage: true,
+        //   differentialPackageId: "SpartaApp-differential",
+        //   createDesktopShortcut: true,
+        //   oneClick: true,
+
+        //   // installerName: "SpartaApp",
+        //   // shortcutName: "SpartaApp",
+        // },
+
+        // win: {
+        //   target:"nsis",
+
+        // }
+        // defaultArch: "x64", // Specify architecture
         //   },
         //   {
         //     target: "dmg", // Added macOS target

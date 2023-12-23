@@ -24,11 +24,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTransaksiStore } from "src/stores/transaksi-store";
+
+const transaksiStore = useTransaksiStore();
+
 const props = defineProps({
   title: String,
   shortkey: String,
   jumlah: String,
+});
+
+onMounted(async () => {
+  await transaksiStore.getCountVehicleInToday();
+  await transaksiStore.getCountVehicleOutToday();
+  await transaksiStore.getCountVehicleInside();
 });
 </script>
 
@@ -162,35 +172,35 @@ const props = defineProps({
 }
 
 /* Animation */
-@keyframes rotate {
+/* @keyframes rotate {
   from,
   to {
     animation-timing-function: ease-in;
-    box-shadow: 0 0 0 hsl(0, 0%, 80%), 0.1rem 0 0 hsl(0, 0%, 100%),
+    box-shadow: 0 0 0 hsl(0, 0%, 63%), 0.1rem 0 0 hsl(0, 0%, 61%),
       -0.2rem 0 0.75rem 0 hsla(0, 0%, 0%, 0.3);
     transform: rotateY(-10deg);
   }
   25%,
   75% {
     animation-timing-function: ease-out;
-    box-shadow: 0 0 0 hsl(0, 0%, 80%), 0 0 0 hsl(0, 0%, 100%),
+    box-shadow: 0 0 0 hsl(0, 0%, 80%), 0 0 0 hsl(0, 0%, 55%),
       -0.25rem -0.05rem 1rem 0.15rem hsla(0, 0%, 0%, 0.3);
     transform: rotateY(0deg);
   }
   50% {
     animation-timing-function: ease-in;
-    box-shadow: -0.1rem 0 0 hsl(0, 0%, 80%), 0 0 0 hsl(0, 0%, 100%),
+    box-shadow: -0.1rem 0 0 hsl(0, 0%, 64%), 0 0 0 hsl(0, 0%, 100%),
       -0.3rem -0.1rem 1.5rem 0.3rem hsla(0, 0%, 0%, 0.3);
     transform: rotateY(10deg);
   }
-}
+} */
 @keyframes texture {
   from,
   to {
     transform: translate3d(0, 0, 0);
   }
-  50% {
-    transform: translate3d(-50%, 0, 0);
+  40% {
+    transform: translate3d(-40%, 0, 0);
   }
 }
 </style>

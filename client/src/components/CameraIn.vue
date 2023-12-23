@@ -5,6 +5,8 @@
 <script setup>
 import { watch, ref, onMounted } from "vue";
 import ls from "localstorage-slim";
+import { useQuasar } from "quasar";
+const $q = useQuasar();
 
 // const cameraId = computed(ls.get("cameraIn").id);
 const cameraId = ref(ls.get("cameraIn"));
@@ -17,6 +19,8 @@ watch(
   }
 );
 const video = ref(null);
+const width = $q.screen.width <= 1366 ? "1280" : "720";
+const height = $q.screen.height <= 1366 ? "720" : "1180";
 
 onMounted(() => {
   if (cameraId.value.value) {
@@ -24,8 +28,8 @@ onMounted(() => {
       const constraints = {
         video: {
           deviceId: cameraId.value.value,
-          width: { ideal: 720 }, // Adjusted for portrait orientation
-          height: { ideal: 1280 }, // Adjusted for portrait orientation
+          width: { ideal: width }, // Adjusted for portrait orientation
+          height: { ideal: height }, // Adjusted for portrait orientation
           facingMode: "environment", // Optimal for IPCamera
           frameRate: { ideal: 60 }, // Higher frame rate for smoother video
         },
@@ -36,6 +40,8 @@ onMounted(() => {
           videoRef.value.srcObject = stream;
           videoRef.value.play();
         })
+        // videoRef.value.style.width = "55vw";
+        // videoRef.value.style.height = "62vh";
         .catch(function (error) {
           console.error("Error accessing video stream: ", error);
         });

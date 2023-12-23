@@ -24,6 +24,7 @@ export const useTransaksiStore = defineStore("transaksi", {
     biayaParkir: ref(0),
     bayar: ref(),
     pic_body_keluar: ref(null),
+    vehicleInToday: ref(0),
     totalVehicleOut: ref(0),
     totalVehicleInside: ref(0),
   }),
@@ -329,6 +330,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         this.API_URL + "/transactions/count/vehicle/in"
       );
       const data = response.data;
+      this.vehicleInToday = data.count;
       return data.count;
     },
     async getCountVehicleOutToday() {

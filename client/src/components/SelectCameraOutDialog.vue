@@ -63,7 +63,7 @@
 
 <script setup>
 import { useDialogPluginComponent } from "quasar";
-import { onMounted, ref } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import ls from "localstorage-slim";
 import { useComponentStore } from "/src/stores/component-store";
 
@@ -130,6 +130,10 @@ const handleKeydownOnCameraOut = (event) => {
 
 onMounted(async () => {
   window.addEventListener("keydown", handleKeydownOnCameraOut);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKeydownOnCameraOut);
 });
 </script>
 

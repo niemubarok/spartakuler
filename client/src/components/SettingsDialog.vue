@@ -141,11 +141,11 @@
                 </span>
               </q-item-label>
             </q-item-section>
-            <q-item-section side>
+            <!-- <q-item-section side>
               <q-btn push text-color="white" style="width: 60px" color="black"
                 >K</q-btn
               >
-            </q-item-section>
+            </q-item-section> -->
           </q-item>
         </div>
 

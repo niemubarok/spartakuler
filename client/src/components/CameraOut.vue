@@ -7,10 +7,14 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import ls from "localstorage-slim";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
-
+import { useQuasar } from "quasar";
+const $q = useQuasar();
 // const cameraId = ref(ls.get("cameraOut").id);
 const cameraId = ref(ls.get("cameraOut"));
 const videoRef = ref(null);
+
+const width = $q.screen.width <= 1366 ? "1280" : "720";
+const height = $q.screen.height <= 1366 ? "720" : "1280";
 
 onMounted(() => {
   console.log("mounted");
@@ -19,8 +23,8 @@ onMounted(() => {
       const constraints = {
         video: {
           deviceId: cameraId.value.value,
-          width: { ideal: 720 }, // Adjusted for portrait orientation
-          height: { ideal: 1280 }, // Adjusted for portrait orientation
+          width: { ideal: width }, // Adjusted for portrait orientation
+          height: { ideal: height }, // Adjusted for portrait orientation
           facingMode: "environment", // Optimal for IPCamera
           frameRate: { ideal: 60 }, // Higher frame rate for smoother video
         },

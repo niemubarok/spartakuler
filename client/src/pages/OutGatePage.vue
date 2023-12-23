@@ -37,7 +37,7 @@
         style="transform: scale(1.5)"
       />
 
-      <CompanyName />
+      <!-- <CompanyName /> -->
       <!-- style="height: 150px" -->
 
       <div class="content-end q-pr-md">
@@ -45,7 +45,7 @@
           <ShinyCard
             class="bg-indigo-10"
             title="Kendaraan Masuk"
-            :jumlah="vehicleInToday"
+            :jumlah="transaksiStore.vehicleInToday"
           />
           <!-- shortkey="F3" -->
           <ShinyCard
@@ -92,20 +92,20 @@
       <Clock />
     </div>
 
-    <div v-if="$q.screen.gt.sm" class="q-mb-md full-width">
+    <div v-if="$q.screen.gt.sm" class="full-width q-pt-md">
       <Quotes />
     </div>
 
     <!-- KAMERA -->
-    <div class="row justify-center items-center" style="height: 100vh">
+    <div class="row justify-center items-center">
       <div>
         <div
-          v-show="!transaksiStore.isCheckedIn"
+          v-if="!transaksiStore.isCheckedIn"
           ref="cardVideo"
-          class="row justify-evenly items-center q-mt-lg q-py-sm fixed-center relative bg-transparent"
-          style="width: 100vw; height: 100vh; max-height: 600px"
+          class="flex row justify-between content-center items-center q-px-sm relative bg-transparent"
+          style="width: 100vw; max-height: 62vh"
         >
-          <div class="relative">
+          <div class="col-6 relative">
             <q-chip
               class="absolute bg-transparent"
               icon="camera"
@@ -113,20 +113,21 @@
             />
             <q-skeleton
               v-if="cameraIn == null || cameraIn == '-'"
-              height="62vh"
+              height="52vh"
+              class="rounded-corner"
               width="49vw"
             />
             <CaemeraIn
               :key="componentStore.cameraInKey"
               v-else
-              :style="{
-                cursor: 'pointer',
-                width: '46vw',
-              }"
               class="rounded-corner"
+              :style="{
+                width: '49vw',
+              }"
             />
+            <!-- height: '62vh', -->
           </div>
-          <div class="relative">
+          <div class="col-6 relative">
             <q-chip
               class="absolute bg-transparent"
               icon="camera"
@@ -134,16 +135,16 @@
             />
             <q-skeleton
               v-if="cameraOut == null || cameraOut == '-'"
-              height="62vh"
               width="49vw"
+              height="52vh"
+              class="rounded-corner"
             />
             <CaemeraOut
               ref="cameraOutRef"
               :key="componentStore.cameraOutKey"
               v-else
               :style="{
-                cursor: 'pointer',
-                width: '46vw',
+                width: '49vw',
               }"
               class="rounded-corner"
             />
@@ -160,7 +161,7 @@
     </div>
 
     <div
-      class="flex row justify-center fixed full-width no-wrap"
+      class="flex row justify-center fixed full-width no-wrap z-max"
       style="bottom: 20px"
     >
       <div class="col-8">
@@ -168,7 +169,7 @@
           v-show="
             !componentStore.hideInputPlatNomor && !transaksiStore.isCheckedIn
           "
-          class="input-box rounded-corner relative z-top text-uppercase q-pa-md"
+          class="input-box rounded-corner relative text-uppercase q-pa-md"
           :class="darkMode ? 'bg-grey-3 text-dark' : 'bg-secondary  text-white'"
           :input-class="
             darkMode
@@ -318,11 +319,6 @@ const pegawai = ls.get("pegawai") ? ls.get("pegawai").nama : null;
 const cameraIn = ls.get("cameraIn") || null;
 const cameraOut = ls.get("cameraOut") || null;
 const cameraOutRef = ref(null);
-
-const vehicleInToday = ref(0);
-const vehicleOutToday = ref(0);
-const vehicleInside = ref(0);
-
 const router = useRouter();
 
 const inputPlatNomorRef = ref(null);
@@ -423,6 +419,9 @@ const onPressEnterPlatNomor = async () => {
 
 const logout = async () => {
   await transaksiStore.logout();
+  ls.remove("pegawai");
+  ls.remove("shift");
+  ls.remove("timeLogin");
 };
 
 const handleKeyDown = (event) => {
@@ -440,11 +439,6 @@ const handleKeyDown = (event) => {
     } else if (event.shiftKey === true && event.key === "L") {
       event.preventDefault();
       logout();
-      // componentStore.stopCamera();
-      ls.remove("pegawai");
-      ls.remove("shift");
-      ls.remove("timeLogin");
-      // router.push("/");
       window.location.replace("/");
     } else if (event.shiftKey === true && event.key === "D") {
       event.preventDefault();
@@ -459,9 +453,9 @@ const handleKeyDown = (event) => {
 
 onMounted(async () => {
   componentStore.currentPage = "outgate";
-  vehicleInToday.value = await transaksiStore.getCountVehicleInToday();
-  await transaksiStore.getCountVehicleOutToday();
-  await transaksiStore.getCountVehicleInside();
+  // await transaksiStore.getCountVehicleInToday();
+  // await transaksiStore.getCountVehicleOutToday();
+  // await transaksiStore.getCountVehicleInside();
   // const totalVehicleOut = Array.isArray(vehicleOut)
   //   ? vehicleOut.reduce((total, count) => total + Number(count.count), 0)
   //   : 0;

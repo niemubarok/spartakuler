@@ -63,7 +63,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .container {
   // width: 30vw;
-  height: 10vh;
+  // height: 10vh;
   display: flex;
   justify-content: center;
   flex: start;

@@ -107,7 +107,7 @@ const handleKeydownOnCameraIn = (event) => {
 // });
 
 onBeforeUnmount(() => {
-  // window.removeEventListener("keydown", handleKeydownOnJenisKendaraan);
+  window.removeEventListener("keydown", handleKeydownOnCameraIn);
   if (ls.get("cameraIn") === "-") {
     componentStore.stopCamera();
   }
