@@ -15,6 +15,16 @@ const routes = [
         },
       },
       {
+        path: "/pic",
+        name: "picture",
+        component: () => import("pages/VehicleImagePage.vue"),
+        meta: {
+          isSidebar: false,
+          isHeader: false,
+          requiresAuth: false,
+        },
+      },
+      {
         path: "/transaksi/create",
         name: "createTransaksi",
         component: () => import("pages/CreateTransactionPage.vue"),

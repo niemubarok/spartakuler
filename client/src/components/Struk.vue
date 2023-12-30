@@ -35,8 +35,7 @@ const transaksiStore = useTransaksiStore();
 
 <style scoped>
 .struk {
-  display: flex;
-  align-items: start;
+  display: flex-start;
   flex-direction: column;
   width: 600px;
 }

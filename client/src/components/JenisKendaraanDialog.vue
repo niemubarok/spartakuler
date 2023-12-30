@@ -142,15 +142,15 @@ const handleKeydownOnJenisKendaraan = (event) => {
     //   (option) => option.shortcut === defaultJenisKendaraan.value.shortcut
     // );
 
-    console.log("matchingDefaultOption", matchingDefaultOption);
-    console.log("matchingOption", matchingOption);
+    // console.log("matchingDefaultOption", matchingDefaultOption);
+    // console.log("matchingOption", matchingOption);
     jenisKendaraanModel.value = matchingDefaultOption.value.id;
     transaksiStore.selectedJenisKendaraan = matchingDefaultOption.value;
-    console.log(transaksiStore.selectedJenisKendaraan);
+    // console.log(transaksiStore.selectedJenisKendaraan);
     onClickTicket(matchingDefaultOption.value.label);
     dialogRef.value.hide();
   } else if (matchingOption) {
-    console.log("matchingOption", matchingOption);
+    // console.log("matchingOption", matchingOption);
     jenisKendaraanModel.value = matchingOption.id;
     transaksiStore.selectedJenisKendaraan = matchingOption;
     onClickTicket(matchingOption.label);
@@ -166,7 +166,7 @@ onMounted(async () => {
   );
   defaultShortcut.value = matchingDefaultOption.value.shortcut;
 
-  console.log(transaksiStore.jenisKendaraan);
+  // console.log(transaksiStore.jenisKendaraan);
 
   window.addEventListener("keydown", handleKeydownOnJenisKendaraan);
 });

@@ -1,69 +1,43 @@
 <template>
-  <div :ref="paymentCardKey" class="relative">
-    <Clock class="absolute-top-left q-ma-md" />
+  <div :ref="paymentCardKey" class="relative flex row justify-start full-width">
+    <!-- <Clock class="absolute-top-left q-ma-md" /> -->
     <!-- card untuk transaksi pembayaran -->
-    <q-card
-      flat
-      rounded
-      class="gradient-primary q-ma-md fixed-top relative"
-      style="top: 5vh; width: 95vw; height: 91vh; border-radius: 10px"
-    >
-      <div>
-        <q-btn
-          push
-          class="cursor-pointer z-top absolute-top-left q-ma-sm"
-          text-color="grey-9"
-          color="grey-1"
-          no-caps
-          label="shift + esc"
-        >
-          <!-- icon="arrow_upward" -->
-        </q-btn>
-      </div>
-      <q-card-section>
-        <q-card
-          flat
-          bordered
-          class="glass q-mt-xl"
-          style="width: 60vw; height: 55vh"
-        >
-          <MemberRibbon v-if="transaksiStore.isMember" />
-          <div>
-            <q-chip square class="glass text-primary text-h6"
-              >Detail Parkir</q-chip
-            >
-          </div>
+    <div class="col-6">
+      <q-card flat rounded class="bg-grey-4 relative">
+        <!-- style="top: 5vh; width: 95vw; height: 91vh; border-radius: 10px" -->
+        <!-- <div>
+          <q-btn
+            push
+            class="z-top absolute-top-left q-ma-sm"
+            text-color="grey-9"
+            color="grey-1"
+            no-caps
+            label="shift + esc"
+          >
+          </q-btn>
+        </div> -->
+        <q-card-section>
+          <q-card flat bordered class="glass">
+            <!-- style="width: 60vw; height: 55vh" -->
+            <MemberRibbon v-if="transaksiStore.isMember" />
+            <div>
+              <q-chip
+                square
+                class="bg-grey-4 rounded-corner text-primary text-body"
+                >Detail Parkir</q-chip
+              >
+            </div>
 
-          <q-card-section>
+            <!-- <q-card-section> -->
             <div class="flex row">
-              <div class="col-5">
-                <q-timeline color="secondary" class="q-ma-xl">
-                  <q-timeline-entry
-                    :title="tanggalMasuk"
-                    subtitle="Tanggal Masuk"
-                    icon="today"
-                  />
-                  <q-timeline-entry
-                    :title="waktuMasuk"
-                    subtitle="Waktu Masuk"
-                    icon="schedule"
-                  />
-
-                  <q-timeline-entry
-                    :title="transaksiStore.durasi"
-                    subtitle="Lama Parkir"
-                    icon="timer"
-                  />
-                </q-timeline>
-              </div>
-              <div class="col-6">
+              <div class="col-6 q-ma-md">
                 <div class="column">
                   <div class="col q-mb-md">
                     <!-- NOMOR TIKET -->
                     <q-chip
                       square
                       outline
-                      class="bg-transparent q-py-lg text-h6 text-dark q-mb-md relative full-width"
+                      class="q-py-lg text-h6 text-dark q-mb-md relative full-width"
                       :label="transaksiStore.nomorTiket"
                     >
                       <!-- style="border-color: ;" -->
@@ -79,7 +53,7 @@
                     <q-chip
                       square
                       outline
-                      class="bg-transparent q-py-lg text-h6 text-dark q-mb-sm relative full-width"
+                      class="q-py-lg text-h6 text-dark q-mb-sm relative full-width"
                       :label="transaksiStore.selectedJenisKendaraan?.label"
                     >
                       <!-- style="border-color: ;" -->
@@ -92,115 +66,163 @@
                         style="top: -8px; left: 5px"
                       />
                     </q-chip>
+                    <PlatNomor
+                      style="transform: scale(1.1)"
+                      class="q-mt-md q-ml-md"
+                    />
                   </div>
 
-                  <div class="flex justify-end q-mr-xl">
+                  <div class="flex justify-start q-mr-xl">
                     <!-- PLAT NOMOR  -->
-
-                    <PlatNomor
-                      style="transform: scale(1.5); bottom: 20%; right: 15%"
-                      class="absolute-bottom-right"
-                    />
                   </div>
                 </div>
               </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-      <q-card-section>
-        <div class="flex row justify-start">
-          <!-- <q-btn
-            outline
-            class="rounded-corner q-mt-xl text-right text-grey-5 text-h4 bg-transparent"
-            label="BUKA MANUAL"
-            size="sm"
-            style="width: 10vw; height: 5vh"
-          /> -->
-          <!-- TOTAL BAYAR  -->
-          <q-card
-            flat
-            bordered
-            class="glass text-dark q-pr-md q-mr-xl relative"
-            style="width: 40vw"
-          >
-            <q-card-section>
-              <div class="text-h6 text-right">Biaya Parkir</div>
-              <div
-                class="text-right text-weight-bold"
-                style="
-                  font-size: clamp(3rem, 5vw, 5rem);
-                  font-family: 'Courier Prime', monospace;
-                "
-              >
-                {{
-                  transaksiStore.biayaParkir
-                    .toLocaleString("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    })
-                    .split(",")[0]
-                }}
+
+              <div class="col-5 q-pl-md">
+                <q-timeline color="secondary" layout="dense">
+                  <q-timeline-entry
+                    :title="tanggalMasuk"
+                    subtitle="Tanggal Masuk"
+                    icon="today"
+                  />
+                  <!-- side="right" -->
+                  <q-timeline-entry
+                    :title="waktuMasuk"
+                    subtitle="Waktu Masuk"
+                    icon="schedule"
+                  />
+                  <!-- side="right" -->
+
+                  <q-timeline-entry
+                    :title="transaksiStore.durasi"
+                    subtitle="Lama Parkir"
+                    icon="timer"
+                  />
+                  <!-- side="right" -->
+                </q-timeline>
               </div>
-            </q-card-section>
+            </div>
+            <!-- </q-card-section> -->
           </q-card>
 
-          <q-btn
-            push
-            class="text-right text-dark text-weight-bolder text-h4 bg-yellow"
-            label="BAYAR"
-            style="width: 15vw; font-size: clamp(2rem, 1vw, 1rem)"
-          >
-            <q-btn
-              push
-              color="grey-9"
-              text-color="white"
-              icon="keyboard_return"
-              class="q-pa-md text-weight-bolder text-body q-ml-sm"
-            />
-          </q-btn>
-        </div>
-      </q-card-section>
-      <div class="col-4">
-        <div class="column q-mt-lg q-mb-md q-mr-md fixed-top-right">
-          <FotoKendaraan title="Foto Masuk" type="image" :url="picBodyMasuk" />
-
-          <FotoKendaraan
-            v-if="!transaksiStore.pic_body_keluar"
-            title="Kamera Keluar"
-            type="video"
-          >
-            <template v-slot:video>
-              <q-skeleton
-                v-if="cameraOut == null || cameraOut === '-'"
-                height="40vh"
-                width="30vw"
-                class="relative"
+          <div class="column q-mt-sm">
+            <!-- TOTAL BAYAR  -->
+            <q-card
+              bordered
+              class="glass text-dark q-pr-sm q-mr-xl relative full-width"
+            >
+              <!-- style="width: 40vw" -->
+              <q-card-section>
+                <div class="text-h6 text-right">Biaya Parkir</div>
+                <div
+                  class="text-right text-weight-bold"
+                  style="
+                    font-size: clamp(2rem, 4rem, 5rem);
+                    font-family: 'Courier Prime', monospace;
+                  "
+                >
+                  {{
+                    transaksiStore.biayaParkir
+                      .toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      })
+                      .split(",")[0]
+                  }}
+                </div>
+              </q-card-section>
+            </q-card>
+            <div class="row justify-end">
+              <q-btn
+                push
+                class="col text-right text-wrap text-dark text-weight-bolder text-h4 bg-yellow q-mt-sm q-mr-sm"
+                label="BAYAR CASHLESS"
+                style="font-size: clamp(1rem, 1rem, 1rem)"
               >
-                <h4 class="absolute-center text-center text-grey-5">
-                  <q-icon name="videocam_off" size="lg" />
-                  Tidak ada Kamera
-                </h4>
-              </q-skeleton>
-              <!-- @capture="captureCameraOut()" -->
-              <CameraOut
-                ref="cameraOutRef"
-                v-else
-                :style="{ width: '30vw' }"
-                class="q-mt-sm glass"
-              />
-            </template>
-            <!-- width: '42vw', -->
-          </FotoKendaraan>
-          <FotoKendaraan
-            v-else
-            title="Foto Masuk"
-            type="image"
-            :url="transaksiStore.pic_body_keluar"
-          />
-        </div>
+                <q-btn
+                  push
+                  color="grey-9"
+                  text-color="white"
+                  label="shift"
+                  class="text-weight-bolder text-body q-ml-sm"
+                />
+                <q-btn
+                  push
+                  color="grey-9"
+                  text-color="white"
+                  icon="keyboard_return"
+                  class="text-weight-bolder text-body q-ml-sm"
+                />
+              </q-btn>
+              <q-btn
+                push
+                class="col text-right text-dark text-weight-bolder text-h4 bg-yellow q-mt-sm"
+                label="BAYAR CASH"
+                style="font-size: clamp(1rem, 1rem, 1rem)"
+              >
+                <q-btn
+                  push
+                  color="grey-9"
+                  text-color="white"
+                  icon="keyboard_return"
+                  class="text-weight-bolder text-body q-ml-sm"
+                />
+              </q-btn>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <!-- FOTO KENDARAAN -->
+    <div class="col-6 column justify-between fixed-top-right full-height">
+      <div class="col-4 q-mb-md q-mr-md">
+        <FotoKendaraan
+          class="col-4"
+          title="Foto Masuk"
+          type="image"
+          :url="picBodyMasuk"
+        />
       </div>
-    </q-card>
+      <!-- :style="{ width: '45vw', height: '30vh' }" -->
+      <div class="col-6 items-end">
+        <FotoKendaraan
+          v-if="!transaksiStore.pic_body_keluar"
+          title="Kamera Keluar"
+          type="video"
+          :style="{ width: '45vw' }"
+        >
+          <template v-slot:video>
+            <q-skeleton
+              v-if="cameraOut == null || cameraOut === '-'"
+              height="49vh"
+              width="49vw"
+              class="relative"
+            >
+              <h4 class="absolute-center text-center text-grey-7">
+                <q-icon name="videocam_off" size="lg" />
+                Tidak ada Kamera
+              </h4>
+            </q-skeleton>
+            <!-- @capture="captureCameraOut()" -->
+            <!-- mode="landscape" -->
+            <CameraOut
+              ref="cameraOutRef"
+              v-else
+              class="q-mt-sm glass"
+              :style="{ width: '49vw' }"
+            />
+          </template>
+          <!-- width: '42vw', -->
+        </FotoKendaraan>
+        <FotoKendaraan
+          v-else
+          title="Foto Keluar"
+          type="image"
+          :url="transaksiStore.pic_body_keluar"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -278,40 +300,43 @@ const onClickBayar = async () => {
   // );
 
   if (
-    componentStore.currentPage === "payment" &&
-    componentStore.isPaymentDialogMounted === false
+    componentStore.currentPage === "payment"
+    // &&
+    // componentStore.isPaymentDialogMounted === false
   ) {
-    if (!transaksiStore.isMember) {
-      const paymentDialog = $q.dialog({
-        component: PaymentDialogComponent,
+    // if (!transaksiStore.isMember) {
+    //   const paymentDialog = $q.dialog({
+    //     component: PaymentDialogComponent,
+    //     noBackdropDismiss: true,
+    //     // noEscDismiss: true,
+    //     // persistent: true,
+    //   });
+
+    //   paymentDialog.update();
+    //   componentStore.isPaymentDialogMounted = true;
+    // } else if (transaksiStore.isMember && transaksiStore.isMemberExpired) {
+    //   const paymentDialog = $q.dialog({
+    //     component: PaymentDialogComponent,
+    //     noBackdropDismiss: true,
+    //     // noEscDismiss: true,
+    //     // persistent: true,
+    //   });
+    //   componentStore.isPaymentDialogMounted = true;
+    //   paymentDialog.update();
+    // } else {
+    // console.log("kesini");
+    // if (componentStore.currentPage === "payment") {
+    const updateTransaksi = await transaksiStore.updateTableTransaksi();
+    if (updateTransaksi == 200) {
+      const openGateDialog = $q.dialog({
+        component: OpenGateDialogComponent,
         noBackdropDismiss: true,
-        // noEscDismiss: true,
-        // persistent: true,
       });
 
-      paymentDialog.update();
-      componentStore.isPaymentDialogMounted = true;
-    } else if (transaksiStore.isMember && transaksiStore.isMemberExpired) {
-      const paymentDialog = $q.dialog({
-        component: PaymentDialogComponent,
-        noBackdropDismiss: true,
-        // noEscDismiss: true,
-        // persistent: true,
-      });
-      componentStore.isPaymentDialogMounted = true;
-      paymentDialog.update();
-    } else {
-      // console.log("kesini");
-      // if (componentStore.currentPage === "payment") {
-      const updateTransaksi = await transaksiStore.updateTableTransaksi();
-      if (updateTransaksi == 200) {
-        const openGateDialog = $q.dialog({
-          component: OpenGateDialogComponent,
-          noBackdropDismiss: true,
-        });
+      openGateDialog.update();
 
-        openGateDialog.update();
-      }
+      window.removeEventListener("keydown", handleKeyDown);
+      // }
       // componentStore.isPaymentDialogMounted = true;
       // }
     }
@@ -355,8 +380,6 @@ const handleKeyDown = (event) => {
   }
 };
 
-window.addEventListener("keydown", handleKeyDown);
-
 const onClosePaymentCard = () => {
   componentStore.currentPage = "outgate";
   componentStore.setOutGateKey();
@@ -364,9 +387,10 @@ const onClosePaymentCard = () => {
   transaksiStore.$reset();
 };
 onMounted(async () => {
+  window.addEventListener("keydown", handleKeyDown);
   // console.log(transaksiStore.waktuMasuk);
   componentStore.currentPage = "payment";
-  console.log(componentStore.currentPage);
+  // console.log(componentStore.currentPage);
   try {
     const getPicBodyMasuk = await axios.post(
       transaksiStore.API_URL + "/transactions/pic",
@@ -374,7 +398,21 @@ onMounted(async () => {
         no_pol: transaksiStore.nomorTiket,
       }
     );
-    picBodyMasuk.value = getPicBodyMasuk.data;
+
+    // const bufferData = new Uint8Array(getPicBodyMasuk.data);
+    // const blob = new Blob([bufferData], { type: "image/jpeg" });
+    // const imageUrl = URL.createObjectURL(blob);
+    // console.log(imageUrl);
+    // console.log(getPicBodyMasuk.data);
+    const contentType = getPicBodyMasuk.data.startsWith("data:image/png")
+      ? "png"
+      : "jpeg";
+    if (!getPicBodyMasuk.data.startsWith("data:image")) {
+      picBodyMasuk.value =
+        `data:image/${contentType};base64,` + getPicBodyMasuk.data;
+    } else {
+      picBodyMasuk.value = getPicBodyMasuk.data;
+    }
   } catch (error) {
     console.error(error);
   }

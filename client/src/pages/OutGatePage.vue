@@ -65,10 +65,10 @@
       </div>
     </div>
     <div
-      class="window-width flex row q-pr-lg q-col-gutter-sm"
+      class="window-width flex row q-pr-lg q-col-gutter-sm z-top"
       :class="
         transaksiStore.isCheckedIn
-          ? 'justify-start q-mt-md q-ml-md'
+          ? 'justify-start q-mt-md q-ml-md '
           : 'justify-end'
       "
     >
@@ -92,7 +92,10 @@
       <Clock />
     </div>
 
-    <div v-if="$q.screen.gt.sm" class="full-width q-pt-md">
+    <div
+      v-if="$q.screen.gt.sm && !transaksiStore.isCheckedIn"
+      class="full-width q-pt-md"
+    >
       <Quotes />
     </div>
 
@@ -118,8 +121,8 @@
               width="49vw"
             />
             <CaemeraIn
-              :key="componentStore.cameraInKey"
               v-else
+              :key="componentStore.cameraInKey"
               class="rounded-corner"
               :style="{
                 width: '49vw',
@@ -143,20 +146,14 @@
               ref="cameraOutRef"
               :key="componentStore.cameraOutKey"
               v-else
+              class="rounded-corner"
               :style="{
                 width: '49vw',
               }"
-              class="rounded-corner"
             />
+            <!-- :style="$q.screen.lt.md ? 'width: 49vw' : 'height: 52vh'" -->
           </div>
         </div>
-      </div>
-
-      <div
-        :class="!transaksiStore.isCheckedIn ? 'col-12' : ''"
-        class="col-8 justify-center items-start"
-      >
-        <PaymentCard v-if="transaksiStore.isCheckedIn" />
       </div>
     </div>
 
@@ -271,6 +268,7 @@
       /> -->
       </div>
     </div>
+    <PaymentCard v-if="transaksiStore.isCheckedIn" />
   </div>
 </template>
 
@@ -383,23 +381,22 @@ const onPressEnterPlatNomor = async () => {
 
     // checkSubscriptionExpiration();
     if (dataCustomer.value == "") {
-      const dialog = $q.dialog({
+      const _jenisKendaraanDialog = $q.dialog({
         component: JenisKendaraanDialog,
         noBackdropDismiss: true,
         persistent: true,
       });
 
-      dialog.update();
+      _jenisKendaraanDialog.update();
     } else {
       const jenis_kendaraan = {
         id: dataCustomer.value?.id_jenis_kendaraan,
         label: dataCustomer.value?.jenis_kendaraan,
       };
       transaksiStore.selectedJenisKendaraan = jenis_kendaraan;
-      console.log(jenis_kendaraan);
       const expiration = checkSubscriptionExpiration(dataCustomer.value?.akhir);
       console.log(transaksiStore.isMemberExpired);
-      const dialog = $q.dialog({
+      const _ticketDialog = $q.dialog({
         component: TicketDialog,
         // noBackdropDismiss: true,
         // persistent: true,
@@ -411,7 +408,7 @@ const onPressEnterPlatNomor = async () => {
         },
       });
 
-      dialog.update();
+      _ticketDialog.update();
       // componentStore.hideInputPlatNomor = true;
     }
   }
@@ -490,7 +487,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyDown);
+  // window.removeEventListener("keydown", handleKeyDown);
   // console.log("unMounted");
 });
 

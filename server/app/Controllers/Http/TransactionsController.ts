@@ -3,9 +3,12 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class TransactionsController {
   public async index({}: HttpContextContract) {
-    const transactions = await Database.query() // 👈 gives an instance of select query builder
-      .from("transaksi_parkir")
-      .select("*");
+    // const transactions = await Database.query() // 👈 gives an instance of select query builder
+    //   .from("transaksi_parkir")
+    //   .select("*");
+    const transactions = await Database.rawQuery(
+      "SELECT no_pol, pic_body_masuk FROM transaksi_parkir WHERE EXTRACT(MONTH from waktu_masuk) = 12 LIMIT 10"
+    );
     return transactions;
   }
 
@@ -103,8 +106,21 @@ export default class TransactionsController {
     const pic = await Database.rawQuery(
       `SELECT pic_body_masuk FROM transaksi_parkir WHERE no_pol = '${no_pol}'`
     );
-    const picBodyMasuk = pic.rows[0].pic_body_masuk;
-    response.send(picBodyMasuk);
+
+    // return pic.rows[0].pic_body_masuk.toString();
+    // let picBodyMasukBase64;
+    if (pic.rows && pic.rows.length > 0) {
+      const binaryData = pic.rows[0].pic_body_masuk;
+      if (!binaryData.toString().startsWith("data:image")) {
+        return binaryData.toString("base64");
+      } else {
+        return pic.rows[0].pic_body_masuk;
+      }
+    }
+
+    // const picBodyMasuk = pic.rows[0].pic_body_masuk;
+    // return picBodyMasuk;
+    // response.send(picBodyMasuk);
   }
 
   public async update({ request, response }: HttpContextContract) {

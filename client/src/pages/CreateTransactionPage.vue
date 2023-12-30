@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <img :src="streamUrl" />
     <form>
       <div>
         <label for="id">ID:</label>
@@ -16,14 +17,14 @@
         <input type="text" id="id_kendaraan" v-model="formData.id_kendaraan" />
       </div>
 
-      <!-- <div>
+      <div>
         <label for="id_pintu_masuk">ID Pintu Masuk:</label>
         <input
           type="text"
           id="id_pintu_masuk"
           v-model="formData.id_pintu_masuk"
         />
-      </div> -->
+      </div>
 
       <div>
         <label for="waktu_masuk">Waktu Masuk:</label>
@@ -38,10 +39,9 @@
         <input type="file" id="pic_body_masuk" @change="onFilePicked($event)" />
       </div>
 
-      <!-- continue adding input fields for the remaining properties -->
 
       <button @click="storeData()">Submit</button>
-    </form>
+    </form> -->
 
     <q-btn
       color="primary"
@@ -66,9 +66,9 @@
 
   <!-- {{ formData.pic_body_masuk }} -->
 
-  <div id="struk" class="q-ma-lg">
+  <!-- <div id="struk" class="q-ma-lg">
     <Struk />
-  </div>
+  </div> -->
   <q-btn
     color="primary"
     icon="check"
@@ -86,32 +86,28 @@
     class="q-mt-xl"
     style="border: 1px solid black; width: 400px; height: 400px; margin: 0 auto"
   >
-    <q-img
-      :src="imageUrl"
-      :ratio="16 / 9"
-      spinner-color="primary"
-      spinner-size="82px"
-    />
-
-    <img id="imageContainer" :src="formData.pic_body_masuk" />
+    <struk ref="strukRef" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { reactive, ref, computed, onMounted } from "vue";
 import { Buffer } from "buffer";
 import axios from "axios";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
-import Struk from "src/components/Struk.vue";
 import { useQuasar } from "quasar";
 import OpenGateDialog from "src/components/OpenGateDialog.vue";
-// const picData = ref([
-//   91, 111, 98, 106, 101, 99, 116, 32, 79, 98, 106, 101, 99, 116, 93,
-// ]);
+import { toPng } from "html-to-image";
+import Struk from "src/components/Struk.vue";
 
-const imageUrl = ref("");
+// Usage example:
+
+const componentRef = ref();
+const strukRef = ref(null);
+
 const $q = useQuasar();
+// const struk = ref(null);
 
 const formData = ref({
   id: "098760",
@@ -174,71 +170,16 @@ const formData = ref({
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
 
+// const transaksi = {
+//   platNomor: "B9876AB",
+//   waktuMasuk: "10:00:00",
+//   waktuKeluar: "11:00:00",
+//   lamaParkir: "1",
+//   biayaParkir: "3000",
+// };
+
 const onClickCetakStruk = () => {
-  // Add logic for printing receipt here
-  const elementToPrint = document.getElementById("struk");
-  if (elementToPrint) {
-    const printWindow = window.open("", "_blank");
-    const printDocument = printWindow.document;
-    printDocument.write(`
-  <html>
-    <head>
-      <style>
-        @media print {
-          body {
-            margin: 0;
-            padding: 0;
-          }
-          #struk {
-            width: 100%;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          table td {
-            padding: 5px;
-            border: 1px solid #000;
-          }
-          .label {
-            font-weight: bold;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <table>
-        <tr>
-          <td class="label">Nomor Struk</td>
-          <td class="value">: ...</td>
-        </tr>
-        <tr>
-          <td class="label">Plat Nomor</td>
-          <td class="value">: ...</td>
-        </tr>
-        <tr>
-          <td class="label">Waktu Masuk</td>
-          <td class="value">: ...</td>
-        </tr>
-        <tr>
-          <td class="label">Waktu Keluar</td>
-          <td class="value">: 16:00:00</td>
-        </tr>
-        <tr>
-          <td class="label">Lama Parkir</td>
-          <td class="value">: 2 Jam</td>
-        </tr>
-        <tr>
-          <td class="label">Biaya Parkir</td>
-          <td class="value">: 0</td>
-        </tr>
-      </table>
-    </body>
-  </html>
-`);
-    printDocument.close();
-    printWindow.print();
-  }
+  transaksiStore.onClickCetakStruk();
 };
 const onFilePicked = (event) => {
   const files = event.target.files;
@@ -282,6 +223,51 @@ const openGateDialogue = () => {
   });
   openGate.update();
 };
+
+// onMounted(async () => {
+//   console.log(print);
+// });
+
+// const getStreamUrl = async () => {
+//   const url = `http://10.40.38.51:80/ISAPI/Streaming/channels/1/picture`;
+//   const headers = {
+//     Authorization: getAuthorizationHeader(),
+//   };
+
+//   try {
+//     const response = await axios.get(url, { headers });
+//     console.log(response);
+//     streamUrl.value = response.data;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+
+// const generateNonce = () => {
+//   return Math.random().toString(36).substr(2, 16);
+// };
+// const generateCNonce = () => {
+//   const randomChars = '0123456789abcdef';
+//   let result = '';
+//   for (let i = 0; i < 16; i++) {
+//     result += randomChars[Math.floor(Math.random() * randomChars.length)];
+//   }
+//   return result;
+// };
+
+// const getAuthorizationHeader = () => {
+//   const nonce = generateNonce();
+//   const realm = "IP Camera(AA568)";
+//   const algorithm = "MD5";
+//   const method = "GET";
+//   const uri = "ISAPI/Streaming/channels/1/picture";
+
+//   const ha1 = md5(`${username}:${realm}:${password}`);
+//   const ha2 = md5(`${method}:${uri}`);
+//   const response = md5(`${ha1}:${nonce}:${ha2}`);
+
+//   return `Digest username="${username}", realm="${realm}", nonce="${nonce}", uri="${uri}", response="${response}", qop="auth"`;
+// };
 
 // onMounted(async () => {
 //   // componentStore.openGate();

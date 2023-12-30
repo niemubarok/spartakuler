@@ -46,7 +46,6 @@
           color="teal"
           v-model="transaksiStore.nomorTiket"
           label="Scan Nomor Struk"
-          mask="XXXXXXXXXXXXXXXXXXXXX"
           ref="strukRef"
           :rules="[
             (val) => (val ? val.length >= 4 || 'Nomor ticket kurang' : true),
@@ -134,6 +133,8 @@ const onSaveSettings = async () => {
     return;
   }
 
+  console.log(transaksiStore.nomorTiket);
+
   try {
     const transaksi = await transaksiStore.getTransaksiByNopol(
       transaksiStore.nomorTiket
@@ -161,10 +162,6 @@ const onSaveSettings = async () => {
 
       // console.log(lamaParkir);
       transaksiStore.waktuMasuk = transaksi[0].waktu_masuk;
-      // console.log(transaksi[0].waktu_masuk);
-      // console.log(waktuKeluar);
-      // console.log(biayaParkir);
-      // console.log(transaksiStore.transaksi.value);
       componentStore.currentPage = "payment";
 
       transaksiStore.setCheckIn(true);
@@ -175,6 +172,7 @@ const onSaveSettings = async () => {
         type: "negative",
         message: "Nomor Struk Sudah digunakan",
       });
+      transaksiStore.nomorTiket = "";
     }
   } catch (error) {
     console.log(error);
@@ -183,35 +181,24 @@ const onSaveSettings = async () => {
       message: error,
     });
   }
-
-  // if (type == "car") {
-  //   transaksiStore.jenisKendaraan = "Mobil";
-  // } else if (type == "bus") {
-  //   transaksiStore.jenisKendaraan = "Bus";
-  // } else if (type == "bike") {
-  //   transaksiStore.jenisKendaraan = "Motor";
-  // }
-  // window.location.reload();
 };
 const onDialogHide = () => {
-  // console.log("at hide");
-
-  componentStore.hideInputPlatNomor = false;
+  // componentStore.hideInputPlatNomor = false;
   transaksiStore.dataCustomer = "";
 };
 
-const onInputTicket = () => {
-  if (transaksiStore.platNomor.length >= 3) {
-    const firstCharacter = transaksiStore.platNomor?.charAt(0);
+// const onInputTicket = () => {
+//   if (transaksiStore.platNomor.length >= 3) {
+//     const firstCharacter = transaksiStore.platNomor?.charAt(0);
 
-    if (!isNaN(firstCharacter)) {
-      transaksiStore.platNomor = "B" + transaksiStore.platNomor?.toUpperCase();
-    } else {
-      transaksiStore.platNomor = transaksiStore.platNomor?.toUpperCase();
-    }
-  }
-  // console.log(platNomorModel.value.toUpperCase());
-};
+//     if (!isNaN(firstCharacter)) {
+//       transaksiStore.platNomor = "B" + transaksiStore.platNomor?.toUpperCase();
+//     } else {
+//       transaksiStore.platNomor = transaksiStore.platNomor?.toUpperCase();
+//     }
+//   }
+//   // console.log(platNomorModel.value.toUpperCase());
+// };
 
 const handleKeydownOnInputTicket = (event) => {
   if (event.key === "Escape") {
@@ -222,6 +209,10 @@ const handleKeydownOnInputTicket = (event) => {
 onMounted(() => {
   transaksiStore.nomorTiket = "";
   window.addEventListener("keydown", handleKeydownOnInputTicket);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKeydownOnInputTicket);
 });
 
 // const jenisKendaraanValue = computed(()=>;

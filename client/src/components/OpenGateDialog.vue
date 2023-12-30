@@ -119,6 +119,41 @@
           </q-card>
         </q-card-section>
       </q-card>
+
+      <table ref="struk">
+        <tr>
+          <td class="label">Nomor Struk</td>
+          <td class="value">: ${transaksiStore.nomorTiket}</td>
+        </tr>
+        <tr>
+          <td class="label">Plat Nomor</td>
+          <td class="value">: ${transaksiStore.platNomor}</td>
+        </tr>
+        <tr>
+          <td class="label">Waktu Masuk</td>
+          <td class="value">
+            : ${new Date( transaksiStore.waktuMasuk ).toLocaleString("en-GB", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit",
+            minute: "2-digit", })}
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Waktu Keluar</td>
+          <td class="value">
+            : ${new Date( transaksiStore.waktuKeluar ).toLocaleString("en-GB", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit",
+            minute: "2-digit", })}
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Lama Parkir</td>
+          <td class="value">: ${transaksiStore.durasi}</td>
+        </tr>
+        <tr>
+          <td class="label">Biaya Parkir</td>
+          <td class="value">: ${transaksiStore.biayaParkir}</td>
+        </tr>
+      </table>
     </div>
   </q-dialog>
 </template>
@@ -155,101 +190,12 @@ const onOpenGate = async () => {
   }
 };
 
-const onClickCetakStruk = () => {
-  // Add logic for printing receipt here
-  const printWindow = window.open("", "_blank");
-  const printDocument = printWindow.document;
+const struk = ref(null);
 
-  const elementToPrint = printDocument.createElement("div");
-  elementToPrint.id = "struk";
-  printDocument.body.appendChild(elementToPrint);
-
-  const htmlContent = `
-<html>
-  <head>
-    <style>
-      @media print {
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        #struk {
-          width: 100%;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        table td {
-          padding: 5px;
-          border: 0;
-        }
-        .label {
-          font-weight: bold;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <table>
-      <tr>
-        <td class="label">Nomor Struk</td>
-        <td class="value">: ${transaksiStore.nomorTiket}</td>
-      </tr>
-      <tr>
-        <td class="label">Plat Nomor</td>
-        <td class="value">: ${transaksiStore.platNomor}</td>
-      </tr>
-      <tr>
-        <td class="label">Waktu Masuk</td>
-        <td class="value">: ${new Date(
-          transaksiStore.waktuMasuk
-        ).toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}</td>
-      </tr>
-      <tr>
-        <td class="label">Waktu Keluar</td>
-        <td class="value">: ${new Date(
-          transaksiStore.waktuKeluar
-        ).toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}</td>
-      </tr>
-      <tr>
-        <td class="label">Lama Parkir</td>
-        <td class="value">: ${transaksiStore.durasi}</td>
-      </tr>
-      <tr>
-        <td class="label">Biaya Parkir</td>
-        <td class="value">: ${transaksiStore.biayaParkir}</td>
-      </tr>
-    </table>
-  </body>
-</html>`;
-
-  elementToPrint.innerHTML = htmlContent;
-
-  printDocument.open();
-  printDocument.write(htmlContent);
-  printDocument.close();
-  printWindow.print();
-
-  // Register the onafterprint event listener
-  setTimeout(() => {
-    if (!printWindow.closed) {
-      printWindow.close();
-    }
-  }, 1000);
-};
+// const cetakStruk = () => {
+//   // struk.value.print();
+//   transaksiStore.onClickCetakStruk();
+// };
 
 const handleKeyDown = (event) => {
   // console.log(event);
@@ -266,8 +212,9 @@ const handleKeyDown = (event) => {
   } else if (event.key === "Enter") {
     event.preventDefault();
     console.log("Enter");
-    onClickCetakStruk();
+    transaksiStore.onClickCetakStruk();
     onOpenGate();
+    dialogRef.value.hide();
   }
 };
 

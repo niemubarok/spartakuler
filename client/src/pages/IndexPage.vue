@@ -48,6 +48,22 @@
           label="shift + i"
         />
       </q-btn>
+      <q-btn
+        push
+        style="width: 300px; height: 100px"
+        color="primary"
+        icon="directions_car"
+        label="Gambar Kendaraan keluar dan masuk"
+        @click="$router.push({ name: 'picture' })"
+      >
+        <q-btn
+          push
+          class="q-ma-md"
+          color="white"
+          text-color="primary"
+          label="shift + g"
+        />
+      </q-btn>
       <!-- icon="directions_car" -->
       <q-btn
         push

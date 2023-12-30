@@ -13,7 +13,7 @@
 
         <q-toolbar-title> SIPARKA </q-toolbar-title>
 
-        <span>Sistem Parkir Yadika</span>
+        <!-- <span>Sistem Parkir Yadika</span> -->
       </q-toolbar>
     </q-header>
 

@@ -12,9 +12,14 @@ const $q = useQuasar();
 // const cameraId = ref(ls.get("cameraOut").id);
 const cameraId = ref(ls.get("cameraOut"));
 const videoRef = ref(null);
-
-const width = $q.screen.width <= 1366 ? "1280" : "720";
-const height = $q.screen.height <= 1366 ? "720" : "1280";
+const props = defineProps({
+  mode: {
+    type: String,
+    default: "potrait",
+  },
+});
+const width = props.mode === "potrait" ? "1280" : "720";
+const height = props.mode === "potrait" ? "720" : "1280";
 
 onMounted(() => {
   console.log("mounted");

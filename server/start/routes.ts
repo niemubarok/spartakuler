@@ -77,6 +77,11 @@ Route.group(() => {
     Route.get("/soft-setting", "SettingsController.softSetting");
     Route.get("/logo", "SettingsController.logo");
     Route.get("/pesan", "SettingsController.pesan");
+    Route.get("/snapshot", "SettingsController.snapshot");
     // Route.patch("/update", "SettingsController.update");
   }).prefix("settings");
+
+  Route.group(() => {
+    Route.post("/node-red", "NodeRedController.index");
+  });
 }).prefix("api");

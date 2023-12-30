@@ -27,6 +27,9 @@ function createWindow() {
   });
 
   // let grantedDeviceThroughPermHandler;
+  mainWindow.webPreferences = {
+    crossOrigin: "none",
+  };
 
   // mainWindow.webContents.session.on(
   //   "select-usb-device",

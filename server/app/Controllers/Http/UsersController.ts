@@ -42,12 +42,37 @@ export default class UsersController {
           .substring(0, 19);
         const tanggal = new Date().toISOString();
         const currentHour = new Date().getHours();
+        // const currentHour = 12;
+        const shifts = await Database.query()
+          .from("shift")
+          .select("id", "mulai");
 
-        const getShift = await Database.rawQuery(
-          `SELECT id FROM shift WHERE (string_to_array(mulai, ':'))[1]::integer >= ${currentHour}`
+        // Sort the shifts by their start time
+        shifts.sort(
+          (a, b) =>
+            parseInt(a.mulai.split(":")[0]) - parseInt(b.mulai.split(":")[0])
         );
 
-        const shift = getShift.rows[0].id;
+        let shiftIndex = -1;
+        for (let i = 0; i < shifts.length; i++) {
+          const startHour = parseInt(shifts[i].mulai.split(":")[0]);
+          const endHour =
+            i + 1 < shifts.length
+              ? parseInt(shifts[i + 1].mulai.split(":")[0])
+              : 24; // Assume shifts wrap to the next day
+
+          if (currentHour >= startHour && currentHour < endHour) {
+            shiftIndex = i;
+            break;
+          }
+        }
+
+        // If currentHour didn't match any shifts, take the startHour of the first shift
+        if (shiftIndex === -1) {
+          shiftIndex = shifts.length - 1;
+        }
+
+        const shift = shifts[shiftIndex].id;
         const res = {
           id_pegawai: user.rows[0].nomer,
           username: user.rows[0].username,

@@ -283,7 +283,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         );
 
         const interval24 = Math.floor(durationInHour / 24);
-        console.log("durationInHour", durationInHour);
+        // console.log("durationInHour", durationInHour);
 
         // Calculate the additional fee
         let additionalFee = durationInHour * tarifBerikutnya;
@@ -304,17 +304,17 @@ export const useTransaksiStore = defineStore("transaksi", {
 
         // Calculate the number of 24-hour intervals
         const additionalHourAfter24 = durationInHour - interval24 * 24;
-        console.log("additionalHourAfter24", additionalHourAfter24);
+        // console.log("additionalHourAfter24", additionalHourAfter24);
         let additionalFeeAfter24 = additionalHourAfter24 * tarifBerikutnya;
         //jika lebih dari 24 jam tarif maksimal + tarif berikutnya
         if (interval24 > 0) {
           if (additionalFeeAfter24 > tarifMaksimal) {
             additionalFeeAfter24 = tarifMaksimal;
           }
-          console.log("additionalFeeAfter24", additionalFeeAfter24);
+          // console.log("additionalFeeAfter24", additionalFeeAfter24);
           totalFee = interval24 * tarifMaksimal + additionalFeeAfter24;
         }
-        console.log("interval24", interval24);
+        // console.log("interval24", interval24);
         if (this.isMember && !this.isMemberExpired) {
           totalFee = 0;
         }
@@ -378,6 +378,44 @@ export const useTransaksiStore = defineStore("transaksi", {
       const data = response.data;
       this.totalVehicleInside = data.count;
       return data.count;
+    },
+
+    onClickCetakStruk() {
+      const localeOptions = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+
+      const pegawai = ls.get("pegawai")?.nama;
+      const lokasiPosValue = ls.get("lokasiPos")?.value;
+
+      const namaPerusahaan = ls.get("companyName")?.toUpperCase();
+      // console.log(this.selectedJenisKendaraan.label);
+      const transaksi = {
+        jnsKendaraan: this.selectedJenisKendaraan.label,
+        platNomor: this.platNomor
+          ? this.platNomor.replace(/(\D)(\d+)(\D)/, "$1 $2 $3")
+          : "",
+        petugas: pegawai,
+        idPintuKeluar: lokasiPosValue,
+        waktuMasuk: this.waktuMasuk
+          ? new Date(this.waktuMasuk).toLocaleString("id-ID", localeOptions)
+          : "",
+        waktuKeluar: this.waktuKeluar
+          ? new Date(this.waktuKeluar).toLocaleString("id-ID", localeOptions)
+          : "",
+        lamaParkir: this.durasi,
+        biayaParkir: this.biayaParkir
+          .toLocaleString("id-ID", {
+            style: "currency",
+            currency: "IDR",
+          })
+          .split(",")[0],
+      };
+      window?.electron.createPDFStruk(namaPerusahaan, transaksi);
     },
   },
 });
