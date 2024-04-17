@@ -118,7 +118,7 @@ import ls from "localstorage-slim";
 const $q = useQuasar();
 
 const transaksiStore = useTransaksiStore();
-const settingsStore = useSettingsStore();
+// const settingsStore = useSettingsStore();
 
 const onClickDemoPage = () => {
   if (ls.get("lokasiPos") === null) {
@@ -143,19 +143,19 @@ const onClickDemoPage = () => {
   }
 };
 const onClickSettings = () => {
-  if (!transaksiStore.isAdmin) {
-    const dialog = $q.dialog({
-      component: LoginDialog,
-      // noBackdropDismiss: true,
-      // persistent: true,
-      componentProps: {
-        type: "check",
-        component: "SettingsDialog",
-      },
-    });
-    console.log(dialog);
-    dialog.update();
-  } else {
+  // if (!transaksiStore.isAdmin) {
+  //   const dialog = $q.dialog({
+  //     component: LoginDialog,
+  //     // noBackdropDismiss: true,
+  //     // persistent: true,
+  //     componentProps: {
+  //       type: "check",
+  //       component: "SettingsDialog",
+  //     },
+  //   });
+  //   console.log(dialog);
+  //   dialog.update();
+  // } else {
     const settingsDialog = $q.dialog({
       component: SettingsDialog,
       persistent: true,
@@ -163,7 +163,7 @@ const onClickSettings = () => {
     });
 
     settingsDialog.update();
-  }
+  // }
 };
 
 const handleKeyDown = (event) => {

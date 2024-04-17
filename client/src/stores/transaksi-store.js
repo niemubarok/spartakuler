@@ -12,7 +12,9 @@ export const useTransaksiStore = defineStore("transaksi", {
     lokasiPos: ref(ls.get("lokasiPos") || "-"),
     jenisKendaraan: [],
     selectedJenisKendaraan: ref(""),
-    defaultJenisKendaraan: ref(ls.get("defaultJenisKendaraan") || "-"),
+    defaultJenisKendaraan: ref(
+      ls.get("defaultJenisKendaraan") || "-"
+    ),
     platNomor: ref(""),
     nomorTiket: ref(""),
     isMember: ref(false),
@@ -120,7 +122,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         // waktu_masuk: "",
         waktu_keluar: new Date().toISOString(),
         // id_op_masuk: null,
-        id_op_keluar: ls.get("pegawai"),
+        id_op_keluar: ls.get("pegawai")?.id_pegawai,
         // id_shift_masuk: null,
         id_shift_keluar: ls.get("shift"),
         // kategori: null,
@@ -176,7 +178,7 @@ export const useTransaksiStore = defineStore("transaksi", {
             formData,
           }
         );
-
+        console.log(update);
         if (update.status == 200) {
           console.log(update.data);
           return 200;

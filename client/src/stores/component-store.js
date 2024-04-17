@@ -16,6 +16,7 @@ export const useComponentStore = defineStore("component", {
       in: ls.get("cameraIn"),
       out: ls.get("cameraOut"),
     }),
+    jenisTarif: ref(ls.get("jenisTarif")),
     paymenCardKey: ref(0),
     outGateKey: ref(0),
     cameraInKey: ref(0),
@@ -30,6 +31,7 @@ export const useComponentStore = defineStore("component", {
     selectCameraInDialogModel: ref(false),
     selectDefaultJenisKendaraanDialogModel: ref(false),
     selectPosDialogModel: ref(false),
+    selectJenisTarifDialogModel: ref(false),
   }),
   actions: {
     async getAvailableCameras() {

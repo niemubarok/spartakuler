@@ -1,6 +1,6 @@
 <template>
   <div v-if="$q.screen.lt.md" class="text-h2">
-    <q-card class="fixed-center">
+    <q-card class="fixed-center glass">
       <img src="~assets/logo.png" />
       <q-card-section>
         <div class="text-h6">
@@ -65,7 +65,7 @@
       </div>
     </div>
     <div
-      class="window-width flex row q-pr-lg q-col-gutter-sm z-top"
+      class="window-width bg-grey-5 text-dark text-weight-bolder flex row q-pr-lg q-col-gutter-sm z-top"
       :class="
         transaksiStore.isCheckedIn
           ? 'justify-start q-mt-md q-ml-md '
@@ -289,6 +289,7 @@ import ShinyCard from "src/components/ShinyCard.vue";
 import CaemeraOut from "src/components/CameraOut.vue";
 import CaemeraIn from "src/components/CameraIn.vue";
 import CompanyName from "src/components/CompanyName.vue";
+import SettingsDialog from "src/components/SettingsDialog.vue";
 
 // dialogues
 import TicketDialog from "src/components/TicketDialog.vue";
@@ -304,6 +305,7 @@ import JenisKendaraanDialog from "src/components/JenisKendaraanDialog.vue";
 
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
+// const settingsStore = useSettingsStore();
 const $q = useQuasar();
 
 const darkMode = ref(ls.get("darkMode")) || ref(false);
@@ -444,12 +446,40 @@ const handleKeyDown = (event) => {
     } else if (event.key === "F12") {
       event.preventDefault();
       onClickBukaManual();
+    
+    } else if (event.shiftKey === true && event.key === "S") {
+      event.preventDefault();
+      onClickSettings();
     }
   }
 };
 
+const onClickSettings = () => {
+  // if (!transaksiStore.isAdmin) {
+  //   const dialog = $q.dialog({
+  //     component: LoginDialog,
+  //     // noBackdropDismiss: true,
+  //     // persistent: true,
+  //     componentProps: {
+  //       type: "check",
+  //       component: "SettingsDialog",
+  //     },
+  //   });
+  //   console.log(dialog);
+  //   dialog.update();
+  // } else {
+    const settingsDialog = $q.dialog({
+      component: SettingsDialog,
+      persistent: true,
+      noEscDismiss: true,
+    });
+
+    settingsDialog.update();
+  // }
+};
+
 onMounted(async () => {
-  componentStore.currentPage = "outgate";
+  // componentStore.currentPage = "outgate";
   // await transaksiStore.getCountVehicleInToday();
   // await transaksiStore.getCountVehicleOutToday();
   // await transaksiStore.getCountVehicleInside();

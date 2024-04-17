@@ -93,13 +93,25 @@ export default class TransactionsController {
   public async store({}: HttpContextContract) {}
 
   public async getDataByNopol({ request, response }: HttpContextContract) {
-    const no_pol = request.body().no_pol;
+    const { no_pol } = request.body();
     const transaction = await Database.rawQuery(
-      `SELECT no_pol, waktu_masuk, pic_body_masuk, pic_body_keluar, pic_driver_masuk,status, id_pintu_masuk, waktu_masuk FROM transaksi_parkir WHERE no_pol = '${no_pol}' Limit 1`
+      `SELECT no_pol, waktu_masuk, pic_body_masuk, pic_body_keluar, pic_driver_masuk,status, id_pintu_masuk, waktu_masuk FROM transaksi_parkir WHERE LOWER(no_pol) = LOWER('${no_pol}') Limit 1`
     );
 
     // return transaction.rows;
     response.status(200).json(transaction.rows);
+  }
+  public async checkTransaction({ request, response }: HttpContextContract) {
+    const { no_pol } = request.body();
+
+    const [transaction] = await Database.query()
+      .from('transaksi_parkir')
+      .select('count(no_pol)')
+      .where('no_pol', no_pol)
+      .where('status', 1)
+      .limit(1);
+
+    response.status(200).json({ count: transaction.count });
   }
   public async getPicture({ request, response }: HttpContextContract) {
     const no_pol = request.body().no_pol;
@@ -111,7 +123,7 @@ export default class TransactionsController {
     // let picBodyMasukBase64;
     if (pic.rows && pic.rows.length > 0) {
       const binaryData = pic.rows[0].pic_body_masuk;
-      if (!binaryData.toString().startsWith("data:image")) {
+      if (!binaryData?.toString().startsWith("data:image")) {
         return binaryData.toString("base64");
       } else {
         return pic.rows[0].pic_body_masuk;
@@ -177,18 +189,26 @@ export default class TransactionsController {
           pic_body_keluar = '${formData.pic_body_keluar}',
           pklogin = '${formData.pklogin}',
           no_barcode = '${formData.no_barcode}'
-        WHERE no_pol = '${nomorTiket}';
+        WHERE LOWER (no_pol) = LOWER ('${nomorTiket}');
       `;
 
       const update = await Database.rawQuery(updateQuery);
+      console.log(update.rowCount);
+      
       // return update;
-      if (update) {
+      if (update.rowCount > 0) {
         // Update successful
         response.status(200).json({
           message: "Update successful",
         });
+      }else{
+        response.status(304).json({
+          message: "Update failed",
+        });
       }
     } catch (error) {
+      console.log(error);
+      
       // Handle the error here
       response.status(304).json({
         message: "Update failed",

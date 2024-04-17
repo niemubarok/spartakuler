@@ -34,7 +34,7 @@
     <div>
       <q-chip
         class="bg-yellow-7 text-h6 text-weight-bolder absolute-top-left q-pa-md"
-        label="Pilih Kamera Masuk"
+        label="Pilih Lokasi POS"
       />
     </div>
 

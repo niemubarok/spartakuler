@@ -73,13 +73,14 @@ import { onMounted, onBeforeUnmount, onBeforeMount, ref } from "vue";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import MemberCard from "./MemberCard.vue";
 import PlatNomor from "./PlatNomor.vue";
+import TarifDialog from "./TarifDialog.vue";
 import { useComponentStore } from "src/stores/component-store";
 
 import {
   calculateParkingDuration,
   checkSubscriptionExpiration,
 } from "src/utils/time-util";
-// import ls from "localstorage-slim";
+import ls from "localstorage-slim";
 
 // ls.config.encrypt = false;
 const $q = useQuasar();
@@ -123,6 +124,8 @@ const { dialogRef } = useDialogPluginComponent();
 // });
 
 const onSaveSettings = async () => {
+  // console.log(ls.get("jenisTarif").toLowerCase() === "manual");
+  // return
   if (transaksiStore.nomorTiket.length < 4) {
     $q.notify({
       type: "negative",
@@ -140,7 +143,6 @@ const onSaveSettings = async () => {
       transaksiStore.nomorTiket
     );
 
-    console.log(transaksi);
 
     if (transaksi.length) {
       const waktuMasuk = new Date(transaksi[0].waktu_masuk);
@@ -154,23 +156,40 @@ const onSaveSettings = async () => {
           : lamaParkir.hours > 0
           ? `${lamaParkir.hours} Jam ${lamaParkir.minutes} Menit`
           : `${lamaParkir.minutes} Menit`;
-      await transaksiStore.calculateParkingFee(waktuMasuk, waktuKeluar);
-      transaksiStore.waktuKeluar = waktuKeluar.toISOString();
-      // transaksiStore.lamaParkir = lamaParkir;
 
-      // // const biayaParkir = calculateParkingFee(waktuMasuk, waktuKeluar);
-
-      // console.log(lamaParkir);
       transaksiStore.waktuMasuk = transaksi[0].waktu_masuk;
+      transaksiStore.waktuKeluar = waktuKeluar.toISOString();
+
+      if(transaksi[0].status === 0){
+        $q.notify({
+          type: "negative",
+          message: "Nomor Struk Sudah Terpakai",
+          position: "top",
+        })
+    
+      }else if(ls.get("jenisTarif") === "Manual"){
+        const tarifDialog = $q.dialog({
+          component: TarifDialog,
+          noBackdropDismiss: true,
+          persistent: true,
+        })
+        componentStore.currentPage = "tarifDialog";
+        tarifDialog.update();
+        dialogRef.value.hide();
+        return
+      }else {
+        await transaksiStore.calculateParkingFee(waktuMasuk, waktuKeluar);
+     
       componentStore.currentPage = "payment";
 
       transaksiStore.setCheckIn(true);
 
       dialogRef.value.hide();
+    }
     } else {
       $q.notify({
         type: "negative",
-        message: "Nomor Struk Sudah digunakan",
+        message: "Nomor Struk Tidak Ditemukan",
       });
       transaksiStore.nomorTiket = "";
     }
@@ -183,6 +202,7 @@ const onSaveSettings = async () => {
   }
 };
 const onDialogHide = () => {
+  console.log(componentStore.currentPage);
   // componentStore.hideInputPlatNomor = false;
   transaksiStore.dataCustomer = "";
 };

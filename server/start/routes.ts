@@ -19,6 +19,7 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
+Route.get("/", "ManlessController.index");
 
 Route.group(() => {
   Route.group(() => {
@@ -84,4 +85,14 @@ Route.group(() => {
   Route.group(() => {
     Route.post("/node-red", "NodeRedController.index");
   });
+
+
+  //manless endpoint
+  Route.group(()=>{
+    // Route.get("/button/:termno/:direction/:qrcode", "ManlessController.button");
+    Route.get("/button/:params", "ManlessController.button");
+    Route.get("/longrange/:params", "ManlessController.button");
+    Route.get("/card/:params", "ManlessController.card");
+    Route.get("/:params","ManlessController.button");
+  }).prefix("manless");
 }).prefix("api");

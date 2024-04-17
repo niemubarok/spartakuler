@@ -19,7 +19,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["axios", "vue3topdf"],
+    boot: ["axios"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss"],
@@ -55,7 +55,7 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       env: {
-        API_URL: "http://127.0.0.1:3333/api",
+        API_URL: "http://127.0.0.1:80/api",
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

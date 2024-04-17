@@ -387,10 +387,8 @@ const onClosePaymentCard = () => {
   transaksiStore.$reset();
 };
 onMounted(async () => {
-  window.addEventListener("keydown", handleKeyDown);
   // console.log(transaksiStore.waktuMasuk);
-  componentStore.currentPage = "payment";
-  // console.log(componentStore.currentPage);
+  console.log(componentStore.currentPage);
   try {
     const getPicBodyMasuk = await axios.post(
       transaksiStore.API_URL + "/transactions/pic",
@@ -410,12 +408,14 @@ onMounted(async () => {
     if (!getPicBodyMasuk.data.startsWith("data:image")) {
       picBodyMasuk.value =
         `data:image/${contentType};base64,` + getPicBodyMasuk.data;
-    } else {
-      picBodyMasuk.value = getPicBodyMasuk.data;
-    }
-  } catch (error) {
+      } else {
+        picBodyMasuk.value = getPicBodyMasuk.data;
+      }
+    } catch (error) {
     console.error(error);
   }
+  window.addEventListener("keydown", handleKeyDown);
+  componentStore.currentPage = "payment";
 });
 </script>
 
