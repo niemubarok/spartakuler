@@ -3,8 +3,8 @@
     <!-- v-if="$q.screen.gt.sm" -->
     <q-chip
       flat
-      class="text-h4 text-weight-bolder"
-      :label="ls.get('companyName')?.toUpperCase()"
+      class="text-h4 text-weight-bolder bg-transparent text-dark"
+      :label="companyName"
     />
   </div>
 </template>
@@ -15,6 +15,7 @@ import { onMounted } from "vue";
 import ls from "localstorage-slim";
 
 const settingsStore = useSettingsStore();
+const companyName = process.env.COMPANY_NAME?.toUpperCase()
 
 onMounted(async () => {});
 </script>

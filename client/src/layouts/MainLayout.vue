@@ -11,9 +11,8 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> SIPARKA </q-toolbar-title>
+        <q-toolbar-title> SPARTA </q-toolbar-title>
 
-        <!-- <span>Sistem Parkir Yadika</span> -->
       </q-toolbar>
     </q-header>
 
@@ -46,54 +45,60 @@ import { onMounted, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import KeyboardOverlay from "src/components/KeyboardOverlay.vue";
 
-const linksList = [
+const essentialLinks = [
   {
-    title: "Docs",
-    caption: "quasar.dev",
-    icon: "school",
-    link: "https://quasar.dev",
+    title: "Dashboard",
+    caption: "",
+    icon: "dashboard",
+    to: "/dashboard",
   },
+  // {
+  //   title: "Ticketing",
+  //   caption: "",
+  //   icon: "receipt",
+  //   to: "/",
+  // },
+
+  // {
+  //   title: "Laporan Tiket",
+  //   caption: "",
+  //   icon: "bar_chart",
+  //   link: "/laporan/penjualan-tiket",
+  // },
   {
-    title: "Github",
-    caption: "github.com/quasarframework",
-    icon: "code",
-    link: "https://github.com/quasarframework",
+    title: "Data Transaksi",
+    caption: "",
+    icon: "fact_check",
+    link: "/daftar-transaksi",
   },
+  // {
+  //   title: "Laporan Transaksi Per Hari",
+  //   caption: "",
+  //   icon: "fact_check",
+  //   link: "/laporan/transaksi/per-hari",
+  // },
   {
-    title: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
-    icon: "chat",
-    link: "https://chat.quasar.dev",
+    title: "Petugas",
+    caption: "",
+    icon: "person",
+    link: "/petugas",
   },
-  {
-    title: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
-    link: "https://forum.quasar.dev",
-  },
-  {
-    title: "Twitter",
-    caption: "@quasarframework",
-    icon: "rss_feed",
-    link: "https://twitter.quasar.dev",
-  },
-  {
-    title: "Facebook",
-    caption: "@QuasarFramework",
-    icon: "public",
-    link: "https://facebook.quasar.dev",
-  },
-  {
-    title: "Quasar Awesome",
-    caption: "Community Quasar projects",
-    icon: "favorite",
-    link: "https://awesome.quasar.dev",
-  },
+  // {
+  //   title: "Master Wahana",
+  //   caption: "",
+  //   icon: "apps",
+  //   link: "/wahana",
+  // },
+  // {
+  //   title: "Daftar Paket",
+  //   caption: "",
+  //   icon: "dataset",
+  //   link: "/paket",
+  // },
 ];
 
 const leftDrawerOpen = ref(false);
 
-const essentialLinks = linksList;
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };

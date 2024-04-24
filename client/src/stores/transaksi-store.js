@@ -116,7 +116,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         nomorTiket: this.nomorTiket,
         no_pol: this.platNomor,
         id_kendaraan: this.selectedJenisKendaraan.id,
-        status: 0,
+        status: 1,
         // id_pintu_masuk: null,
         // id_pintu_keluar: null,
         // waktu_masuk: "",
@@ -394,7 +394,7 @@ export const useTransaksiStore = defineStore("transaksi", {
       const pegawai = ls.get("pegawai")?.nama;
       const lokasiPosValue = ls.get("lokasiPos")?.value;
 
-      const namaPerusahaan = ls.get("companyName")?.toUpperCase();
+      const namaPerusahaan = process.env.COMPANY_NAME?.toUpperCase();
       // console.log(this.selectedJenisKendaraan.label);
       const transaksi = {
         jnsKendaraan: this.selectedJenisKendaraan.label,

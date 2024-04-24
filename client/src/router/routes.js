@@ -34,6 +34,26 @@ const routes = [
           requiresAuth: true,
         },
       },
+      {
+        path: "/dashboard",
+        name: "dashboard",
+        component: () => import("pages/DashboardPage.vue"),
+        meta: {
+          isSidebar: true,
+          isHeader: true,
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/daftar-transaksi",
+        name: "daftarTransaksi",
+        component: () => import("pages/LaporanTransaksiPerHariPage.vue"),
+        meta: {
+          isSidebar: true,
+          isHeader: true,
+          requiresAuth: true,
+        },
+      },
     ],
   },
 

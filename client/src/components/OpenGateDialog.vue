@@ -120,7 +120,7 @@
         </q-card-section>
       </q-card>
 
-      <table ref="struk">
+      <!-- <table ref="struk">
         <tr>
           <td class="label">Nomor Struk</td>
           <td class="value">: ${transaksiStore.nomorTiket}</td>
@@ -153,7 +153,7 @@
           <td class="label">Biaya Parkir</td>
           <td class="value">: ${transaksiStore.biayaParkir}</td>
         </tr>
-      </table>
+      </table> -->
     </div>
   </q-dialog>
 </template>

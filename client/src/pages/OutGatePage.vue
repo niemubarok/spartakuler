@@ -1,4 +1,5 @@
 <template>
+
   <div v-if="$q.screen.lt.md" class="text-h2">
     <q-card class="fixed-center glass">
       <img src="~assets/logo.png" />
@@ -18,14 +19,16 @@
   <div
     :key="componentStore.outGateKey"
     v-else
-    class="relative fixed-top"
-    :class="darkMode ? 'bg-primary' : 'bg-grey-4'"
+    class="relative fixed-top full-height"
+    :class="darkMode ? 'bg-primary' : 'bg-grey-5'"
   >
     <div
       v-if="!transaksiStore.isCheckedIn"
       class="flex row justify-between items-center q-pl-lg no-wrap q-pt-md"
       style="height: 150px"
     >
+    <q-card class="row items-center bg-grey-2">
+   
       <q-img
         v-if="$q.screen.gt.sm"
         src="~assets/logo.png"
@@ -37,8 +40,8 @@
         style="transform: scale(1.5)"
       />
 
-      <!-- <CompanyName /> -->
-      <!-- style="height: 150px" -->
+      <CompanyName />
+    </q-card>
 
       <div class="content-end q-pr-md">
         <div class="flex row no-wrap justify-end">
@@ -65,7 +68,7 @@
       </div>
     </div>
     <div
-      class="window-width bg-grey-5 text-dark text-weight-bolder flex row q-pr-lg q-col-gutter-sm z-top"
+      class="window-width  text-dark text-weight-bolder flex row q-pr-lg q-col-gutter-sm z-top"
       :class="
         transaksiStore.isCheckedIn
           ? 'justify-start q-mt-md q-ml-md '
@@ -166,7 +169,7 @@
           v-show="
             !componentStore.hideInputPlatNomor && !transaksiStore.isCheckedIn
           "
-          class="input-box rounded-corner relative text-uppercase q-pa-md"
+          class="input-box  rounded-corner relative text-uppercase q-pa-md q-mb-xl "
           :class="darkMode ? 'bg-grey-3 text-dark' : 'bg-secondary  text-white'"
           :input-class="
             darkMode
@@ -215,42 +218,45 @@
           </template>
         </q-input>
       </div>
-      <div v-if="componentStore.currentPage == 'outgate'">
+      <div v-if="componentStore.currentPage == 'outgate'" class="full-width fixed-bottom-right bg-dark q-pa-sm  row justify-between ">
+
+        <div>
+          <span class=" text-weight-bolder text-grey-5"> .::PINTU KELUAR::.</span>
+        </div>
+       <div class="q-gutter-sm">
         <q-btn
-          flat
-          class="fixed-bottom-right q-mb-xl"
-          color="primary"
-          icon="logout"
+          color="grey-8"
+          size="sm"
+          label="Log out"
         >
           <q-badge
             color="primary"
             text-color="white"
-            label="shift + L"
-            class="q-ml-xs"
+            label="F5"
+            class="q-mx-xs"
           />
+          <q-tooltip content-class="bg-primary">Log out</q-tooltip>
         </q-btn>
-        <!-- <q-btn
-        flat
-        class="absolute-bottom-right q-mb-lg"
-        color="primary"
-        size="sm"
-        icon="summarize"
-        @click="onClickKendaraanKeluar()"
-      >
- <q-badge
-          color="primary"
-          text-color="white"
-          label="shift + R"
-          class="q-ml-xs"
-        />
-      </q-btn> -->
         <q-btn
-          flat
-          class="fixed-bottom-right q-mb-md"
-          color="primary"
+          color="grey-7"
           size="sm"
           @click="onClickBukaManual()"
           label="Buka Manual"
+        >
+          <!-- icon="settings" -->
+          <q-badge
+            color="primary"
+            text-color="white"
+            label="F8"
+            class="q-ml-xs"
+          />
+        </q-btn>
+        <q-btn
+          color="red-9 "
+         
+          size="sm"
+          @click="onClickBukaManual()"
+          label="Emergency"
         >
           <!-- icon="settings" -->
           <q-badge
@@ -260,7 +266,8 @@
             class="q-ml-xs"
           />
         </q-btn>
-
+      </div>
+       
         <!-- <q-toggle
         v-model="darkMode"
         @update:model-value="darkModeToggle"
@@ -329,6 +336,10 @@ const prefix = ref(ls.get("prefix"));
 
 // nopolInput.register(inputPlatNomorRef)
 
+const testPrint=()=>{
+  window.electron.print()
+}
+
 const onClickKendaraanKeluar = () => {
   const dialog = $q.dialog({
     component: KendaraanKeluarDialog,
@@ -352,6 +363,23 @@ const onInputPlatNomor = () => {
 };
 
 const onClickBukaManual = async () => {
+  const videoRef = cameraOutRef.value?.$refs.videoRef;
+  // transaksiStore.waktuMasuk = waktuMasuk.value;
+
+  if (videoRef !== undefined) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
+
+    const imageBase64 = canvas.toDataURL("image/png");
+
+    transaksiStore.pic_body_keluar = imageBase64;
+    // console.log(transaksiStore.pic_body_keluar);
+  }
+  await transaksiStore.setManualOpenGate();
+  componentStore.openGate();
+};
+const onClickEmergency = async () => {
   const videoRef = cameraOutRef.value?.$refs.videoRef;
   // transaksiStore.waktuMasuk = waktuMasuk.value;
 
@@ -435,7 +463,7 @@ const handleKeyDown = (event) => {
     } else if (event.shiftKey === true && event.key === "R") {
       event.preventDefault();
       onClickKendaraanKeluar();
-    } else if (event.shiftKey === true && event.key === "L") {
+    } else if ( event.key === "F5") {
       event.preventDefault();
       logout();
       window.location.replace("/");
@@ -443,11 +471,11 @@ const handleKeyDown = (event) => {
       event.preventDefault();
       darkMode.value = !darkMode.value;
       darkModeToggle();
-    } else if (event.key === "F12") {
+    } else if (event.key === "F8") {
       event.preventDefault();
       onClickBukaManual();
     
-    } else if (event.shiftKey === true && event.key === "S") {
+    } else if (event.key === "F7") {
       event.preventDefault();
       onClickSettings();
     }
@@ -479,7 +507,7 @@ const onClickSettings = () => {
 };
 
 onMounted(async () => {
-  // componentStore.currentPage = "outgate";
+  componentStore.currentPage = "outgate";
   // await transaksiStore.getCountVehicleInToday();
   // await transaksiStore.getCountVehicleOutToday();
   // await transaksiStore.getCountVehicleInside();

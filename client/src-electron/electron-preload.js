@@ -28,62 +28,28 @@
  * }
  */
 
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { SerialPort } from "serialport";
-// import app from "@electron/remote";
-import { print, getPrinters } from "unix-print";
+import {
+  print as printUnix,
+  getPrinters as getUnixPrinters,
+  getDefaultPrinter as getUnixDefaultPrinter,
+} from "unix-print";
+import { print as printWindows } from "pdf-to-printer"; // Replace 'windows-print' with the actual package for Windows printing
 
-const path = require("path");
+import {
+  getPrinters as getWindowsPrinters,
+  getDefaultPrinter as getWindowsDefaultPrinter,
+} from "pdf-to-printer";
+
 const fs = require("fs");
-
-// async function createPdfStruk() {
-//   const pageWidth = 500,
-//     pageHeight = 283;
-//   const margin = 30;
-
-//   // Request a canvas from the main process.
-//   const canvas = await ipcRenderer.invoke(
-//     "create-canvas",
-//     pageWidth,
-//     pageHeight
-//   );
-//   const ctx = canvas.getContext("2d");
-
-//   // Set the background color to white.
-//   ctx.fillStyle = "#ffffff";
-//   ctx.fillRect(0, 0, pageWidth, pageHeight);
-
-//   // Draw the company name centered at the top.
-//   const namaPerusahaan = "Nama Perusahaan";
-//   ctx.font = "12px Helvetica";
-//   let textWidth = ctx.measureText(namaPerusahaan).width;
-//   ctx.fillText(namaPerusahaan, (pageWidth - textWidth) / 2, margin);
-
-//   // Simulate the drawing of other elements (you will need to replace with your data).
-//   const kodePintuMasuk = "12345";
-//   const waktu = new Date().toLocaleTimeString();
-
-//   ctx.fillText("Kode Pintu Masuk", margin, 60);
-//   ctx.fillText(": " + kodePintuMasuk, 200, 60); // Replace 200 with actual calculated x position
-
-//   ctx.fillText("Waktu", margin, 90);
-//   ctx.fillText(": " + waktu, 200, 90); // Replace 200 with actual calculated x position
-
-//   // Convert the canvas to a Buffer containing the PDF data.
-//   const pdfBuffer = await ipcRenderer.invoke("canvas-to-pdf", canvas);
-
-//   // Save the PDF to the file system.
-//   const outputFilePath = path.resolve(
-//     __dirname,
-//     process.env.QUASAR_PUBLIC_FOLDER,
-//     "struk/struk.pdf"
-//   );
-
-//   fs.writeFileSync(outputFilePath, pdfBuffer);
-//   console.log("The PDF file was created.");
-// }
-
-// import { writeFileSync } from "fs";
+const path = require("path");
+const os = require("os");
+const directoryPath = path.join(os.homedir(), "struk");
+if (!fs.existsSync(directoryPath)) {
+  fs.mkdirSync(directoryPath, { recursive: true });
+}
+const filePath = path.join(directoryPath, "struk.pdf");
 import PDFDocument from "pdfkit";
 import { Buffer } from "buffer";
 import { log } from "console";
@@ -103,10 +69,7 @@ const createPDFStruk = (nama_perusahaan, transaksi) => {
 
   // Keep track of the current Y position on the page
   const stream = fs.createWriteStream(
-    path.resolve(
-      __dirname,
-      process.env.QUASAR_PUBLIC_FOLDER + "/struk/struk.pdf"
-    )
+    filePath
   );
 
   doc.pipe(stream);
@@ -186,33 +149,35 @@ const createPDFStruk = (nama_perusahaan, transaksi) => {
 
   // Handle the 'finish' event of the stream to know when the PDF writing is complete
   stream.on("finish", function () {
-    // printStruk();
+    printStruk();
     log("PDF created successfully");
     // Here you can perform post-creation operations like opening the PDF or displaying a message
   });
 };
 
-async function printStruk() {
-  // createPdfStruk();
+async function printStruk(namaPrinter ) {
+  const defaultPrinter = process.platform === "win32" ? await getWindowsDefaultPrinter() : await getUnixDefaultPrinter();
+  // console.log("defaultPrinter", defaultPrinter.name);
+  // console.log("print", namaPrinter);
+  // return
+  const printerOption = {
+    printer: namaPrinter??defaultPrinter.name,
+  };
 
-  const outputFilePath = path.resolve(
-    __dirname,
-    process.env.QUASAR_PUBLIC_FOLDER + "/struk/struk.pdf"
-  );
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
 
-  console.log(outputFilePath);
-  fs.access(outputFilePath, fs.constants.F_OK, async (err) => {
-    if (err) {
-      console.error("Struk file does not exist:", outputFilePath);
-      return;
-    }
+    const printResult =
+      process.platform === "win32"
+        ? await printWindows(filePath, printerOption.printer)
+        : await printUnix(filePath, printerOption.printer);
 
-    await print(outputFilePath)
-      .then(() => {
-        console.log("Printing done");
-      })
-      .catch(console.error);
-  });
+    console.log(printResult);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error(`Error during printing: ${errorMessage}`);
+  }
 }
 
 // function getDeviceDetails(device) {

@@ -36,6 +36,22 @@
         push
         style="width: 300px; height: 100px"
         color="primary"
+        icon="dashboard"
+        label="DASHBOARD"
+        @click="$router.push({ name: 'dashboard' })"
+      >
+        <q-btn
+          push
+          class="q-ma-md"
+          color="white"
+          text-color="primary"
+          label="shift + g"
+        />
+      </q-btn>
+      <q-btn
+        push
+        style="width: 300px; height: 100px"
+        color="primary"
         icon="directions_car"
         label="Post Masuk"
         @click="$router.push({ name: 'createTransaksi' })"
@@ -64,6 +80,7 @@
           label="shift + g"
         />
       </q-btn>
+    
       <!-- icon="directions_car" -->
       <q-btn
         push
@@ -118,7 +135,7 @@ import ls from "localstorage-slim";
 const $q = useQuasar();
 
 const transaksiStore = useTransaksiStore();
-// const settingsStore = useSettingsStore();
+const settingsStore = useSettingsStore();
 
 const onClickDemoPage = () => {
   if (ls.get("lokasiPos") === null) {
@@ -168,6 +185,7 @@ const onClickSettings = () => {
 
 const handleKeyDown = (event) => {
   if (event.shiftKey && event.key === "O") {
+    event.preventDefault();
     onClickDemoPage();
   } else if (event.shiftKey === true && event.key === "S") {
     event.preventDefault();

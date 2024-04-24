@@ -11,7 +11,7 @@ export const useSettingsStore = defineStore("settings", {
     logo: ref([]),
     isLicenseExpired: ref(false),
     pesan: ref([]),
-    companyName: ref(""),
+    companyName: process.env.COMPANY_NAME,
   }),
 
   getters: {
@@ -26,8 +26,8 @@ export const useSettingsStore = defineStore("settings", {
       const [data] = res.data;
       this.logo = data.logo;
       this.isLicenseExpired = data.lisensi === 1 ? false : true;
-      this.companyName = data.namalokasi;
-      ls.set("companyName", this.companyName);
+      // this.companyName = data.namalokasi;
+      // ls.set("companyName", this.companyName);
       console.log(data);
       return data;
     },

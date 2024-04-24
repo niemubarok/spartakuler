@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { ipcMain, app, BrowserWindow } from "electron";
 import path from "path";
 import os from "os";
 
@@ -24,6 +24,21 @@ function createWindow() {
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       sandbox: false,
     },
+  });
+
+  
+  ipcMain.on("download-pdf", async (event, arrayBuffer, filename) => {
+    const directoryPath = path.join(os.homedir(), "struk");
+    try {
+      const fsp = fs.promises;
+      await fsp.mkdir(directoryPath, { recursive: true });
+      const filePath = path.join(directoryPath, filename);
+      const buffer = Buffer.from(arrayBuffer);
+      await fsp.writeFile(filePath, buffer);
+      console.log("File written successfully");
+    } catch (err) {
+      console.log("Error writing file", err);
+    }
   });
 
   // let grantedDeviceThroughPermHandler;

@@ -43,6 +43,11 @@ Route.group(() => {
     );
   }).prefix("transactions");
 
+
+  Route.group(() => {
+    Route.post("/data-transaksi-per-tanggal", "ReportsController.dataTransaksiPerTanggal");
+  }).prefix("reports");
+
   Route.group(() => {
     Route.get("/all", "VehiclesController.index");
   }).prefix("vehicles");

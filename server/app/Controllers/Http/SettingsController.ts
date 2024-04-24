@@ -23,6 +23,7 @@ export default class SettingsController {
   }
 
   public async pesan({response}: HttpContextContract) {
+    const pesan = await Database.from('pesan').select('*').where()
   }
 
   public async snapshot({response}: HttpContextContract) {
