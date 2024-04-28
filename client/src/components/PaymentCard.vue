@@ -133,7 +133,7 @@
               </q-card-section>
             </q-card>
             <div class="row justify-end">
-              <q-btn
+              <!-- <q-btn
                 push
                 class="col text-right text-wrap text-dark text-weight-bolder text-h4 bg-yellow q-mt-sm q-mr-sm"
                 label="BAYAR CASHLESS"
@@ -153,7 +153,7 @@
                   icon="keyboard_return"
                   class="text-weight-bolder text-body q-ml-sm"
                 />
-              </q-btn>
+              </q-btn> -->
               <q-btn
                 push
                 class="col text-right text-dark text-weight-bolder text-h4 bg-yellow q-mt-sm"
