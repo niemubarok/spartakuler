@@ -3,9 +3,9 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/IndexPage.vue") },
+      // { path: "", component: () => import("pages/IndexPage.vue") },
       {
-        path: "/outgate",
+        path: "",
         name: "outgate",
         component: () => import("pages/OutGatePage.vue"),
         meta: {
@@ -14,16 +14,16 @@ const routes = [
           requiresAuth: true,
         },
       },
-      {
-        path: "/pic",
-        name: "picture",
-        component: () => import("pages/VehicleImagePage.vue"),
-        meta: {
-          isSidebar: false,
-          isHeader: false,
-          requiresAuth: false,
-        },
-      },
+      // {
+      //   path: "/pic",
+      //   name: "picture",
+      //   component: () => import("pages/VehicleImagePage.vue"),
+      //   meta: {
+      //     isSidebar: false,
+      //     isHeader: false,
+      //     requiresAuth: false,
+      //   },
+      // },
       {
         path: "/transaksi/create",
         name: "createTransaksi",

@@ -188,10 +188,10 @@ module.exports = configure(function (/* ctx */) {
         productName: "SpartaApp", // Added productName for better identification
         // targets: [
         // {
-        target: "AppImage",
+        // target: "AppImage",
         // },
-        //   {
-        // target: "nsis", // Added Windows target
+          // {
+        target: "portable", // Added Windows target
         // nsis: {
         //   differentialPackage: true,
         //   differentialPackageId: "SpartaApp-differential",
@@ -203,7 +203,7 @@ module.exports = configure(function (/* ctx */) {
         // },
 
         // win: {
-        //   target:"nsis",
+        //   target:"portable ",
 
         // }
         // defaultArch: "x64", // Specify architecture

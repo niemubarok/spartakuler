@@ -1,5 +1,6 @@
 node_modules
 build
+build.zip
 coverage
 .vscode
 .DS_STORE

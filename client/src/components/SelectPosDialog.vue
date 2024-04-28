@@ -94,7 +94,8 @@ const handleKeydownOnposLocation = (event) => {
   const key = event.key;
 
   if (posOptions.value[key - 1] !== undefined) {
-    transaksiStore.posLocation = posOptions.value[key - 1];
+    transaksiStore.lokasiPos = posOptions.value[key - 1];
+    posLocation.value = posOptions.value[key - 1];
     ls.set("lokasiPos", posOptions.value[key - 1]);
     // dialogRef.value.hide();
     useComponentStore().selectPosDialogModel = false;

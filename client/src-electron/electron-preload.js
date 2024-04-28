@@ -224,6 +224,37 @@ async function printStruk(namaPrinter ) {
 //   }
 // };
 
+
+const { spawn } = require('child_process');
+
+async function downloadImageFromCCTV(url) {
+  const imgPath = path.join(os.homedir(), `snapshot.jpg`);
+  try {
+    const curl = spawn('curl', ['-o', imgPath, url]);
+    return new Promise((resolve, reject) => {
+      curl.stdout.on('data', () => { });
+      curl.stderr.on('data', (data) => {
+        console.error(`Error downloading image from ${url}:`, data.toString());
+        reject(data.toString());
+      });
+
+      curl.on('close', (code) => {
+        if (code !== 0) {
+          reject(`curl exited with code ${code}`);
+        } else {
+          resolve(imgPath);
+        }
+      });
+    });
+  } catch (error) {
+    console.error(`Error downloading image from ${url}:`, error);
+    throw error;
+  }
+}
+
+
+
+
 function createSerialPort(portName) {
   const instance = new SerialPort({
     path: portName,
@@ -258,6 +289,7 @@ contextBridge.exposeInMainWorld("electron", {
   serialport: createSerialPort,
   print: printStruk,
   createPDFStruk,
+  pic_body_keluar:downloadImageFromCCTV
   // detectLicensePlateArea: detectLicensePlateArea,
   // getSerialPortList: getSerialPortList,
 });

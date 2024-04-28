@@ -99,7 +99,7 @@
       v-if="$q.screen.gt.sm && !transaksiStore.isCheckedIn"
       class="full-width q-pt-md"
     >
-      <Quotes />
+      <!-- <Quotes /> -->
     </div>
 
     <!-- KAMERA -->
@@ -285,6 +285,8 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+import LoginDialog from "src/components/LoginDialog.vue";
+import ApiUrlDialog from "src/components/ApiUrlDialog.vue";
 import { getTime, checkSubscriptionExpiration } from "src/utils/time-util";
 import ls from "localstorage-slim";
 
@@ -525,16 +527,49 @@ onMounted(async () => {
   //   //   type: "negative",
   //   //   message: "Silahkan pilih lokasi terlebih dahulu",
   //   //   position: "center",
-  //   // });
+  //   // }); 
   // } else
+  if (!transaksiStore.API_URL || transaksiStore.API_URL === "-") {
+    const dialog = $q.dialog({
+      component: ApiUrlDialog,
+      noBackdropDismiss: true,
+    });
+
+    dialog.update();
+    $q.notify({
+      type: "negative",
+      message: "Silahkan Isi URL API terlebih dahulu",
+      position: "top",
+    });
+    
+    return
+  }
+
+
   if (
-    transaksiStore.API_URL === "-" ||
-    !pegawai ||
-    !ls.get("shift") ||
     transaksiStore.lokasiPos === "-"
   ) {
-    router.push("/");
+    onClickSettings()
+    return
   }
+  if (
+    
+    !pegawai ||
+    !ls.get("shift") 
+  ) {
+    const dialog = $q.dialog({
+      component: LoginDialog,
+      noBackdropDismiss: true,
+      persistent: true,
+      componentProps: {
+        type: "login",
+        url: "/",
+      },
+    });
+    dialog.update();
+  }
+
+
   // inputPlatNomorRef ? inputPlatNomorRef.value.focus() : "";
 
   window.addEventListener("keydown", handleKeyDown);
@@ -544,22 +579,6 @@ onMounted(async () => {
   // }
 });
 
-onUnmounted(() => {
-  // window.removeEventListener("keydown", handleKeyDown);
-  // console.log("unMounted");
-});
-
-onUpdated(() => {
-  console.log("updated");
-});
-// const inputRef = ref(null);
-// const isTransaksi = ref(true);
-// const isHover = ref({
-//   car: false,
-//   bike: false,
-//   bus: false,
-// });
-// const onClickTicket = (type) => {
 </script>
 
 <style>

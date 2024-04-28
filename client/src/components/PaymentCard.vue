@@ -385,6 +385,7 @@ const onClosePaymentCard = () => {
   componentStore.setOutGateKey();
   transaksiStore.setCheckIn(false);
   transaksiStore.$reset();
+  window.removeEventListener("keydown", handleKeyDown);
 };
 onMounted(async () => {
   // console.log(transaksiStore.waktuMasuk);
@@ -397,20 +398,16 @@ onMounted(async () => {
       }
     );
 
-    // const bufferData = new Uint8Array(getPicBodyMasuk.data);
-    // const blob = new Blob([bufferData], { type: "image/jpeg" });
-    // const imageUrl = URL.createObjectURL(blob);
-    // console.log(imageUrl);
-    // console.log(getPicBodyMasuk.data);
     const contentType = getPicBodyMasuk.data.startsWith("data:image/png")
       ? "png"
-      : "jpeg";
+      : "jpg";
     if (!getPicBodyMasuk.data.startsWith("data:image")) {
       picBodyMasuk.value =
         `data:image/${contentType};base64,` + getPicBodyMasuk.data;
       } else {
         picBodyMasuk.value = getPicBodyMasuk.data;
       }
+
     } catch (error) {
     console.error(error);
   }

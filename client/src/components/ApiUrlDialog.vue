@@ -78,7 +78,7 @@ const onSaveSettings = () => {
   ls.set("API_URL", transaksiStore.API_URL);
 
   dialogRef.value.hide();
-  // window.location.reload();
+  window.location.reload();
 };
 
 defineEmits([...useDialogPluginComponent.emits]);

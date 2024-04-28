@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" @hide="onDialogHide" persistent>
     <q-card
       class="q-px-md q-pt-sm glass relative"
       style="width: 500px; height: fit-content"
@@ -77,7 +77,7 @@ const onSubmit = async () => {
     if (props.type == "login") {
       // determineShift();
       ls.set("pegawai", user);
-      router.push(props.url);
+      window.location.reload()
     } else if (props.type === "check" && props.component === "SettingsDialog") {
       if (transaksiStore.isAdmin) {
         const SettingDialog = $q.dialog({

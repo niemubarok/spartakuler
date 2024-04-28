@@ -343,7 +343,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         }
       );
       const data = response.data;
-      console.log(data);
+      // console.log(data);
       if (data.length) {
         // const total = data.reduce(
         //   (total, item) => total + parseInt(item.count),

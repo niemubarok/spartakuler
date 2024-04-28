@@ -54,7 +54,7 @@ const eraseText = () => {
 };
 
 onMounted(async () => {
-  await settingsStore.getPesan();
+  // await settingsStore.getPesan();
   setTimeout(typeText(), newTextDelay + 200);
 });
 </script>
