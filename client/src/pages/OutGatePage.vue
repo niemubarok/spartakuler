@@ -218,8 +218,8 @@
           </template>
         </q-input>
       </div>
-      <div v-if="componentStore.currentPage == 'outgate'" class="full-width fixed-bottom-right bg-dark q-pa-sm  row justify-between ">
-
+      <div  class="full-width fixed-bottom-right bg-dark q-pa-sm  row justify-between ">
+  <!-- v-if="componentStore.currentPage == 'outgate'"-->
         <div>
           <span class=" text-weight-bolder text-grey-5"> .::PINTU KELUAR::.</span>
         </div>

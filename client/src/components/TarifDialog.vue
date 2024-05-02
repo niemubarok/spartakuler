@@ -1,30 +1,39 @@
 <template>
-  <q-dialog ref="dialogRef" >
-    <q-card
-      class="q-px-md q-pt-sm glass relative"
-      style="width: 500px; height: fit-content"
-    >
+  <q-dialog ref="dialogRef" :maximized="true"  class="q-pa-xl"
+    content-class="dialog__backdrop" >
+    <div>
+   <q-card
+        style="width: 70vw; height: fit-content"
+        class="q-px-md q-pt-xl q-pb-md glass rounded-corner relative fixed-center"
+      >
       <q-card-section>
         <q-input
           v-model="tarif"
-          label="Tarif"
-          dense
-          outlined
+          label="Masukan Tarif Parkir"
+          borderless
           autofocus
-          autocomplete="off"
+          class="input-box bg-primary rounded-corner relative q-pa-sm"
+          input-class="input-box text-white text-h1"
+          label-color="yellow text-h3"
+          color="teal"
+          :rules="[
+            (val) => (val ? val.length >= 1 || 'Masukkan Tarif' : true),
+
+          ]"
           @keydown.enter="onSubmit"
-          ></q-input>
-          <q-card-actions align="right">
+          >
+          <template v-slot:append>
             <q-btn
-            push
-            icon="keyboard_return"
-            type="submit"
-            color="primary"
-            class="q-pa-xl"
+              push
+              :size="'xl'"
+              class="q-mt-xl q-mr-lg bg-white text-dark"
+              icon="keyboard_return"
             />
-          </q-card-actions>
+          </template>
+        </q-input>
       </q-card-section>
     </q-card>
+    </div>
   </q-dialog>
 </template>
 
@@ -48,13 +57,13 @@ const props = defineProps({
   component: String,
 });
 
-const tarif = ref("");
+const tarif = ref();
 
 defineEmits([...useDialogPluginComponent.emits]);
 
 const onSubmit = async () => {
-  
-  if (tarif.value !== undefined) {
+  console.log(tarif.value)
+  if (tarif.value || tarif.value !== undefined) {
     transaksiStore.biayaParkir = tarif.value;
     transaksiStore.setCheckIn(true);
     dialogRef.value.hide();
@@ -64,7 +73,7 @@ const onSubmit = async () => {
     $q.notify({
       type: "negative",
       message: "Tarif Harus Diisi",
-      position: "top",
+      position: "center",
       timeout: 1000,
     });
   }
@@ -97,7 +106,23 @@ onBeforeUnmount(() => {
 }
 
 :deep(.q-dialog__backdrop.fixed-full) {
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.432);
+  backdrop-filter: blur(30px);
+}
+.glass {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.301);
+  border-radius: 20px;
+  border: 1px solid rgba(14, 13, 13, 0.125);
+}
+
+/* :deep(.input-box .q-field__append), */
+:deep(.input-box .q-field__control),
+:deep(.input-box .q-field__append .q-field__marginal) {
+  height: 10vh;
+  width: 80vw;
+  font-size: 2rem;
+  font-family: "Courier New", Courier, monospace;
 }
 </style>

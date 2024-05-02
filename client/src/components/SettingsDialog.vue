@@ -101,6 +101,7 @@ import { useComponentStore } from "src/stores/component-store";
 import { useSettingsStore } from "src/stores/settings-store";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import LoginDialog from "src/components/LoginDialog.vue";
+import ApiUrlDialog from "src/components/ApiUrlDialog.vue";
 
 import ls from "localstorage-slim";
 import SelectJenisTarifDialog from "./SelectJenisTarifDialog.vue";
@@ -129,6 +130,7 @@ const settingItems = [
   { icon: "place", title: "Lokasi Pos", shortcut: "p", label: ()=> transaksiStore.lokasiPos?.label },
   { icon: "directions_car", title: "Jenis Kendaraan", shortcut: "J", label: ()=> transaksiStore.defaultJenisKendaraan?.label },
   { icon: "event", title: "Kode Plat Nomor", shortcut: "k", label: ()=> settingsStore.prefix },
+  { icon: "http", title: "API URL", shortcut: "U", label: ()=> ls.get("API_URL") },
 ];
 
 const onSaveSettings = () => {
@@ -168,6 +170,12 @@ const handleKeyDownOnSettingDialog = async (event) => {
     // });
     // posDialog.update();
     componentStore.selectPosDialogModel = true;
+  } else if (event.key.toUpperCase() === "U") {
+    event.preventDefault();
+    const ApiDialog = $q.dialog({
+       component: ApiUrlDialog,
+     });
+     ApiDialog.update();
   } else if (event.key.toUpperCase() === "J") {
     // const defaultJenisKendaraan = $q.dialog({
     //   component: SelectDefaultJenisKendaraanDialog,

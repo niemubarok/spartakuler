@@ -4,7 +4,7 @@ import ls from "localstorage-slim";
 
 // import { BetterSerialPort } from "better-serial-port";
 const { serialport } = window.electron;
-const port = serialport("/dev/ttyUSB0");
+const port = serialport("/dev/ttyS1");
 
 export const useComponentStore = defineStore("component", {
   state: () => ({
@@ -91,8 +91,8 @@ export const useComponentStore = defineStore("component", {
     },
 
     async openGate() {
-      console.log("port", port);
-      console.log("window", window.electron);
+      // console.log("port", port);
+      // console.log("window", window.electron);
       await port.open();
       await port.write("*OUT1ON#");
 

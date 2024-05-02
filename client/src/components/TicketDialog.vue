@@ -42,7 +42,7 @@
           borderless
           class="input-box bg-primary rounded-corner relative q-pa-sm"
           input-class="input-box text-white"
-          label-color="yellow text-h6"
+          label-color="yellow text-h3"
           color="teal"
           v-model="transaksiStore.nomorTiket"
           label="Scan Nomor Struk"

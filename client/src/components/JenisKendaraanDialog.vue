@@ -1,6 +1,6 @@
 <template>
-  <!-- :maximized="true" -->
   <q-dialog
+   :maximized="true"
     ref="dialogRef"
     @hide="onDialogHide"
     class="q-pa-xl"
@@ -9,9 +9,10 @@
     <!-- no-backdrop-dismiss
     no-route-dismiss -->
     <!-- :content-css="{ 'background-color': 'rgba(0, 0, 0, 0.9)' }" -->
+    <div>
     <q-card
       style="width: 50vw; height: fit-content"
-      class="q-px-md q-pt-xl q-pb-md glass rounded-corner relative"
+      class="q-px-md q-pt-xl q-pb-md glass rounded-corner relative fixed-center"
     >
       <div>
         <q-avatar
@@ -67,6 +68,7 @@
         </q-item>
       </div>
     </q-card>
+    </div>
   </q-dialog>
 </template>
 
@@ -109,7 +111,7 @@ const jenisKendaraanOptions = ref([]);
 const jenisKendaraanModel = ref(null);
 const jenisKendaraanRef = ref(null);
 const defaultJenisKendaraan = ref(ls.get("defaultJenisKendaraan"));
-const defaultShortcut = ref("");
+const defaultShortcut = ref("A");
 const matchingDefaultOption = ref(null);
 
 const onClickTicket = (type) => {
@@ -130,7 +132,7 @@ const onClickTicket = (type) => {
 const handleKeydownOnJenisKendaraan = (event) => {
   const key = event.key;
   const matchingOption = jenisKendaraanOptions.value.find(
-    (option) => option.shortcut === key.toUpperCase()
+    (option) => option?.shortcut === key.toUpperCase()
   );
 
   if (key === "Escape") {

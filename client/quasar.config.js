@@ -175,6 +175,7 @@ module.exports = configure(function (/* ctx */) {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
         // OS X / Mac App Store
         appBundleId: "com.sparta.app",
+	platform:'linux',
         // appCategoryType: '',
         // osxSign: '',
         // protocol: 'myapp://path',
@@ -185,13 +186,13 @@ module.exports = configure(function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
         appId: "com.sparta.app",
-        productName: "SpartaApp", // Added productName for better identification
+        productName: "Sparta", // Added productName for better identification
         // targets: [
         // {
-        // target: "AppImage",
+         target: "AppImage",
         // },
           // {
-        target: "portable", // Added Windows target
+        //target: "portable", // Added Windows target
         // nsis: {
         //   differentialPackage: true,
         //   differentialPackageId: "SpartaApp-differential",
