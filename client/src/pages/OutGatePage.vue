@@ -117,16 +117,18 @@
               icon="camera"
               label="Kamera Pintu Masuk"
             />
-            <q-skeleton
-              v-if="cameraIn == null || cameraIn == '-'"
+            <!-- <q-skeleton
+              v-if="cameraInUrl == null || cameraInUrl == '-'"
               height="52vh"
               class="rounded-corner"
               width="49vw"
-            />
-            <CaemeraIn
-              v-else
+            /> -->
+            <Camera
               :key="componentStore.cameraInKey"
               class="rounded-corner"
+              camera-location="in"
+              :camera-url="settingsStore.cameraInUrl"
+              :file-name="cameraInFileName"
               :style="{
                 width: '49vw',
               }"
@@ -139,17 +141,27 @@
               icon="camera"
               label="Kamera Pintu Keluar"
             />
-            <q-skeleton
+            <!-- <q-skeleton
               v-if="cameraOut == null || cameraOut == '-'"
               width="49vw"
               height="52vh"
-              class="rounded-corner"
-            />
-            <CaemeraOut
+              class="rounded-corner" -->
+            <!-- /> -->
+            <!-- <CaemeraOut
               ref="cameraOutRef"
               :key="componentStore.cameraOutKey"
-              v-else
               class="rounded-corner"
+              :style="{
+                width: '49vw',
+              }"
+            /> -->
+
+            <Camera
+              :key="componentStore.cameraOutKey"
+              class="rounded-corner"
+              camera-location="out"
+              :camera-url="settingsStore.cameraOutUrl"
+              :file-name="cameraOutFileName"
               :style="{
                 width: '49vw',
               }"
@@ -285,6 +297,7 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+import { useSettingsStore } from "src/stores/settings-store";
 import LoginDialog from "src/components/LoginDialog.vue";
 import ApiUrlDialog from "src/components/ApiUrlDialog.vue";
 import { getTime, checkSubscriptionExpiration } from "src/utils/time-util";
@@ -296,7 +309,7 @@ import PaymentCard from "src/components/PaymentCard.vue";
 import Quotes from "src/components/Quotes.vue";
 import ShinyCard from "src/components/ShinyCard.vue";
 import CaemeraOut from "src/components/CameraOut.vue";
-import CaemeraIn from "src/components/CameraIn.vue";
+import Camera from "src/components/Camera.vue";
 import CompanyName from "src/components/CompanyName.vue";
 import SettingsDialog from "src/components/SettingsDialog.vue";
 
@@ -314,7 +327,7 @@ import JenisKendaraanDialog from "src/components/JenisKendaraanDialog.vue";
 
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
-// const settingsStore = useSettingsStore();
+const settingsStore = useSettingsStore();
 const $q = useQuasar();
 
 const darkMode = ref(ls.get("darkMode")) || ref(false);
@@ -325,7 +338,11 @@ const darkModeToggle = () => {
 const cardVideo = ref(null);
 const pegawai = ls.get("pegawai") ? ls.get("pegawai").nama : null;
 
-const cameraIn = ls.get("cameraIn") || null;
+// const cameraInUrl = ls.get("cameraInUrl") || null;
+// const cameraOutUrl = ls.get("cameraOutUrl") || null;
+const cameraInFileName = `${ls.get('lokasiPos')?.value}_in_snapshot`
+const cameraOutFileName = "02_out_snapshot"
+
 const cameraOut = ls.get("cameraOut") || null;
 const cameraOutRef = ref(null);
 const router = useRouter();

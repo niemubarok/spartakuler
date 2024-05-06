@@ -19,7 +19,9 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
-Route.get("/", "ManlessController.index");
+Route.get("/", () => {
+  return "Works";
+});
 
 Route.group(() => {
   Route.group(() => {
@@ -100,4 +102,9 @@ Route.group(() => {
     Route.get("/card/:params", "ManlessController.card");
     Route.get("/:params","ManlessController.button");
   }).prefix("manless");
+
+  Route.group(() => {
+    Route.get("/snapshot", "CCTVController.index");
+    // Route.get("/out-snapshot", "CCTVController.index");
+  }).prefix("cctv");
 }).prefix("api");

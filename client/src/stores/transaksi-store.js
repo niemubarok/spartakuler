@@ -240,11 +240,12 @@ export const useTransaksiStore = defineStore("transaksi", {
       // }
     },
     async getCustomerByNopol() {
-      console.log(this.platNomor);
-      const res = await axios.post(this.API_URL + "/customers/nopol", {
-        no_pol: this.platNomor?.toUpperCase(),
-      });
+      try{
 
+        const res = await axios.post(this.API_URL + "/customers/nopol", {
+          no_pol: this.platNomor?.toUpperCase(),
+        });
+        
       if (res.data) {
         this.isMember = true;
         this.dataCustomer = res.data;
@@ -253,8 +254,15 @@ export const useTransaksiStore = defineStore("transaksi", {
       } else {
         this.isMember = false;
       }
+    }catch (err){
+      Notify.create({
+        message: "gagal terhubung ke server "+ err.message,
+        color: "negative",
+        icon: "report_problem",
+        position: "top",
+      })
 
-      // return res;
+    }
     },
 
     async getTarifJenisKendaraan() {

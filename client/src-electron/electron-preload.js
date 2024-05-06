@@ -227,34 +227,34 @@ async function printStruk(namaPrinter ) {
 
 const { spawn } = require('child_process');
 
-async function downloadImageFromCCTV(url, filename) {
-  try {
-    const curl = spawn('curl', ['-s', '-o', '-', url]);
-    return new Promise((resolve, reject) => {
-      const dataChunks = [];
-      curl.stdout.on('data', (chunk) => {
-        dataChunks.push(chunk);
-      });
-      curl.stderr.on('data', (data) => {
-        console.error(`Error downloading image from ${url}:`, data.toString());
-        reject(data.toString());
-      });
+// async function downloadImageFromCCTV(url, filename) {
+//   try {
+//     const curl = spawn('curl', ['-s', '-o', '-', url]);
+//     return new Promise((resolve, reject) => {
+//       const dataChunks = [];
+//       curl.stdout.on('data', (chunk) => {
+//         dataChunks.push(chunk);
+//       });
+//       curl.stderr.on('data', (data) => {
+//         console.error(`Error downloading image from ${url}:`, data.toString());
+//         reject(data.toString());
+//       });
 
-      curl.on('close', (code) => {
-        if (code !== 0) {
-          reject(`curl exited with code ${code}`);
-        } else {
-          const data = Buffer.concat(dataChunks);
-          const base64Image = data.toString('base64');
-          resolve(`data:image/jpeg;base64,${base64Image}`);
-        }
-      });
-    });
-  } catch (error) {
-    console.error(`Error downloading image from ${url}:`, error);
-    throw error;
-  }
-}
+//       curl.on('close', (code) => {
+//         if (code !== 0) {
+//           reject(`curl exited with code ${code}`);
+//         } else {
+//           const data = Buffer.concat(dataChunks);
+//           const base64Image = data.toString('base64');
+//           resolve(`data:image/jpeg;base64,${base64Image}`);
+//         }
+//       });
+//     });
+//   } catch (error) {
+//     console.error(`Error downloading image from ${url}:`, error);
+//     throw error;
+//   }
+// }
 
 
 
@@ -293,7 +293,7 @@ contextBridge.exposeInMainWorld("electron", {
   serialport: createSerialPort,
   print: printStruk,
   createPDFStruk,
-  downloadImageFromCCTV
+  // downloadImageFromCCTV
   // detectLicensePlateArea: detectLicensePlateArea,
   // getSerialPortList: getSerialPortList,
 });

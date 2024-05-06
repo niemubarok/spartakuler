@@ -12,6 +12,8 @@ export const useSettingsStore = defineStore("settings", {
     isLicenseExpired: ref(false),
     pesan: ref([]),
     companyName: process.env.COMPANY_NAME,
+    cameraInUrl: ref(ls.get("cameraInUrl") || "-"),
+    cameraOutUrl: ref(ls.get("cameraOutUrl") || "-"),
   }),
 
   getters: {

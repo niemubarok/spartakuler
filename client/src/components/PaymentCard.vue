@@ -186,7 +186,19 @@
       </div>
       <!-- :style="{ width: '45vw', height: '30vh' }" -->
       <div class="col-6 items-end">
-        <FotoKendaraan
+        <!-- :key="componentStore.cameraOutKey"  -->
+        <Camera
+        v-if="componentStore.currentPage === 'payment'"
+              class="rounded-corner"
+              camera-location="out"
+              :camera-url="settingsStore.cameraOutUrl"
+              :file-name="cameraOutFileName"
+              :isInterval="false"
+              :style="{
+                width: '49vw',
+              }"
+            />
+        <!-- <FotoKendaraan
           v-if="!transaksiStore.pic_body_keluar"
           title="Kamera Keluar"
           type="video"
@@ -204,8 +216,6 @@
                 Tidak ada Kamera
               </h4>
             </q-skeleton>
-            <!-- @capture="captureCameraOut()" -->
-            <!-- mode="landscape" -->
             <CameraOut
               ref="cameraOutRef"
               v-else
@@ -213,14 +223,13 @@
               :style="{ width: '49vw' }"
             />
           </template>
-          <!-- width: '42vw', -->
         </FotoKendaraan>
         <FotoKendaraan
           v-else
           title="Foto Keluar"
           type="image"
           :url="transaksiStore.pic_body_keluar"
-        />
+        /> -->
       </div>
     </div>
   </div>
@@ -230,6 +239,7 @@
 import { ref, onMounted } from "vue";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
+import { useSettingsStore } from "src/stores/settings-store";
 import FotoKendaraan from "src/components/FotoKendaraan.vue";
 import { format, useQuasar } from "quasar";
 import CameraOut from "./CameraOut.vue";
@@ -239,14 +249,17 @@ import OpenGateDialogComponent from "./OpenGateDialog.vue";
 import ls from "localstorage-slim";
 import PlatNomor from "./PlatNomor.vue";
 import MemberRibbon from "./MemberRibbon.vue";
+import Camera from "./Camera.vue";
 
 import axios from "axios";
 
 const $q = useQuasar();
 const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
+const settingsStore = useSettingsStore();
 // const buttonBatal = ref(false);
 const cameraOut = ls.get("cameraOut") || null;
+const cameraOutFileName = `${ls.get("lokasiPos").value}_out_snapshot` || null;
 const cameraOutRef = ref(null);
 // const bayarParkir = () => {
 //   // logika bayar parkir

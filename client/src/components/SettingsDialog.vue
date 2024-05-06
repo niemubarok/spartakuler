@@ -6,6 +6,7 @@
     maximized
     @hide="onDialogHide"
     persistent
+    :key="componentStore.settingsKey"
   >
     <div class="row justify-center items-center">
       <q-card
@@ -37,10 +38,11 @@
         </q-item>
         <q-separator inset />
 
-        <div class="row q-col-gutter-md justify-center">
+        <div class="row q-col-gutter-sm  justify-center">
           <div
             v-for="setting in settingItems"
-            class="column col-12 col-sm-6 col-md-4"
+            class="row" style="min-width:200px"
+          
           >
             <setting-item
               :icon="setting.icon"
@@ -65,15 +67,16 @@
       </q-card>
     </div>
 
-    <q-dialog v-model="componentStore.selectJenisTarifDialogModel" persistent>
+    <q-dialog v-model="componentStore.selectJenisTarifDialogModel"  persistent>
       <select-jenis-tarif-dialog />
     </q-dialog>
-    <q-dialog v-model="componentStore.selectCameraInDialogModel" persistent>
-      <select-camera-in-dialog />
+    <q-dialog v-model="componentStore.selectCameraInDialogModel" @hide="onCameraInDialogHide" >
+      <camera-in-url-dialog />
     </q-dialog>
-    <q-dialog v-model="componentStore.selectCameraOutDialogModel" persistent>
-      <select-camera-out-dialog />
+    <q-dialog v-model="componentStore.selectCameraOutDialogModel" @hide="onCameraOutDialogHide" >
+      <camera-out-url-dialog />
     </q-dialog>
+    
     <q-dialog v-model="componentStore.selectPosDialogModel" persistent>
       <select-pos-dialog />
     </q-dialog>
@@ -110,6 +113,8 @@ import SelectCameraOutDialog from "./SelectCameraOutDialog.vue";
 import SelectPosDialog from "./SelectPosDialog.vue";
 import SelectDefaultJenisKendaraanDialog from "./SelectDefaultJenisKendaraanDialog.vue";
 import SettingItem from "./SettingItem.vue"
+import CameraInUrlDialog from "./CameraInUrlDialog.vue";
+import CameraOutUrlDialog from "./CameraOutUrlDialog.vue";
 
 const componentStore = useComponentStore();
 const transaksiStore = useTransaksiStore();
@@ -125,8 +130,9 @@ const { dialogRef } = useDialogPluginComponent();
 
 const settingItems = [
   { icon: "money", title: "Tarif Otomatis / Manual", shortcut: "T", label: ()=> componentStore.jenisTarif },
-  { icon: "camera", title: "Kamera Masuk", shortcut: "i", label: ()=> componentStore.camera.in?.label },
-  { icon: "camera", title: "Kamera Keluar", shortcut: "o", label: ()=> componentStore.camera.out?.label },
+  { icon: "camera", title: "URL Kamera Masuk", shortcut: "i", label: ()=> settingsStore.cameraInUrl },
+  { icon: "camera", title: "URL Kamera Keluar", shortcut: "O", label: ()=> settingsStore.cameraOutUrl },
+  // { icon: "camera", title: "Kamera Keluar", shortcut: "o", label: ()=> componentStore.camera.out?.label },
   { icon: "place", title: "Lokasi Pos", shortcut: "p", label: ()=> transaksiStore.lokasiPos?.label },
   { icon: "directions_car", title: "Jenis Kendaraan", shortcut: "J", label: ()=> transaksiStore.defaultJenisKendaraan?.label },
   { icon: "event", title: "Kode Plat Nomor", shortcut: "k", label: ()=> settingsStore.prefix },
@@ -136,6 +142,16 @@ const settingItems = [
 const onSaveSettings = () => {
   dialogRef.value.hide();
   window.location.reload();
+};
+
+
+const onCameraInDialogHide = () => {
+  // window.location.reload();
+  window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+};
+const onCameraOutDialogHide = () => {
+  // window.location.reload();
+  window.addEventListener("keydown", handleKeyDownOnSettingDialog);
 };
 
 const handleKeyDownOnSettingDialog = async (event) => {
@@ -150,12 +166,13 @@ const handleKeyDownOnSettingDialog = async (event) => {
     // posDialog.update();
     componentStore.selectJenisTarifDialogModel = true;
   } else if (event.key.toUpperCase() === "I") {
+    event.preventDefault();
     // const cameraInDialog = $q.dialog({
-    //   component: SelectCameraInDialog,
+    //   component: CameraInUrlDialog,
     // });
     // cameraInDialog.update();
-    event.preventDefault();
     componentStore.selectCameraInDialogModel = true;
+    window.removeEventListener("keydown", handleKeyDownOnSettingDialog);
   } else if (event.key.toUpperCase() === "O") {
     // const cameraOutDialog = $q.dialog({
     //   component: SelectCameraOutDialog,
@@ -163,6 +180,7 @@ const handleKeyDownOnSettingDialog = async (event) => {
     // cameraOutDialog.update();
     event.preventDefault();
     componentStore.selectCameraOutDialogModel = true;
+    window.removeEventListener("keydown", handleKeyDownOnSettingDialog);
   } else if (event.key.toUpperCase() === "P") {
     event.preventDefault();
     // const posDialog = $q.dialog({
@@ -199,7 +217,12 @@ const handleKeyDownOnSettingDialog = async (event) => {
 onMounted(async () => {
   await settingsStore.getPosConfig();
   window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+  // componentStore.settingsKey = true;
 });
+
+// onUpdated(() => {
+//   console.log("settings updated");
+// });
 
 const onDialogHide = () => {
   if (transaksiStore.lokasiPos === "-" || transaksiStore.lokasiPos === null) {
