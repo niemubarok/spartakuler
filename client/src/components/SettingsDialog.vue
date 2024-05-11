@@ -38,19 +38,15 @@
         </q-item>
         <q-separator inset />
 
-        <div class="row q-col-gutter-sm  justify-center">
-          <div
-            v-for="setting in settingItems"
-            class="row" style="min-width:200px"
-          
-          >
+        <div class="row q-col-gutter-sm justify-center">
+          <div v-for="setting in settingItems" class="row">
+            <!-- style="min-width: 20vw" -->
             <setting-item
               :icon="setting.icon"
               :title="setting.title"
               :label="setting.label() || '-'"
               :shortcut="setting.shortcut"
             />
-
           </div>
         </div>
 
@@ -67,16 +63,22 @@
       </q-card>
     </div>
 
-    <q-dialog v-model="componentStore.selectJenisTarifDialogModel"  persistent>
+    <q-dialog v-model="componentStore.selectJenisTarifDialogModel" persistent>
       <select-jenis-tarif-dialog />
     </q-dialog>
-    <q-dialog v-model="componentStore.selectCameraInDialogModel" @hide="onCameraInDialogHide" >
+    <q-dialog
+      v-model="componentStore.selectCameraInDialogModel"
+      @hide="onCameraInDialogHide"
+    >
       <camera-in-url-dialog />
     </q-dialog>
-    <q-dialog v-model="componentStore.selectCameraOutDialogModel" @hide="onCameraOutDialogHide" >
+    <q-dialog
+      v-model="componentStore.selectCameraOutDialogModel"
+      @hide="onCameraOutDialogHide"
+    >
       <camera-out-url-dialog />
     </q-dialog>
-    
+
     <q-dialog v-model="componentStore.selectPosDialogModel" persistent>
       <select-pos-dialog />
     </q-dialog>
@@ -86,6 +88,12 @@
     >
       <select-default-jenis-kendaraan-dialog />
     </q-dialog>
+  </q-dialog>
+  <q-dialog
+    v-model="componentStore.selectSerialPortDialogModel"
+    @hide="onSerialPortDialogHide"
+  >
+    <select-serial-port-dialog />
   </q-dialog>
 </template>
 
@@ -112,7 +120,8 @@ import SelectCameraInDialog from "./SelectCameraInDialog.vue";
 import SelectCameraOutDialog from "./SelectCameraOutDialog.vue";
 import SelectPosDialog from "./SelectPosDialog.vue";
 import SelectDefaultJenisKendaraanDialog from "./SelectDefaultJenisKendaraanDialog.vue";
-import SettingItem from "./SettingItem.vue"
+import SelectSerialPortDialog from "./SelectSerialPortDialog.vue";
+import SettingItem from "./SettingItem.vue";
 import CameraInUrlDialog from "./CameraInUrlDialog.vue";
 import CameraOutUrlDialog from "./CameraOutUrlDialog.vue";
 
@@ -127,16 +136,58 @@ defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef } = useDialogPluginComponent();
 
-
 const settingItems = [
-  { icon: "money", title: "Tarif Otomatis / Manual", shortcut: "T", label: ()=> componentStore.jenisTarif },
-  { icon: "camera", title: "URL Kamera Masuk", shortcut: "i", label: ()=> settingsStore.cameraInUrl },
-  { icon: "camera", title: "URL Kamera Keluar", shortcut: "O", label: ()=> settingsStore.cameraOutUrl },
+  {
+    icon: "money",
+    title: "Tarif Otomatis / Manual",
+    shortcut: "T",
+    label: () => componentStore.jenisTarif,
+  },
+
   // { icon: "camera", title: "Kamera Keluar", shortcut: "o", label: ()=> componentStore.camera.out?.label },
-  { icon: "place", title: "Lokasi Pos", shortcut: "p", label: ()=> transaksiStore.lokasiPos?.label },
-  { icon: "directions_car", title: "Jenis Kendaraan", shortcut: "J", label: ()=> transaksiStore.defaultJenisKendaraan?.label },
-  { icon: "event", title: "Kode Plat Nomor", shortcut: "k", label: ()=> settingsStore.prefix },
-  { icon: "http", title: "API URL", shortcut: "U", label: ()=> ls.get("API_URL") },
+  {
+    icon: "place",
+    title: "Lokasi Pos",
+    shortcut: "p",
+    label: () => transaksiStore.lokasiPos?.label,
+  },
+  {
+    icon: "directions_car",
+    title: "Jenis Kendaraan",
+    shortcut: "J",
+    label: () => transaksiStore.defaultJenisKendaraan?.label,
+  },
+  {
+    icon: "event",
+    title: "Kode Plat Nomor",
+    shortcut: "k",
+    label: () => settingsStore.prefix,
+  },
+  {
+    icon: "serial_port",
+    title: "Serial Port",
+    shortcut: "S",
+    label: () => settingsStore.serialPort,
+  },
+  {
+    icon: "http",
+    title: "API URL",
+    shortcut: "U",
+    label: () => ls.get("API_URL"),
+  },
+
+  {
+    icon: "camera",
+    title: "URL Kamera Masuk",
+    shortcut: "i",
+    label: () => settingsStore.cameraInUrl,
+  },
+  {
+    icon: "camera",
+    title: "URL Kamera Keluar",
+    shortcut: "O",
+    label: () => settingsStore.cameraOutUrl,
+  },
 ];
 
 const onSaveSettings = () => {
@@ -144,6 +195,9 @@ const onSaveSettings = () => {
   window.location.reload();
 };
 
+const onSerialPortDialogHide = () => {
+  window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+};
 
 const onCameraInDialogHide = () => {
   // window.location.reload();
@@ -158,7 +212,7 @@ const handleKeyDownOnSettingDialog = async (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     onSaveSettings();
-  }else if (event.key.toUpperCase() === "T") {
+  } else if (event.key.toUpperCase() === "T") {
     event.preventDefault();
     // const posDialog = $q.dialog({
     //   component: SelectPosDialog,
@@ -191,9 +245,9 @@ const handleKeyDownOnSettingDialog = async (event) => {
   } else if (event.key.toUpperCase() === "U") {
     event.preventDefault();
     const ApiDialog = $q.dialog({
-       component: ApiUrlDialog,
-     });
-     ApiDialog.update();
+      component: ApiUrlDialog,
+    });
+    ApiDialog.update();
   } else if (event.key.toUpperCase() === "J") {
     // const defaultJenisKendaraan = $q.dialog({
     //   component: SelectDefaultJenisKendaraanDialog,
@@ -211,6 +265,10 @@ const handleKeyDownOnSettingDialog = async (event) => {
       event.preventDefault();
       dialogRef.value.hide();
     }
+  } else if (event.key.toUpperCase() === "S") {
+    event.preventDefault();
+    componentStore.selectSerialPortDialogModel = true;
+    window.removeEventListener("keydown", handleKeyDownOnSettingDialog);
   }
 };
 

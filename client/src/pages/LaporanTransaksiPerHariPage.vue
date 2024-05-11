@@ -1,10 +1,9 @@
 <template>
-    <q-page padding>
-      <LaporanTransaksiPerHari />
-    </q-page>
-  </template>
-  
-  <script setup>
-  import LaporanTransaksiPerHari from "src/components/LaporanTransaksiPerHari.vue";
-  </script>
-  
+  <q-page padding>
+    <LaporanTransaksiPertanggal />
+  </q-page>
+</template>
+
+<script setup>
+import LaporanTransaksiPertanggal from "src/components/LaporanTransaksiPertanggal.vue";
+</script>

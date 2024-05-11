@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import ls from "localstorage-slim";
 import axios from "axios";
+import { api } from "src/boot/axios";
 
 export const useSettingsStore = defineStore("settings", {
   state: () => ({
@@ -14,6 +15,7 @@ export const useSettingsStore = defineStore("settings", {
     companyName: process.env.COMPANY_NAME,
     cameraInUrl: ref(ls.get("cameraInUrl") || "-"),
     cameraOutUrl: ref(ls.get("cameraOutUrl") || "-"),
+    serialPort: ref(ls.get("serialPort") || "-"),
   }),
 
   getters: {
@@ -54,5 +56,19 @@ export const useSettingsStore = defineStore("settings", {
       const data = res.data;
       this.pesan = Object.values(data).map((item) => item.pesan);
     },
+    async fetchCameraImage(fileName, cameraUrl) {
+      try {
+        const image = await api.get(`/cctv/snapshot?fileName=${fileName}&cctv_url=${cameraUrl}`);
+        
+        if (image.data.isSuccess) {
+          // console.log("image.data.base64.split(",")[1] ", image.data.base64.split(",")[1]);
+          return image.data.base64.includes("data:image/") ? image.data.base64.split(';base64,').pop() : image.data.base64;
+        } else {
+          return image.data.message;
+        }
+      } catch (error) {
+        return error;
+      }
+    }
   },
 });

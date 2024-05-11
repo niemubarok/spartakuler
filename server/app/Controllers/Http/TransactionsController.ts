@@ -1,7 +1,47 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
+import sharp from "sharp";
 
 export default class TransactionsController {
+  private formatLocalDateTime(date: Date): string {
+    return (
+      date.getFullYear() +
+      "-" +
+      ("0" + (date.getMonth() + 1)).slice(-2) +
+      "-" +
+      ("0" + date.getDate()).slice(-2) +
+      " " +
+      ("0" + date.getHours()).slice(-2) +
+      ":" +
+      ("0" + date.getMinutes()).slice(-2) +
+      ":" +
+      ("0" + date.getSeconds()).slice(-2) +
+      "." +
+      (date.getMilliseconds() + "000").slice(0, 3)
+    );
+  }
+
+  private async compressImageAndConvertToBase64(
+    imageBuffer: Buffer
+  ): Promise<string | null> {
+    // Pengecekan apakah imageBuffer ada dan merupakan instance dari Buffer
+    if (!imageBuffer || !(imageBuffer instanceof Buffer)) {
+      return null;
+    }
+
+    try {
+      const compressedImage = await sharp(imageBuffer)
+        .resize(512) // Atur ukuran maksimal gambar
+        .jpeg({ quality: 80 }) // Atur kualitas gambar
+        .toBuffer();
+
+      return compressedImage.toString("base64");
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      return null;
+    }
+  }
+
   public async index({}: HttpContextContract) {
     // const transactions = await Database.query() // 👈 gives an instance of select query builder
     //   .from("transaksi_parkir")
@@ -105,10 +145,10 @@ export default class TransactionsController {
     const { no_pol } = request.body();
 
     const [transaction] = await Database.query()
-      .from('transaksi_parkir')
-      .select('count(no_pol)')
-      .where('no_pol', no_pol)
-      .where('status', 1)
+      .from("transaksi_parkir")
+      .select("count(no_pol)")
+      .where("no_pol", no_pol)
+      .where("status", 1)
       .limit(1);
 
     response.status(200).json({ count: transaction.count });
@@ -123,7 +163,7 @@ export default class TransactionsController {
     // let picBodyMasukBase64;
     // console.log(pic.rows[0]);
     return pic.rows[0].pic_body_masuk;
-    
+
     if (pic.rows && pic.rows.length > 0) {
       const binaryData = pic.rows[0].pic_body_masuk;
       if (!binaryData?.toString().startsWith("data:image")) {
@@ -140,56 +180,56 @@ export default class TransactionsController {
 
   public async update({ request, response }: HttpContextContract) {
     const requestBody = request.body().formData;
+
     const {
-      // id,
       nomorTiket,
       no_pol,
       id_kendaraan,
       status,
-      waktu_keluar,
       id_op_keluar,
       id_shift_keluar,
       status_transaksi,
       bayar_keluar,
-      tanggal,
       pic_body_keluar,
       pklogin,
       no_barcode,
     } = requestBody;
 
     const formData = {
-      // id,
       no_pol,
       id_kendaraan,
       status,
-      waktu_keluar,
       id_op_keluar,
       id_shift_keluar,
       status_transaksi,
       bayar_keluar,
-      tanggal,
       pic_body_keluar,
       pklogin,
       no_barcode,
     };
 
-    // return formData;
-
-    // id = ${formData.id},
     try {
+      const compressedBase64 = await this.compressImageAndConvertToBase64(
+        Buffer.from(formData.pic_body_keluar, "base64")
+      );
+
       const updateQuery = `
         UPDATE transaksi_parkir
         SET
           no_pol = '${formData.no_pol}',
           id_kendaraan = '${formData.id_kendaraan}',
           status = '${formData.status}',
-          waktu_keluar = '${formData.waktu_keluar}',
+          waktu_keluar = '${this.formatLocalDateTime(new Date())}',
           id_op_keluar = '${formData.id_op_keluar}',
           id_shift_keluar = '${formData.id_shift_keluar}',
           status_transaksi = '${formData.status_transaksi}',
           bayar_keluar = '${formData.bayar_keluar}',
-          tanggal = '${formData.tanggal}',
-          pic_body_keluar = '${formData.pic_body_keluar}',
+          tanggal = '${this.formatLocalDateTime(new Date())}',
+          pic_body_keluar = ${
+            compressedBase64
+              ? `decode('${compressedBase64}', 'base64')`
+              : "NULL"
+          },
           pklogin = '${formData.pklogin}',
           no_barcode = '${formData.no_barcode}'
         WHERE LOWER (no_pol) = LOWER ('${nomorTiket}');
@@ -197,26 +237,21 @@ export default class TransactionsController {
 
       const update = await Database.rawQuery(updateQuery);
       console.log(update.rowCount);
-      
-      // return update;
+
       if (update.rowCount > 0) {
-        // Update successful
         response.status(200).json({
           message: "Update successful",
         });
-      }else{
+      } else {
         response.status(304).json({
           message: "Update failed",
         });
       }
     } catch (error) {
       console.log(error);
-      
-      // Handle the error here
       response.status(304).json({
         message: "Update failed",
       });
-      // throw new Error("Update failed");
     }
   }
 

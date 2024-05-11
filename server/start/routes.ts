@@ -45,9 +45,11 @@ Route.group(() => {
     );
   }).prefix("transactions");
 
-
   Route.group(() => {
-    Route.post("/data-transaksi-per-tanggal", "ReportsController.dataTransaksiPerTanggal");
+    Route.post(
+      "/data-transaksi-per-tanggal",
+      "ReportsController.dataTransaksiPerTanggal"
+    );
   }).prefix("reports");
 
   Route.group(() => {
@@ -63,7 +65,10 @@ Route.group(() => {
     Route.get("/all", "UsersController.index");
     Route.post("/login", "UsersController.login");
     Route.post("/logout", "UsersController.logOut");
-  }).prefix("user");
+    Route.post("/add", "UsersController.create");
+    Route.post("/edit", "UsersController.edit");
+    Route.post("/delete", "UsersController.delete");
+  }).prefix("petugas");
 
   Route.group(() => {
     Route.get("/all", "ShiftsController.index");
@@ -93,14 +98,13 @@ Route.group(() => {
     Route.post("/node-red", "NodeRedController.index");
   });
 
-
   //manless endpoint
-  Route.group(()=>{
+  Route.group(() => {
     // Route.get("/button/:termno/:direction/:qrcode", "ManlessController.button");
     Route.get("/button/:params", "ManlessController.button");
     Route.get("/longrange/:params", "ManlessController.button");
     Route.get("/card/:params", "ManlessController.card");
-    Route.get("/:params","ManlessController.button");
+    Route.get("/:params", "ManlessController.button");
   }).prefix("manless");
 
   Route.group(() => {

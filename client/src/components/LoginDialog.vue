@@ -50,6 +50,7 @@ import { useTransaksiStore } from "src/stores/transaksi-store";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import ApiUrlDialog from "./ApiUrlDialog.vue";
+import { userStore } from "src/stores/user-store";
 
 const { dialogRef, onDialogHide } = useDialogPluginComponent();
 const componentStore = useComponentStore();
@@ -71,13 +72,13 @@ const passwordInput = ref(null);
 defineEmits([...useDialogPluginComponent.emits]);
 
 const onSubmit = async () => {
-  const user = await transaksiStore.login(username.value, password.value);
+  const user = await userStore().login(username.value, password.value);
   console.log(user);
   if (user) {
     if (props.type == "login") {
       // determineShift();
       ls.set("pegawai", user);
-      window.location.reload()
+      window.location.reload();
     } else if (props.type === "check" && props.component === "SettingsDialog") {
       if (transaksiStore.isAdmin) {
         const SettingDialog = $q.dialog({

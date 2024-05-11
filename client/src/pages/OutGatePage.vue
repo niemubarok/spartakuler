@@ -1,5 +1,4 @@
 <template>
-
   <div v-if="$q.screen.lt.md" class="text-h2">
     <q-card class="fixed-center glass">
       <img src="~assets/logo.png" />
@@ -19,7 +18,7 @@
   <div
     :key="componentStore.outGateKey"
     v-else
-    class="relative fixed-top full-height"
+    class="relative fixed-top full-height full-width"
     :class="darkMode ? 'bg-primary' : 'bg-grey-5'"
   >
     <div
@@ -27,21 +26,20 @@
       class="flex row justify-between items-center q-pl-lg no-wrap q-pt-md"
       style="height: 150px"
     >
-    <q-card class="row items-center bg-grey-2">
-   
-      <q-img
-        v-if="$q.screen.gt.sm"
-        src="~assets/logo.png"
-        spinner-color="primary"
-        fit="fill"
-        class="q-ml-sm rounded-corner"
-        width="150px"
-        height="150px"
-        style="transform: scale(1.5)"
-      />
+      <q-card class="row items-center bg-grey-2">
+        <q-img
+          v-if="$q.screen.gt.sm"
+          src="~assets/logo.png"
+          spinner-color="primary"
+          fit="fill"
+          class="q-ml-sm rounded-corner"
+          width="150px"
+          height="150px"
+          style="transform: scale(1.5)"
+        />
 
-      <CompanyName />
-    </q-card>
+        <CompanyName />
+      </q-card>
 
       <div class="content-end q-pr-md">
         <div class="flex row no-wrap justify-end">
@@ -68,7 +66,7 @@
       </div>
     </div>
     <div
-      class="window-width  text-dark text-weight-bolder flex row q-pr-lg q-col-gutter-sm z-top"
+      class="window-width text-dark text-weight-bolder flex row q-pr-lg q-col-gutter-sm z-top"
       :class="
         transaksiStore.isCheckedIn
           ? 'justify-start q-mt-md q-ml-md '
@@ -181,7 +179,7 @@
           v-show="
             !componentStore.hideInputPlatNomor && !transaksiStore.isCheckedIn
           "
-          class="input-box  rounded-corner relative text-uppercase q-pa-md q-mb-xl "
+          class="input-box rounded-corner relative text-uppercase q-pa-md q-mb-xl"
           :class="darkMode ? 'bg-grey-3 text-dark' : 'bg-secondary  text-white'"
           :input-class="
             darkMode
@@ -230,56 +228,65 @@
           </template>
         </q-input>
       </div>
-      <div  class="full-width fixed-bottom-right bg-dark q-pa-sm  row justify-between ">
-  <!-- v-if="componentStore.currentPage == 'outgate'"-->
+      <div
+        class="full-width fixed-bottom-right bg-dark q-pa-sm row justify-between"
+      >
+        <!-- v-if="componentStore.currentPage == 'outgate'"-->
         <div>
-          <span class=" text-weight-bolder text-grey-5"> .::PINTU KELUAR::.</span>
+          <span class="text-weight-bolder text-grey-5">
+            .::PINTU KELUAR::.</span
+          >
         </div>
-       <div class="q-gutter-sm">
-        <q-btn
-          color="grey-8"
-          size="sm"
-          label="Log out"
-        >
-          <q-badge
-            color="primary"
-            text-color="white"
-            label="F5"
-            class="q-mx-xs"
-          />
-          <q-tooltip content-class="bg-primary">Log out</q-tooltip>
-        </q-btn>
-        <q-btn
-          color="grey-7"
-          size="sm"
-          @click="onClickBukaManual()"
-          label="Buka Manual"
-        >
-          <!-- icon="settings" -->
-          <q-badge
-            color="primary"
-            text-color="white"
-            label="F8"
-            class="q-ml-xs"
-          />
-        </q-btn>
-        <q-btn
-          color="red-9 "
-         
-          size="sm"
-          @click="onClickBukaManual()"
-          label="Emergency"
-        >
-          <!-- icon="settings" -->
-          <q-badge
-            color="primary"
-            text-color="white"
-            label="F12"
-            class="q-ml-xs"
-          />
-        </q-btn>
-      </div>
-       
+        <div class="q-gutter-sm">
+          <q-btn color="grey-8" size="sm" label="Dashboard">
+            <q-badge
+              color="primary"
+              text-color="white"
+              label="F2"
+              class="q-mx-xs"
+            />
+            <q-tooltip content-class="bg-primary">Dashboard Admin</q-tooltip>
+          </q-btn>
+          <q-btn color="grey-8" size="sm" label="Log out">
+            <q-badge
+              color="primary"
+              text-color="white"
+              label="F5"
+              class="q-mx-xs"
+            />
+            <q-tooltip content-class="bg-primary">Log out</q-tooltip>
+          </q-btn>
+
+          <q-btn
+            color="grey-7"
+            size="sm"
+            @click="onClickBukaManual()"
+            label="Buka Manual"
+          >
+            <!-- icon="settings" -->
+            <q-badge
+              color="primary"
+              text-color="white"
+              label="F8"
+              class="q-ml-xs"
+            />
+          </q-btn>
+          <q-btn
+            color="red-9 "
+            size="sm"
+            @click="onClickBukaManual()"
+            label="Emergency"
+          >
+            <!-- icon="settings" -->
+            <q-badge
+              color="primary"
+              text-color="white"
+              label="F12"
+              class="q-ml-xs"
+            />
+          </q-btn>
+        </div>
+
         <!-- <q-toggle
         v-model="darkMode"
         @update:model-value="darkModeToggle"
@@ -298,6 +305,7 @@ import { useQuasar } from "quasar";
 import { useTransaksiStore } from "src/stores/transaksi-store";
 import { useComponentStore } from "src/stores/component-store";
 import { useSettingsStore } from "src/stores/settings-store";
+import { userStore } from "src/stores/user-store";
 import LoginDialog from "src/components/LoginDialog.vue";
 import ApiUrlDialog from "src/components/ApiUrlDialog.vue";
 import { getTime, checkSubscriptionExpiration } from "src/utils/time-util";
@@ -340,8 +348,8 @@ const pegawai = ls.get("pegawai") ? ls.get("pegawai").nama : null;
 
 // const cameraInUrl = ls.get("cameraInUrl") || null;
 // const cameraOutUrl = ls.get("cameraOutUrl") || null;
-const cameraInFileName = `${ls.get('lokasiPos')?.value}_in_snapshot`
-const cameraOutFileName = "02_out_snapshot"
+const cameraInFileName = `${ls.get("lokasiPos")?.value}_in_snapshot`;
+const cameraOutFileName = "02_out_snapshot";
 
 const cameraOut = ls.get("cameraOut") || null;
 const cameraOutRef = ref(null);
@@ -355,9 +363,9 @@ const prefix = ref(ls.get("prefix"));
 
 // nopolInput.register(inputPlatNomorRef)
 
-const testPrint=()=>{
-  window.electron.print()
-}
+const testPrint = () => {
+  window.electron.print();
+};
 
 const onClickKendaraanKeluar = () => {
   const dialog = $q.dialog({
@@ -464,11 +472,13 @@ const onPressEnterPlatNomor = async () => {
 };
 
 const logout = async () => {
-  await transaksiStore.logout();
+  await userStore().logout();
   ls.remove("pegawai");
   ls.remove("shift");
   ls.remove("timeLogin");
 };
+
+const isAdmin = ls.get("isAdmin") || false;
 
 const handleKeyDown = (event) => {
   // console.log(event.key);
@@ -479,10 +489,22 @@ const handleKeyDown = (event) => {
     } else if (event.key === "F4") {
       event.preventDefault();
       onClickKendaraanKeluar();
+    } else if (event.key === "F2") {
+      event.preventDefault();
+      if (isAdmin) {
+        componentStore.currentPage = "daftar-transaksi";
+        router.push("/daftar-transaksi");
+      } else {
+        $q.notify({
+          type: "negative",
+          message: "Anda tidak memiliki akses",
+          position: "bottom",
+        });
+      }
     } else if (event.shiftKey === true && event.key === "R") {
       event.preventDefault();
       onClickKendaraanKeluar();
-    } else if ( event.key === "F5") {
+    } else if (event.key === "F5") {
       event.preventDefault();
       logout();
       window.location.replace("/");
@@ -493,10 +515,17 @@ const handleKeyDown = (event) => {
     } else if (event.key === "F8") {
       event.preventDefault();
       onClickBukaManual();
-    
     } else if (event.key === "F7") {
       event.preventDefault();
-      onClickSettings();
+      if (isAdmin) {
+        onClickSettings();
+      } else {
+        $q.notify({
+          type: "negative",
+          message: "Anda tidak memiliki akses",
+          position: "bottom",
+        });
+      }
     }
   }
 };
@@ -515,13 +544,13 @@ const onClickSettings = () => {
   //   console.log(dialog);
   //   dialog.update();
   // } else {
-    const settingsDialog = $q.dialog({
-      component: SettingsDialog,
-      persistent: true,
-      noEscDismiss: true,
-    });
+  const settingsDialog = $q.dialog({
+    component: SettingsDialog,
+    persistent: true,
+    noEscDismiss: true,
+  });
 
-    settingsDialog.update();
+  settingsDialog.update();
   // }
 };
 
@@ -544,7 +573,7 @@ onMounted(async () => {
   //   //   type: "negative",
   //   //   message: "Silahkan pilih lokasi terlebih dahulu",
   //   //   position: "center",
-  //   // }); 
+  //   // });
   // } else
   if (!transaksiStore.API_URL || transaksiStore.API_URL === "-") {
     const dialog = $q.dialog({
@@ -558,22 +587,15 @@ onMounted(async () => {
       message: "Silahkan Isi URL API terlebih dahulu",
       position: "top",
     });
-    
-    return
+
+    return;
   }
 
-
-  if (
-    transaksiStore.lokasiPos === "-"
-  ) {
-    onClickSettings()
-    return
+  if (transaksiStore.lokasiPos === "-") {
+    onClickSettings();
+    return;
   }
-  if (
-    
-    !pegawai ||
-    !ls.get("shift") 
-  ) {
+  if (!pegawai || !ls.get("shift")) {
     const dialog = $q.dialog({
       component: LoginDialog,
       noBackdropDismiss: true,
@@ -586,7 +608,6 @@ onMounted(async () => {
     dialog.update();
   }
 
-
   // inputPlatNomorRef ? inputPlatNomorRef.value.focus() : "";
 
   window.addEventListener("keydown", handleKeyDown);
@@ -595,7 +616,6 @@ onMounted(async () => {
   //   router.push("/");
   // }
 });
-
 </script>
 
 <style>

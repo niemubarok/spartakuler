@@ -188,48 +188,16 @@
       <div class="col-6 items-end">
         <!-- :key="componentStore.cameraOutKey"  -->
         <Camera
-        v-if="componentStore.currentPage === 'payment'"
-              class="rounded-corner"
-              camera-location="out"
-              :camera-url="settingsStore.cameraOutUrl"
-              :file-name="cameraOutFileName"
-              :isInterval="false"
-              :style="{
-                width: '49vw',
-              }"
-            />
-        <!-- <FotoKendaraan
-          v-if="!transaksiStore.pic_body_keluar"
-          title="Kamera Keluar"
-          type="video"
-          :style="{ width: '45vw' }"
-        >
-          <template v-slot:video>
-            <q-skeleton
-              v-if="cameraOut == null || cameraOut === '-'"
-              height="49vh"
-              width="49vw"
-              class="relative"
-            >
-              <h4 class="absolute-center text-center text-grey-7">
-                <q-icon name="videocam_off" size="lg" />
-                Tidak ada Kamera
-              </h4>
-            </q-skeleton>
-            <CameraOut
-              ref="cameraOutRef"
-              v-else
-              class="q-mt-sm glass"
-              :style="{ width: '49vw' }"
-            />
-          </template>
-        </FotoKendaraan>
-        <FotoKendaraan
-          v-else
-          title="Foto Keluar"
-          type="image"
-          :url="transaksiStore.pic_body_keluar"
-        /> -->
+          v-if="componentStore.currentPage === 'payment'"
+          class="rounded-corner"
+          camera-location="out"
+          :camera-url="settingsStore.cameraOutUrl"
+          :file-name="cameraOutFileName"
+          :isInterval="false"
+          :style="{
+            width: '49vw',
+          }"
+        />
       </div>
     </div>
   </div>
@@ -288,18 +256,18 @@ const tanggalMasuk = ref(
 
 const onClickBayar = async () => {
   // const video = videoRef.value;
-  const videoRef = cameraOutRef.value?.$refs.videoRef;
+  // const videoRef = cameraOutRef.value?.$refs.videoRef;
   // transaksiStore.waktuMasuk = waktuMasuk.value;
 
-  if (videoRef !== undefined) {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
+  // if (videoRef !== undefined) {
+  // const canvas = document.createElement("canvas");
+  // const context = canvas.getContext("2d");
+  // context.drawImage(videoRef, 0, 0, canvas.width, canvas.height);
 
-    const imageBase64 = canvas.toDataURL("image/png");
+  // const imageBase64 = canvas.toDataURL("image/png");
 
-    transaksiStore.pic_body_keluar = imageBase64;
-  }
+  // transaksiStore.pic_body_keluar = settingsStore.cameraOutUrl;
+  // }
 
   // console.log("isPaymentDialogMounted:", !isPaymentDialogMounted);
   // console.log("transaksiStore.isMember:", transaksiStore.isMember);
@@ -339,6 +307,28 @@ const onClickBayar = async () => {
     // } else {
     // console.log("kesini");
     // if (componentStore.currentPage === "payment") {
+    try {
+      const image = await settingsStore.fetchCameraImage(
+        cameraOutFileName,
+        settingsStore.cameraOutUrl
+      );
+      transaksiStore.pic_body_keluar = image;
+    } catch (error) {
+      console.error("Error fetching camera image:", error);
+      // Handle the error appropriately, e.g., set a default image or log the error
+      transaksiStore.pic_body_keluar = null; // Contoh set gambar default
+    }
+
+    // const isBase64 = (str) => {
+    //   if (typeof str !== "string" || !str) return false; // Pastikan str adalah string dan tidak kosong
+    //   const notBase64 = /[^A-Z0-9+\/=]/i;
+    //   const isPadded = str.endsWith("="); // Sekarang aman untuk memanggil endsWith
+    //   return !notBase64.test(str) && isPadded;
+    // };
+
+    // console.log(isBase64(transaksiStore.pic_body_keluar));
+    // console.log(transaksiStore.pic_body_keluar);
+
     const updateTransaksi = await transaksiStore.updateTableTransaksi();
     if (updateTransaksi == 200) {
       const openGateDialog = $q.dialog({
@@ -417,11 +407,10 @@ onMounted(async () => {
     if (!getPicBodyMasuk.data.startsWith("data:image")) {
       picBodyMasuk.value =
         `data:image/${contentType};base64,` + getPicBodyMasuk.data;
-      } else {
-        picBodyMasuk.value = getPicBodyMasuk.data;
-      }
-
-    } catch (error) {
+    } else {
+      picBodyMasuk.value = getPicBodyMasuk.data;
+    }
+  } catch (error) {
     console.error(error);
   }
   window.addEventListener("keydown", handleKeyDown);

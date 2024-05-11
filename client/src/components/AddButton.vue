@@ -1,7 +1,7 @@
 <template>
   <section>
     <q-btn
-      v-morph:btn:mygroup:300.resize="componentStore().morphGroupModel"
+      v-morph:btn:mygroup:300.resize="useComponentStore().morphGroupModel"
       class="fixed-bottom-right q-mr-sm"
       style="margin-bottom: 70px"
       fab
@@ -9,13 +9,13 @@
       :label="props.label"
       size="xs"
       icon="add"
-      @click="componentStore().nextMorph()"
+      @click="useComponentStore().nextMorph()"
     >
     </q-btn>
 
     <!-- height: 60%; -->
     <q-card
-      v-morph:card1:mygroup:500.resize="componentStore().morphGroupModel"
+      v-morph:card1:mygroup:500.resize="useComponentStore().morphGroupModel"
       class="fixed-bottom-right q-ma-md bg-grey-1"
       style="width: 70%; border-bottom-left-radius: 2em; z-index: 2"
     >
@@ -27,7 +27,7 @@
           text-color="brown"
           icon="close"
           class="float-right cursor-pointer text-weight-bolder"
-          @click="componentStore().nextMorph()"
+          @click="useComponentStore().nextMorph()"
         />
         {{ props.title }}
       </q-banner>
@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { componentStore } from "src/stores/component-store";
+import { useComponentStore } from "src/stores/component-store";
 
 const props = defineProps({
   title: String,
@@ -53,8 +53,8 @@ const props = defineProps({
 });
 
 // const nextMorph = () => {
-//   componentStore().morphGroupModel =
-//     componentStore().nextMorphStep[componentStore().morphGroupModel];
+//   useComponentStore().morphGroupModel =
+//     useComponentStore().nextMorphStep[useComponentStore().morphGroupModel];
 //   // console.log(morphGroupModel.value);
 // };
 

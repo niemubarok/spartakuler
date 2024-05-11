@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import ls from "localstorage-slim";
-import axios from "axios";
+import axios from "axios";  
 
 export const useTransaksiStore = defineStore("transaksi", {
   state: () => ({
@@ -109,6 +109,21 @@ export const useTransaksiStore = defineStore("transaksi", {
 
       console.log(res);
     },
+    getLocalDateTimeString() {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('id-ID', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      })
+    
+      // Menghasilkan string dengan format lokal dan mengganti karakter pemisah
+      return formatter.format(now).replace(/\//g, '-').replace(',', '');
+    },
 
     async updateTableTransaksi() {
       const formData = {
@@ -120,7 +135,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         // id_pintu_masuk: null,
         // id_pintu_keluar: null,
         // waktu_masuk: "",
-        waktu_keluar: new Date().toISOString(),
+        // waktu_keluar: this.getLocalDateTimeString(),
         // id_op_masuk: null,
         id_op_keluar: ls.get("pegawai")?.id_pegawai,
         // id_shift_masuk: null,
@@ -130,7 +145,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         // bayar_masuk: null,
         bayar_keluar: this.biayaParkir,
         // jenis_system: null,
-        tanggal: new Date().toISOString(),
+        // tanggal: this.getLocalDateTimeString(),
         // pic_body_masuk: "",
         pic_body_keluar: this.pic_body_keluar,
         // pic_driver_masuk: null,
@@ -141,7 +156,7 @@ export const useTransaksiStore = defineStore("transaksi", {
         // adm: null,
         // alasan: null,
         // pmlogin: null,
-        pklogin: new Date().toISOString(),
+        pklogin: ls.get("timeLogin"),
         // upload: 0,
         // manual: 0,
         // veri_kode: null,
@@ -171,6 +186,8 @@ export const useTransaksiStore = defineStore("transaksi", {
         // casual_denda: null,
       };
 
+      // console.log(formData.pic_body_keluar);
+      // return 200
       try {
         const update = await axios.patch(
           this.API_URL + "/transactions/update",

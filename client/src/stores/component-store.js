@@ -2,9 +2,11 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import ls from "localstorage-slim";
 
-// import { BetterSerialPort } from "better-serial-port";
-const { serialport } = window.electron;
-const port = serialport("/dev/ttyS1");
+let serialport;
+if (window && window.electron) {
+    serialport = window.electron.serialport;
+  }
+  const port = ls.get("serialPort") && serialport ? serialport(ls.get("serialPort")) : null;
 
 export const useComponentStore = defineStore("component", {
   state: () => ({
@@ -33,6 +35,13 @@ export const useComponentStore = defineStore("component", {
     selectDefaultJenisKendaraanDialogModel: ref(false),
     selectPosDialogModel: ref(false),
     selectJenisTarifDialogModel: ref(false),
+    selectSerialPortDialogModel: ref(false),
+    nextMorphStep: ref({
+      btn: "card1",
+      card1: "btn",
+    }),
+    morphGroupModel: ref("btn"),
+    miniMode: ref(false),
   }),
   actions: {
     async getAvailableCameras() {
@@ -90,7 +99,9 @@ export const useComponentStore = defineStore("component", {
           });
       }
     },
-
+    setSerialPort(port) {
+      ls.set("serialPort", port);
+    },
     async openGate() {
       // console.log("port", port);
       // console.log("window", window.electron);
@@ -106,6 +117,11 @@ export const useComponentStore = defineStore("component", {
       // port.open();
       port.write("*OUT1OFF#");
       await port.close();
+    },
+    nextMorph() {
+      console.log("nextMorph");
+      this.morphGroupModel = this.nextMorphStep[this.morphGroupModel];
+      // console.log(morphGroupModel.value);
     },
   },
 });

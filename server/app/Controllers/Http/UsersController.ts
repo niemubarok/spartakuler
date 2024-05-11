@@ -7,7 +7,16 @@ export default class UsersController {
   public async index({ response }: HttpContextContract) {
     const users = await Database.query() // 👈 gives an instance of select query builder
       .from("pegawai")
-      .select("*");
+      .innerJoin("level_user", "pegawai.level_pegawai", "level_user.level_code")
+      .select(
+        "pegawai.nomer as id_petugas",
+        "pegawai.nama",
+        "pegawai.telepon as no_hp",
+        "pegawai.username",
+        "pegawai.password",
+        "pegawai.status",
+        "level_user.level_name"
+      );
     response.status(200).json(users);
   }
 
@@ -89,15 +98,15 @@ export default class UsersController {
 
         if (id_pos) {
           const insert = await Database.rawQuery(
-            `INSERT INTO login_log (id_petugas, id_shift, time_login, time_logout, tanggal, pos, akses_id, adm) VALUES ('${user.rows[0].nomer}','${shift}','${time_login}','${time_login}','${tanggal}','${id_pos}','','')`
+            `INSERT INTO login_log (id_petugas, id_shift, time_login, tanggal, pos, akses_id, adm) VALUES ('${user.rows[0].nomer}','${shift}','${time_login}','${tanggal}','${id_pos}','','')`
           );
-          //   return "return";
-          //   if (insert) {
-          //     response.status(200).json(res);
-          //   }
+          // return "return";
+          if (insert) {
+            response.status(200).json(res);
+          }
         }
         // return "res";
-        response.status(200).json(res);
+        // response.status(200).json(res);
       }
     } catch (error) {
       return error;
@@ -120,6 +129,8 @@ export default class UsersController {
     //   `SELECT time_logout FROM login_log WHERE id_petugas = '${id_petugas}' AND id_shift = '${id_shift}' AND time_login = '${time_login}' AND tanggal = '${tanggal}' AND pos = '${pos}' `
     // );
     // return update;
+    console.log(update);
+
     if (update) {
       response.status(200).json({
         message: "Update successful",
@@ -127,11 +138,74 @@ export default class UsersController {
     }
   }
 
-  public async show({}: HttpContextContract) {}
+  public async create({ request, response }: HttpContextContract) {
+    const req = request.body();
 
-  public async edit({}: HttpContextContract) {}
+    // const lastIdResult = await Database.rawQuery(
+    //   "SELECT MAX(id_petugas) AS max_id FROM petugas"
+    // );
+    // const lastId = lastIdResult.rows[0]?.max_id;
+    // console.log("lastId", lastId);
 
-  public async update({}: HttpContextContract) {}
+    const newPetugas = await Database.table("pegawai")
+      .returning("nomer")
+      .insert({
+        nomer: req.id_petugas,
+        nama: req.nama,
+        telepon: req.no_hp,
+        username: req.username,
+        password: req.password,
+        status: parseInt(req.status),
+        level_pegawai: req.level_code,
+      });
 
-  public async destroy({}: HttpContextContract) {}
+    if (newPetugas) {
+      const petugasId = newPetugas[0];
+      response.status(201).json({
+        message: "petugas created successfully",
+        id_petugas: petugasId,
+      });
+    } else {
+      response.status(400).json({ message: "Failed to create petugas" });
+    }
+  }
+
+  public async edit({ request, response }: HttpContextContract) {
+    const { id, column, value } = request.body();
+
+    try {
+      await Database.from("pegawai")
+        .where("nomer", id)
+        .update({ [column]: value });
+
+      response.status(201).json({
+        message: "Update berhasil",
+      });
+    } catch (error) {
+      console.log(error);
+
+      response.status(400).json({
+        message: "Update gagal",
+        error: error.message,
+      });
+    }
+  }
+
+  public async delete({ request, response }: HttpContextContract) {
+    const { id } = request.body();
+    console.log(id);
+
+    try {
+      const query = await Database.rawQuery(
+        `DELETE FROM pegawai WHERE nomer = '${id}'`
+      );
+
+      response.status(201).json(query);
+    } catch (error) {
+      response.status(400).json({
+        message: "Delete gagal",
+        error: error.message,
+      });
+    }
+  }
 }

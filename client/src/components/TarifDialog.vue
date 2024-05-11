@@ -13,7 +13,7 @@
           borderless
           autofocus
           class="input-box bg-primary rounded-corner relative q-pa-sm"
-          input-class="input-box text-white text-h1"
+          input-class="input-box text-white text-h1 font-weight-bolder"
           label-color="yellow text-h3"
           color="teal"
           :rules="[
@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
 /* :deep(.input-box .q-field__append), */
 :deep(.input-box .q-field__control),
 :deep(.input-box .q-field__append .q-field__marginal) {
-  height: 10vh;
+  height: 20vh;
   width: 80vw;
   font-size: 2rem;
   font-family: "Courier New", Courier, monospace;

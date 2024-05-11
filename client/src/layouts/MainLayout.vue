@@ -12,7 +12,6 @@
         />
 
         <q-toolbar-title> SPARTA </q-toolbar-title>
-
       </q-toolbar>
     </q-header>
 
@@ -20,6 +19,7 @@
       v-if="$route.meta.isSidebar"
       v-model="leftDrawerOpen"
       show-if-above
+      :mini="componentStore.miniMode"
       bordered
     >
       <q-list>
@@ -34,7 +34,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view class="fixed-center full-width" />
       <KeyboardOverlay class="z-top" />
     </q-page-container>
   </q-layout>
@@ -44,13 +44,16 @@
 import { onMounted, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import KeyboardOverlay from "src/components/KeyboardOverlay.vue";
+import { useComponentStore } from "stores/component-store";
+
+const componentStore = useComponentStore();
 
 const essentialLinks = [
   {
     title: "Dashboard",
     caption: "",
     icon: "dashboard",
-    to: "/dashboard",
+    to: "/daftar-transaksi",
   },
   // {
   //   title: "Ticketing",
@@ -65,12 +68,12 @@ const essentialLinks = [
   //   icon: "bar_chart",
   //   link: "/laporan/penjualan-tiket",
   // },
-  {
-    title: "Data Transaksi",
-    caption: "",
-    icon: "fact_check",
-    link: "/daftar-transaksi",
-  },
+  // {
+  //   title: "Data Transaksi",
+  //   caption: "",
+  //   icon: "fact_check",
+  //   link: "/daftar-transaksi",
+  // },
   // {
   //   title: "Laporan Transaksi Per Hari",
   //   caption: "",
@@ -82,6 +85,12 @@ const essentialLinks = [
     caption: "",
     icon: "person",
     link: "/petugas",
+  },
+  {
+    title: "Pos Keluar",
+    caption: "",
+    icon: "output",
+    link: "/",
   },
   // {
   //   title: "Master Wahana",
@@ -97,17 +106,20 @@ const essentialLinks = [
   // },
 ];
 
+// const miniMode = ref(false);
+
 const leftDrawerOpen = ref(false);
 
 const toggleLeftDrawer = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
+  componentStore.miniMode = !componentStore.miniMode;
 };
 
-// onMounted(() => {
-//   window.onkeydown = (key) => {
-//     if (key.key.startsWith("F")) {
-//       key.preventDefault();
-//     }
-//   };
-// });
+onMounted(() => {
+  componentStore.miniMode = true;
+  // window.onkeydown = (key) => {
+  //   if (key.key.startsWith("F")) {
+  //     key.preventDefault();
+  //   }
+  // };
+});
 </script>

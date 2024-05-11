@@ -33,6 +33,7 @@ export const getTime = () => {
   const minutes = zeroPad(currentDate.getMinutes());
   const seconds = zeroPad(currentDate.getSeconds());
   return {
+    year,
     today,
     day,
     date,

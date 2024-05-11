@@ -1,23 +1,19 @@
 <template>
   <!-- <video ref="videoRef" class="rounded-corner"></video> -->
   <div v-if="imageSrc">
-  <img 
-    :src="imageSrc" 
-    alt="Camera Snapshot" 
-    style="width: 49vw; height: 52vh;border-radius: 10px;" 
-  />
+    <img
+      :src="imageSrc"
+      alt="Camera Snapshot"
+      style="width: 49vw; height: 52vh; border-radius: 10px"
+    />
   </div>
   <div v-else>
-    <q-skeleton
-      height="52vh"
-      class="rounded-corner"
-      width="49vw"
-    >
+    <q-skeleton height="52vh" class="rounded-corner" width="49vw">
       <template v-slot:default>
         <div class="absolute-center text-center text-grey-7">
           <q-icon name="camera_alt" size="xl" />
           <!-- <div>{{cameraStatus ? 'Loading Camera...' : 'Tidak Ada Kamera'}}</div> -->
-          <div>{{message}}</div>
+          <div>{{ message }}</div>
         </div>
       </template>
     </q-skeleton>
@@ -29,9 +25,11 @@ import { watch, ref, onMounted } from "vue";
 import ls from "localstorage-slim";
 import { useQuasar } from "quasar";
 const $q = useQuasar();
-import {api} from 'src/boot/axios'
+import { api } from "src/boot/axios";
 const imageSrc = ref(null);
-const cameraStatus = ref(true)
+const cameraStatus = ref(true);
+import { useRouter } from "vue-router";
+const router = useRouter();
 // const cameraId = ref(
 //   "http://10.40.38.54:80/ISAPI/Streaming/channels/1/picture"
 // );
@@ -41,25 +39,31 @@ const props = defineProps({
   fileName: String,
   isInterval: {
     type: Boolean,
-    default: true
-  }
-})
+    default: true,
+  },
+});
 
 const message = ref("Loading Image...");
 onMounted(async () => {
   // const cameraUrl = ls.get("cameraInUrl")
   // const filename = `tes.png`
-  const interval = ls.get("interval") || 5000
+  const interval = ls.get("interval") || 5000;
   let notFoundCount = 0;
   // const isInterval = true; // tambahkan variable ini
   let intervalId;
+
   if (props.isInterval) {
     intervalId = setInterval(async () => {
+      // console.log(router.currentRoute.value.path === '/');
       try {
         const image = await api.get(`/cctv/snapshot?fileName=${props.fileName}
         &cctv_url=${props.cameraUrl}`);
         console.log(image);
+        if (router.currentRoute.value.path !== "/") {
+          clearInterval(intervalId);
+        }
         if (image.data.isSuccess) {
+          // console.log(image.data.base64);
           imageSrc.value = image.data.base64;
           notFoundCount = 0;
         } else {
@@ -67,14 +71,14 @@ onMounted(async () => {
           ++notFoundCount;
           if (notFoundCount >= 5) {
             clearInterval(intervalId);
-            cameraStatus.value = false
+            cameraStatus.value = false;
           }
         }
       } catch (error) {
         ++notFoundCount;
         if (notFoundCount >= 5) {
           clearInterval(intervalId);
-          cameraStatus.value = false
+          cameraStatus.value = false;
         }
       }
     }, interval);
@@ -90,10 +94,8 @@ onMounted(async () => {
         message.value = image.data.message;
       }
     } catch (error) {
-      cameraStatus.value = false
+      cameraStatus.value = false;
     }
   }
-  
-})
-
+});
 </script>

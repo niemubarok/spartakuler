@@ -7,10 +7,16 @@ const routes = [
       {
         path: "",
         name: "outgate",
-        component: () => import("pages/OutGatePage.vue"),
+        component: () => {
+          if (window && window.electron) {
+            return import("pages/OutGatePage.vue");
+          } else {
+            return import("pages/LaporanTransaksiPerHariPage.vue");
+          }
+        },
         meta: {
-          isSidebar: false,
-          isHeader: false,
+          isSidebar: window && window.electron ? false : true,
+          isHeader: window && window.electron ? false : true,
           requiresAuth: true,
         },
       },
@@ -48,6 +54,16 @@ const routes = [
         path: "/daftar-transaksi",
         name: "daftarTransaksi",
         component: () => import("pages/LaporanTransaksiPerHariPage.vue"),
+        meta: {
+          isSidebar: true,
+          isHeader: true,
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/petugas",
+        name: "petugas",
+        component: () => import("pages/PetugasPage.vue"),
         meta: {
           isSidebar: true,
           isHeader: true,

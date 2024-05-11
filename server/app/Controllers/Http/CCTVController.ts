@@ -3,6 +3,18 @@ import fs from "fs";
 
 import { spawn } from "child_process";
 
+function determineMimeType(extension: string): string {
+  const mimeTypes: { [key: string]: string } = {
+    jpg: "jpeg",
+    jpeg: "jpeg",
+    png: "png",
+    gif: "gif",
+    bmp: "bmp",
+  };
+
+  return `image/${mimeTypes[extension.toLowerCase()] || "jpeg"}`;
+}
+
 export default class ImagesController {
   public async downloadImage(fileName: string, url: string) {
     const dirPath =
@@ -39,7 +51,7 @@ export default class ImagesController {
         });
         return result;
       } catch (error) {
-        console.error(`Error downloading image: ${error.message}`);
+        // console.error(`Error downloading image: ${error.message}`);
         return "failed";
       }
     }
@@ -59,8 +71,8 @@ export default class ImagesController {
       const foundFile = files.find((file) => regex.test(file));
 
       if (!foundFile) {
-        console.error(`No file found starting with name: ${fileName}`);
-        return response.status(404).json({
+        // console.error(`No file found starting with name: ${fileName}`);
+        return response.status(200).json({
           isSuccess: false,
           message: "File tidak ditemukan",
         });
@@ -82,10 +94,10 @@ export default class ImagesController {
               reject(err);
             } else {
               if (data.length === 0) {
-                console.error(`File at path ${filePath} is empty.`);
+                // console.error(`File at path ${filePath} is empty.`);
                 reject(new Error("File is empty"));
               } else {
-                console.log(`File read successfully from path ${filePath}`);
+                // console.log(`File read successfully from path ${filePath}`);
                 resolve(data);
               }
             }
@@ -94,11 +106,11 @@ export default class ImagesController {
 
         const ext = foundFile.split(".").pop() || "jpg"; // Menggunakan ekstensi dari file yang ditemukan
         const base64Image = imageBuffer.toString("base64");
-        // console.log(base64Image);
+        const mimeType = determineMimeType(ext);
 
         return response.status(200).json({
           isSuccess: true,
-          base64: `data:image/${ext};base64,${base64Image}`,
+          base64: `data:${mimeType};base64,${base64Image}`,
         });
       } catch (error) {
         console.error(`Failed to process image: ${error.message}`);
@@ -112,30 +124,33 @@ export default class ImagesController {
     const cctvUrl = request.qs().cctv_url as string;
 
     if (!fileName) {
-      return response
-        .status(400)
-        .json({ message: "Mohon sertakan parameter fileName" });
+      return response.status(400).json({
+        isSuccess: false,
+        message: "Mohon sertakan parameter fileName",
+      });
     }
 
     if (!cctvUrl) {
-      console.log("Tidak ada URL");
-      return response.status(400).json({ message: "URL tidak ditemukan" });
+      // console.log("Tidak ada URL");
+      return response
+        .status(400)
+        .json({ isSuccess: false, message: "URL tidak ditemukan" });
     }
 
     const isDownloaded = await this.downloadImage(fileName, cctvUrl);
     // console.log(typeof isDownloaded);
 
     if (isDownloaded === false) {
-      console.log("tidak ada url");
-      return response.status(200).json({
-        isSuccess: false,
-        message: "Tidak ada url",
-      });
-      // return await loadImageFromDisk();
+      // console.log("tidak ada url");
+      // return response.status(200).json({
+      //   isSuccess: false,
+      //   message: "Tidak ada url",
+      // });
+      return await loadImageFromDisk();
     }
 
     if (isDownloaded === "failed") {
-      console.log("Gagal download image");
+      // console.log("Gagal download image");
       return response.status(200).json({
         isSuccess: false,
         message: "Gagal download image",

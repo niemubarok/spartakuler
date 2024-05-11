@@ -29,65 +29,138 @@ export default class ReportsController {
       .countDistinct("no_transaksi as total")
       .then((result) => result[0].total);
 
-    // Query to get the number of visits per wahana from detail_transaksi
-    // const kunjunganPerWahana = await Database.from("detail_transaksi")
-    //   .innerJoin(
-    //     "master_wahana",
-    //     "detail_transaksi.id_wahana",
-    //     "master_wahana.id_wahana"
-    //   )
-    //   .groupBy("detail_transaksi.id_wahana", "master_wahana.nama")
-    //   .countDistinct("detail_transaksi.no_transaksi as total")
-    //   .select("master_wahana.nama")
-    //   .then((results) => {
-    //     return results.reduce((acc, row) => {
-    //       acc[row.nama] = row.total;
-    //       return acc;
-    //     }, {});
-    //   });
-
     response.status(200).json({
       totalKunjungan,
       kunjunganPerHari,
       kunjunganPerBulan,
-      // kunjunganPerWahana,
     });
   }
 
-
-  public async dataTransaksiPerTanggal({ request, response }: HttpContextContract) {
-    const { startDate: startDateParam, endDate: endDateParam } = request.body();
+  public async dataTransaksiPerTanggal({
+    request,
+    response,
+  }: HttpContextContract) {
+    const { startDate, endDate, lastId, page, perPage, status } =
+      request.body();
     const today = new Date();
     today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-    const startDate = startDateParam
-      ? startDateParam
+    const startDateFormatted = startDate
+      ? startDate
       : today.toISOString().split("T")[0].replace(/-/g, "/");
-    const endDate = endDateParam
-      ? endDateParam
+    const endDateFormatted = endDate
+      ? endDate
       : today.toISOString().split("T")[0].replace(/-/g, "/");
 
+    const pageNumber = page || 1;
+    const limit = perPage || 10; // Default to 10 items per page if not specified
 
-    const currentDate = new Date();
-    const yearMonthDay = currentDate.toISOString().split("T")[0];
-    const yearMonth = yearMonthDay.slice(0, 7);
-
-    
-
-      const dataTransaksi = await Database.from('transaksi_parkir')
-      .select('*')
-      .whereBetween(Database.raw(`TO_DATE(substr(waktu_masuk, 1, 10), 'YYYY-MM-DD')`), [startDate, endDate])
-      .groupBy(
-        Database.raw(`TO_DATE(substr(waktu_masuk, 1, 10), 'YYYY-MM-DD')`).toString(),
-        "tanggal"
+    const query = Database.from("transaksi_parkir")
+      .select(
+        "id",
+        "no_pol",
+        "waktu_masuk",
+        "waktu_keluar",
+        "pic_body_masuk",
+        "pic_body_keluar",
+        "bayar_keluar",
+        "status_transaksi",
+        "status"
       )
-      .orderBy(Database.raw(`TO_DATE(substr(waktu_masuk, 1, 10), 'YYYY-MM-DD')`), 'asc')
-      .then((result) => result || []);
+      .whereBetween(
+        Database.raw(
+          "TO_DATE(substring(CAST(waktu_keluar AS text) from 1 for 10), 'YYYY-MM-DD')"
+        ),
+        [startDateFormatted, endDateFormatted]
+      )
+      .orderBy("id", "asc");
 
+    if (lastId) {
+      query.andWhere("id", ">", lastId);
+    }
+
+    if (status !== null) {
+      query.andWhere("status", "=", status);
+    }
+    const dataTransaksi = await query.paginate(pageNumber, limit);
+
+    // const totalBayarKeluar = dataTransaksi
+    //   .toJSON()
+    //   .data.reduce((acc, item) => acc + (item.bayar_keluar || 0), 0);
+
+    const [totalBayarKeluar] = await Database.from("transaksi_parkir")
+      .whereBetween(
+        Database.raw(
+          "TO_DATE(substring(CAST(waktu_keluar AS text) from 1 for 10), 'YYYY-MM-DD')"
+        ),
+        [startDateFormatted, endDateFormatted]
+      )
+      .sum("bayar_keluar as total");
+
+    // Encode images outside of the database query
+    const enhancedData = await Promise.all(
+      dataTransaksi.toJSON().data.map(async (item) => {
+        const picBodyMasukBase64 = item.pic_body_masuk
+          ? Buffer.from(item.pic_body_masuk).toString("base64")
+          : null;
+        const picBodyKeluarBase64 = item.pic_body_keluar
+          ? Buffer.from(item.pic_body_keluar).toString("base64")
+          : null;
+
+        return {
+          no_pol: item.no_pol,
+          waktu_masuk: item.waktu_masuk,
+          waktu_keluar: item.waktu_keluar,
+          bayar_keluar: item.bayar_keluar,
+          status_transaksi: item.status_transaksi,
+          status: item.status,
+          pic_body_masuk_base64: picBodyMasukBase64,
+          pic_body_keluar_base64: picBodyKeluarBase64,
+        };
+      })
+    );
 
     response.status(200).json({
-      dataTransaksi,
+      dataTransaksi: enhancedData,
+      totalBayarKeluar, // Total bayar keluar dihitung dari hasil query
+      meta: dataTransaksi.toJSON().meta, // Menyertakan metadata pagination
     });
   }
+
+  public async getTransactionImage({ request, response }: HttpContextContract) {
+    const transactionId = request.param("id");
+    const transaction = await Database.from("transaksi_parkir")
+      .where("id", transactionId)
+      .select("pic_body_masuk", "pic_body_keluar")
+      .first();
+
+    if (!transaction) {
+      return response.status(404).json({ message: "Transaction not found" });
+    }
+
+    // Mengembalikan gambar dalam format base64
+    const picBodyMasukBase64 = transaction.pic_body_masuk
+      ? Buffer.from(transaction.pic_body_masuk).toString("base64")
+      : null;
+    const picBodyKeluarBase64 = transaction.pic_body_keluar
+      ? Buffer.from(transaction.pic_body_keluar).toString("base64")
+      : null;
+
+    if (picBodyMasukBase64) {
+      console.log(
+        `Ukuran gambar masuk (base64): ${picBodyMasukBase64.length} karakter`
+      );
+    }
+    if (picBodyKeluarBase64) {
+      console.log(
+        `Ukuran gambar keluar (base64): ${picBodyKeluarBase64.length} karakter`
+      );
+    }
+    response.status(200).json({
+      picBodyMasukBase64,
+      picBodyKeluarBase64,
+    });
+  }
+
   public async pendapatan({ request, response }: HttpContextContract) {
     const { startDate: startDateParam, endDate: endDateParam } = request.body();
     const today = new Date();
@@ -98,10 +171,6 @@ export default class ReportsController {
     const endDate = endDateParam
       ? endDateParam
       : today.toISOString().split("T")[0].replace(/-/g, "/");
-
-    // Convert start and end dates to the desired format
-    // const startDate = startDate.toISOString().split("T")[0].replace(/-/g, "/");
-    // const endDate = endDate.toISOString().split("T")[0].replace(/-/g, "/");
 
     const currentDate = new Date();
     const yearMonthDay = currentDate.toISOString().split("T")[0];
@@ -121,12 +190,17 @@ export default class ReportsController {
       .sum("total_bayar as total")
       .then((result) => result[0].total || 0);
 
-      const detailPendapatanPerHari = await Database.from('transaksi_penjualan')
-      .select(Database.raw('CAST(substr(no_transaksi, 1, 10) AS DATE) as tanggal'))
-      .sum('total_bayar as total')
-      .whereBetween(Database.raw('CAST(substr(no_transaksi, 1, 10) AS DATE)'), [startDate, endDate])
-      .groupBy('tanggal')
-      .orderBy('tanggal', 'asc')
+    const detailPendapatanPerHari = await Database.from("transaksi_penjualan")
+      .select(
+        Database.raw("CAST(substr(no_transaksi, 1, 10) AS DATE) as tanggal")
+      )
+      .sum("total_bayar as total")
+      .whereBetween(Database.raw("CAST(substr(no_transaksi, 1, 10) AS DATE)"), [
+        startDate,
+        endDate,
+      ])
+      .groupBy("tanggal")
+      .orderBy("tanggal", "asc")
       .then((result) => result || []);
 
     // Refactor to use query builder instead of raw query for better readability and maintainability
@@ -145,247 +219,7 @@ export default class ReportsController {
       pendapatanPerBulan,
     });
   }
-  // public async wahana({ response }: HttpContextContract) {
-  //   const currentDate = new Date();
-  //   const yearMonthDay = currentDate.toISOString().split("T")[0];
-  //   const yearMonth = yearMonthDay.slice(0, 7);
 
-  //   const formatForDay = yearMonthDay.replace(/-/g, "/");
-  //   const formatForMonth = yearMonth.replace(/-/g, "/");
-
-  //   const kunjunganWahana = await Promise.all([
-  //     Database.from("detail_transaksi")
-  //       .innerJoin(
-  //         "master_wahana",
-  //         "detail_transaksi.id_wahana",
-  //         "master_wahana.id_wahana"
-  //       )
-  //       .whereRaw("SUBSTRING(detail_transaksi.no_transaksi, 1, 10) = ?", [
-  //         formatForDay,
-  //       ])
-  //       .groupBy("master_wahana.nama")
-  //       .countDistinct("detail_transaksi.no_transaksi as total")
-  //       .select("master_wahana.nama"),
-  //     Database.from("detail_transaksi")
-  //       .innerJoin(
-  //         "master_wahana",
-  //         "detail_transaksi.id_wahana",
-  //         "master_wahana.id_wahana"
-  //       )
-  //       .whereRaw("SUBSTRING(detail_transaksi.no_transaksi, 1, 7) = ?", [
-  //         formatForMonth,
-  //       ])
-  //       .groupBy("master_wahana.nama")
-  //       .countDistinct("detail_transaksi.no_transaksi as total")
-  //       .select("master_wahana.nama"),
-  //   ]);
-
-  //   const kunjunganWahanaPerHari = kunjunganWahana[0].reduce((acc, row) => {
-  //     acc[row.nama] = row.total;
-  //     return acc;
-  //   }, {});
-
-  //   const kunjunganWahanaPerBulan = kunjunganWahana[1].reduce((acc, row) => {
-  //     acc[row.nama] = row.total;
-  //     return acc;
-  //   }, {});
-
-  //   const totalKunjunganWahana = await Database.from("detail_transaksi")
-  //     .innerJoin(
-  //       "master_wahana",
-  //       "detail_transaksi.id_wahana",
-  //       "master_wahana.id_wahana"
-  //     )
-  //     .groupBy("master_wahana.nama")
-  //     .countDistinct("detail_transaksi.no_transaksi as total")
-  //     .select("master_wahana.nama")
-  //     .then((results) =>
-  //       results.reduce((acc, row) => {
-  //         acc[row.nama] = row.total;
-  //         return acc;
-  //       }, {})
-  //     );
-
-  //   response.status(200).json({
-  //     kunjunganWahanaPerHari,
-  //     kunjunganWahanaPerBulan,
-  //     totalKunjunganWahana,
-  //   });
-  // }
-  public async wahana({ request, response }: HttpContextContract) {
-    const { startDate: startDateParam, endDate: endDateParam } = request.body();
-    const today = new Date();
-    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-    const startDate = startDateParam
-      ? startDateParam
-      : today.toISOString().split("T")[0].replace(/-/g, "/");
-    const endDate = endDateParam
-      ? endDateParam
-      : today.toISOString().split("T")[0].replace(/-/g, "/");
-
-    // return startDate;
-
-    // const startDate = startDate
-    //   .toISOString()
-    //   .split("T")[0]
-    //   .replace(/-/g, "/");
-    // const endDate = endDate
-    //   .toISOString()
-    //   .split("T")[0]
-    //   .replace(/-/g, "/");
-
-    // console.log("start", startDate);
-    // console.log("end", endDate);
-
-    const [
-      kunjunganWahanaPerHari,
-      kunjunganWahanaPerBulan,
-      totalKunjunganWahana,
-    ] = await Promise.all([
-      Database.rawQuery(
-        `
-        SELECT master_wahana.nama,
-       jenis_tiket.nama_jenis,
-       SUM(detail_transaksi.qty) as total_kunjungan,
-       SUM(master_wahana.harga_tiket * detail_transaksi.qty) as pendapatan_per_wahana
-FROM detail_transaksi
-INNER JOIN transaksi_penjualan ON detail_transaksi.no_transaksi = transaksi_penjualan.no_transaksi
-INNER JOIN master_wahana ON detail_transaksi.id_wahana = master_wahana.id_wahana
-INNER JOIN jenis_tiket ON master_wahana.id_jenis = jenis_tiket.id_jenis
-WHERE SUBSTRING(detail_transaksi.no_transaksi, 1, 10) BETWEEN ? AND ?
-GROUP BY master_wahana.nama, jenis_tiket.nama_jenis
-
-      `,
-        [startDate, endDate]
-      ),
-      Database.from("detail_transaksi")
-        .innerJoin(
-          "transaksi_penjualan",
-          "detail_transaksi.no_transaksi",
-          "transaksi_penjualan.no_transaksi"
-        )
-        .innerJoin(
-          "master_wahana",
-          "detail_transaksi.id_wahana",
-          "master_wahana.id_wahana"
-        )
-        .whereBetween(
-          Database.raw("SUBSTRING(detail_transaksi.no_transaksi FROM 1 FOR 7)"),
-          [startDate.slice(0, 7), endDate.slice(0, 7)]
-        )
-        .groupBy("master_wahana.nama")
-        .select(
-          "master_wahana.nama",
-          Database.raw(
-            "count(distinct transaksi_penjualan.no_transaksi) as total_kunjungan"
-          )
-        ),
-
-      Database.from("detail_transaksi")
-        .innerJoin(
-          "transaksi_penjualan",
-          "detail_transaksi.no_transaksi",
-          "transaksi_penjualan.no_transaksi"
-        )
-        .innerJoin(
-          "master_wahana",
-          "detail_transaksi.id_wahana",
-          "master_wahana.id_wahana"
-        )
-        .groupBy("master_wahana.nama")
-        .countDistinct("transaksi_penjualan.no_transaksi as total")
-        .select("master_wahana.nama")
-        .then((results) =>
-          results.map(
-            (row) => ({
-              nama_wahana: row.nama,
-              jumlah: row.total,
-            }),
-            {}
-          )
-        ),
-    ]);
-
-    const kunjunganWahanaPerHariResult = kunjunganWahanaPerHari.rows.map(
-      (row) => ({
-        nama_wahana: row.nama,
-        jumlah: row.total_kunjungan,
-        jenis_tiket: row.nama_jenis,
-        pendapatan: row.pendapatan_per_wahana,
-      })
-    );
-
-    const kunjunganWahanaPerBulanResult = kunjunganWahanaPerBulan.map(
-      (row) => ({
-        nama_wahana: row.nama,
-        jumlah: row.total_kunjungan,
-      }),
-      {}
-    );
-
-    const totalPendapatan = kunjunganWahanaPerHari.rows.reduce(
-      (total, row) => parseInt(total) + parseInt(row.pendapatan_per_wahana),
-      0
-    );
-    response.status(200).json({
-      kunjunganWahanaPerHari: kunjunganWahanaPerHariResult,
-      kunjunganWahanaPerBulan: kunjunganWahanaPerBulanResult,
-      totalKunjunganWahana,
-      totalPendapatan,
-    });
-  }
-
-  // public async fix({ response }: HttpContextContract) {
-  //   const currentDate = "2024-01-22";
-  //   const totalHargaTiketRows = await Database.rawQuery(
-  //     `
-  //       SELECT
-  //           dt.no_transaksi,
-  //           SUM(mw.harga_tiket * dt.qty) AS total_harga
-  //       FROM
-  //           detail_transaksi dt
-  //       JOIN
-  //           master_wahana mw ON dt.id_wahana = mw.id_wahana
-  //       WHERE
-  //           TO_DATE(SUBSTRING(dt.no_transaksi FROM 1 FOR 10), 'YYYY/MM/DD') = ?
-  //       GROUP BY
-  //           dt.no_transaksi
-  //   `,
-  //     [currentDate]
-  //   );
-
-  //   for (const row of totalHargaTiketRows.rows) {
-  //     const noTransaksi = row.no_transaksi;
-  //     const totalHarga = parseFloat(row.total_harga);
-
-  //     // Ambil nilai diskon dari tabel transaksi_penjualan
-  //     const diskonResult = await Database.rawQuery(
-  //       `
-  //           SELECT diskon
-  //           FROM transaksi_penjualan
-  //           WHERE no_transaksi = ?
-  //       `,
-  //       [noTransaksi]
-  //     );
-
-  //     if (diskonResult.rows.length > 0) {
-  //       const diskon = parseFloat(diskonResult.rows[0].diskon);
-
-  //       // Hitung total_bayar (total_harga - diskon)
-  //       const totalBayar = totalHarga - diskon;
-
-  //       // Update tabel transaksi_penjualan
-  //       await Database.rawQuery(
-  //         `
-  //               UPDATE transaksi_penjualan
-  //               SET total = ?, total_bayar = ?
-  //               WHERE no_transaksi = ?
-  //           `,
-  //         [totalHarga, totalBayar, noTransaksi]
-  //       );
-  //     }
-  //   }
-  // }
   public async show({}: HttpContextContract) {}
 
   public async edit({}: HttpContextContract) {}
