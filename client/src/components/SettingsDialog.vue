@@ -13,7 +13,7 @@
         class="q-px-md q-pt-sm q-pb-md glass relative"
         style="width: 90vw; height: fit-content"
       >
-        <!-- <div>
+        <div>
           <q-avatar
             size="40px"
             class="cursor-pointer z-top absolute-top-right q-ma-sm"
@@ -22,7 +22,7 @@
             icon="close"
             @click="dialogRef.hide()"
           />
-        </div> -->
+        </div>
         <!-- <q-icon name="close"  /> -->
         <q-item>
           <q-item-section avatar>
@@ -36,9 +36,9 @@
             >
           </q-item-section>
         </q-item>
-        <q-separator inset />
-
-        <div class="row q-col-gutter-sm justify-center">
+        
+        <div v-if="!manlessMode" class="row q-col-gutter-sm justify-center">
+          <q-separator inset />
           <div v-for="setting in settingItems" class="row">
             <!-- style="min-width: 20vw" -->
             <setting-item
@@ -50,6 +50,83 @@
           </div>
         </div>
 
+        <!-- Add this section to the settings form -->
+        <q-separator spaced />
+        
+        <div class="text-h6 q-mb-md">Manless Mode Settings</div>
+        
+        <div class="q-gutter-md">
+          <q-toggle
+            v-model="manlessMode"
+            label="Enable Manless Mode"
+            color="primary"
+            @change="switchManlessMode"
+          />
+     
+        </div>
+
+        <div class="row q-col-gutter-md">
+          <div class="col-12">
+            <div class="text-h6 q-mb-md">Camera Settings</div>
+            
+            <!-- License Plate Camera -->
+            <div class="q-mb-md">
+              <div class="text-subtitle1 q-mb-sm">License Plate Camera</div>
+              <div class="row q-col-gutter-md">
+                <div class="col">
+                  <q-select
+                    v-model="selectedPlateCam"
+                    :options="cameras"
+                    label="USB Camera"
+                    option-value="deviceId"
+                    option-label="label"
+                    :disable="!manlessMode"
+                    clearable
+                    emit-value
+                    map-options
+                    @update:model-value="updatePlateCamera"
+                  />
+                </div>
+                <div class="col">
+                  <q-input
+                    v-model="plateCameraUrl" 
+                    label="CCTV URL"
+                    :disable="!manlessMode || selectedPlateCam"
+                  />
+                </div>
+              </div>
+            </div>
+      
+            <!-- Driver Camera -->
+            <div class="q-mb-md">
+              <div class="text-subtitle1 q-mb-sm">Driver Camera</div>
+              <div class="row q-col-gutter-md">
+                <div class="col">
+                  <q-select
+                    v-model="selectedDriverCam"
+                    :options="cameras"
+                    label="USB Camera"
+                    option-value="deviceId"
+                    option-label="label"
+                    :disable="!manlessMode"
+                    clearable
+                    emit-value
+                    map-options
+                    @update:model-value="updateDriverCamera"
+                  />
+                </div>
+                <div class="col">
+                  <q-input
+                    v-model="driverCameraUrl"
+                    label="CCTV URL"
+                    :disable="!manlessMode || selectedDriverCam"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <q-card-actions align="right">
           <q-chip
             text-color="primary"
@@ -57,7 +134,7 @@
             style="padding: 2rem 1rem"
             class="q-mt-lg q-pa-md text-h6 rounded-corner"
           >
-            <q-btn push icon="keyboard_return" color="black" class="q-ma-md"
+            <q-btn @click="onSaveSettings" push icon="keyboard_return" color="black" class="q-ma-md"
           /></q-chip>
         </q-card-actions>
       </q-card>
@@ -107,6 +184,7 @@ import {
   ref,
   onUpdated,
   onUnmounted,
+  watch,
 } from "vue";
 import { useComponentStore } from "src/stores/component-store";
 import { useSettingsStore } from "src/stores/settings-store";
@@ -128,6 +206,15 @@ import CameraOutUrlDialog from "./CameraOutUrlDialog.vue";
 const componentStore = useComponentStore();
 const transaksiStore = useTransaksiStore();
 const settingsStore = useSettingsStore();
+const switchManlessMode = (val) => {
+  manlessMode.value = val;
+  ls.set("manlessMode", val);
+  if (val) {
+    getCameras();
+  } else {
+    window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+  }
+};
 
 // ls.config.encrypt = false;
 
@@ -189,6 +276,32 @@ const settingItems = [
     label: () => settingsStore.cameraOutUrl,
   },
 ];
+
+const manlessMode = ref(ls.get('manlessMode')||false)
+const plateCameraUrl = ref(ls.get('plateCameraUrl') || '')  
+const driverCameraUrl = ref(ls.get('driverCameraUrl') || '')
+
+const cameras = ref([])
+const selectedPlateCam = ref(null)
+const selectedDriverCam = ref(null)
+
+watch(manlessMode, async (val) => {
+  localStorage.setItem('manlessMode', val)
+  if(val) {
+    await getCameras()
+  }
+  if(!val) {
+    window.addEventListener("keydown", handleKeyDownOnSettingDialog);
+  }
+})
+
+watch(plateCameraUrl, (val) => {
+  localStorage.setItem('plateCameraUrl', val)
+})
+
+watch(driverCameraUrl, (val) => {
+  localStorage.setItem('driverCameraUrl', val)
+})
 
 const onSaveSettings = () => {
   dialogRef.value.hide();
@@ -272,15 +385,67 @@ const handleKeyDownOnSettingDialog = async (event) => {
   }
 };
 
-onMounted(async () => {
-  await settingsStore.getPosConfig();
-  window.addEventListener("keydown", handleKeyDownOnSettingDialog);
-  // componentStore.settingsKey = true;
-});
+const getCameras = async () => {
+  try {
+    console.log('Requesting camera permissions...');
+    await navigator.mediaDevices.getUserMedia({ video: true });
+    
+    console.log('Enumerating devices...');
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoCameras = devices
+      .filter(device => device.kind === 'videoinput')
+      .map(device => ({
+        deviceId: device.deviceId,
+        label: device.label || `Camera ${cameras.value.length + 1}`,
+        value: device.deviceId // Add value for q-select compatibility
+      }));
+    
+    cameras.value = videoCameras;
+    console.log('Available cameras:', cameras.value);
+    
+    // Restore saved camera selections
+    const savedPlateCam = ls.get('plateCameraDevice');
+    const savedDriverCam = ls.get('driverCameraDevice');
+    
+    if (savedPlateCam) {
+      selectedPlateCam.value = savedPlateCam;
+    }
+    if (savedDriverCam) {
+      selectedDriverCam.value = savedDriverCam;
+    }
+  } catch (error) {
+    console.error('Error getting cameras:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Could not access camera. Please check permissions.',
+      position: 'top'
+    });
+  }
+};
 
-// onUpdated(() => {
-//   console.log("settings updated");
-// });
+const updatePlateCamera = (deviceId) => {
+  if (deviceId) {
+    ls.set('plateCameraDevice', deviceId)
+    plateCameraUrl.value = '' // Clear URL if USB camera selected
+  }
+}
+
+const updateDriverCamera = (deviceId) => {
+  if (deviceId) {
+    ls.set('driverCameraDevice', deviceId)
+    driverCameraUrl.value = '' // Clear URL if USB camera selected
+  }
+}
+
+onMounted(async () => {
+  await settingsStore.getPosConfig()
+  if (manlessMode.value) {
+    await getCameras()  
+  }
+  if (!manlessMode.value) {
+    window.addEventListener("keydown", handleKeyDownOnSettingDialog)
+  }
+})
 
 const onDialogHide = () => {
   if (transaksiStore.lokasiPos === "-" || transaksiStore.lokasiPos === null) {

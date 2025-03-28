@@ -56,8 +56,9 @@ module.exports = configure(function (/* ctx */) {
       // analyze: true,
       env: {
         API_URL: "http://127.0.0.1:80/api",
-        COMPANY_NAME:"TABAROKTA"
-      },
+        COMPANY_NAME:"TABAROKTA",
+        ALPR_SERVICE_URL:"http://localhost:8000",
+      }
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

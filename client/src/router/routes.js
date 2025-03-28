@@ -9,7 +9,7 @@ const routes = [
         name: "outgate",
         component: () => {
           if (window && window.electron) {
-            return import("pages/OutGatePage.vue");
+            return import("pages/EntryGatePage.vue");
           } else {
             return import("pages/LaporanTransaksiPerHariPage.vue");
           }
@@ -70,6 +70,11 @@ const routes = [
           requiresAuth: true,
         },
       },
+      { 
+        path: '/entry-gate', 
+        name: 'entry-gate',
+        component: () => import('pages/EntryGatePage.vue') 
+      }
     ],
   },
 

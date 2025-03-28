@@ -2,10 +2,10 @@
   <!-- <div> -->
   <!-- <q-card flat class="bg-transparent">
       <q-card-section> -->
-  <q-chip icon="today" class="bg-transparent">
+  <q-chip square icon="today" class="bg-white">
     <span class="text-primary text-weight-bolder"> {{ day }}, {{ date }} </span>
   </q-chip>
-  <q-chip class="bg-transparent q-mr-md" style="width: 100px">
+  <q-chip square class="bg-white q-mr-md" style="width: 120px">
     <h4 class="text-weight-bolder text-secondary digital-7">
       {{ hours }}<span class="text-grey">:</span>{{ minutes
       }}<span class="text-grey">:</span>{{ seconds }}

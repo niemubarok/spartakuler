@@ -19,11 +19,18 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
+
+// Health check endpoint
+
+
 Route.get("/", () => {
   return "Works";
 });
 
 Route.group(() => {
+  Route.get('/health', async () => {
+    return { status: 'ok' }
+  })
   Route.group(() => {
     Route.get("/all", "TransactionsController.index");
     Route.post("/nopol", "TransactionsController.getDataByNopol");
@@ -100,10 +107,10 @@ Route.group(() => {
 
   //manless endpoint
   Route.group(() => {
-    // Route.get("/button/:termno/:direction/:qrcode", "ManlessController.button");
     Route.get("/button/:params", "ManlessController.button");
     Route.get("/longrange/:params", "ManlessController.button");
     Route.get("/card/:params", "ManlessController.card");
+    Route.post("/detect-plate", "ManlessController.detectPlate"); // Add new ALPR endpoint
     Route.get("/:params", "ManlessController.button");
   }).prefix("manless");
 

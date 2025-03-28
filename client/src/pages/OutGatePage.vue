@@ -1,4 +1,8 @@
 <template>
+
+  <div v-if="manlessMode">
+      <EntryGatePage class="full-width q-pa-md" />
+  </div>
   <div v-if="$q.screen.lt.md" class="text-h2">
     <q-card class="fixed-center glass">
       <img src="~assets/logo.png" />
@@ -320,6 +324,7 @@ import CaemeraOut from "src/components/CameraOut.vue";
 import Camera from "src/components/Camera.vue";
 import CompanyName from "src/components/CompanyName.vue";
 import SettingsDialog from "src/components/SettingsDialog.vue";
+import EntryGatePage from "src/pages/EntryGatePage.vue";
 
 // dialogues
 import TicketDialog from "src/components/TicketDialog.vue";
@@ -337,6 +342,8 @@ const transaksiStore = useTransaksiStore();
 const componentStore = useComponentStore();
 const settingsStore = useSettingsStore();
 const $q = useQuasar();
+
+const manlessMode = ref(ls.get("manlessMode") || false);
 
 const darkMode = ref(ls.get("darkMode")) || ref(false);
 const darkModeToggle = () => {

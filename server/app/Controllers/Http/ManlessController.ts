@@ -1,4 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Database from '@ioc:Adonis/Lucid/Database'
+import axios from 'axios'
+import FormData from 'form-data'
 
 export default class ManlessController {
 
@@ -17,6 +20,90 @@ export default class ManlessController {
 
     return response.status(200).json(data)
   }
+
+  public async detectPlate({ request, response }: HttpContextContract) {
+    try {
+      const imageFile = request.file('file')
+      if (!imageFile) {
+        return response.status(400).json({
+          error: 'No image file provided'
+        })
+      }
+
+      // Create form data for ALPR service
+      const formData = new FormData()
+      formData.append('file', imageFile.tmpPath, {
+        filename: 'image.jpg',
+        contentType: 'image/jpeg'
+      })
+
+      // Call external ALPR service
+      const alprResponse = await axios.post(
+        process.env.ALPR_SERVICE_URL || 'http://localhost:5000/detect-plate',
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders()
+          }
+        }
+      )
+
+      const predictions = alprResponse.data
+      if (predictions && predictions.length > 0) {
+        const bestPrediction = predictions[0]
+        const { plate_number, confidence, bbox } = bestPrediction
+
+        if (confidence > 90) {
+          const now = new Date()
+          const transactionId = `TRX${Date.now()}`
+          
+          await Database.table('transaksi_parkir').insert({
+            id: transactionId,
+            no_pol: plate_number,
+            id_kendaraan: 'A',
+            status: 1,
+            id_pintu_masuk: '01', 
+            waktu_masuk: now,
+            status_transaksi: '1',
+            tanggal: now,
+            sinkron: 0,
+            upload: 0,
+            manual: 0
+          })
+
+          try {
+            await axios.post(`${process.env.GATE_CONTROL_URL || 'http://localhost:8080'}/open`, {
+              gateId: '01',
+              transactionId
+            })
+          } catch (gateError) {
+            console.error('Gate control error:', gateError)
+          }
+
+          return response.status(200).json({
+            confidence,
+            plate_number,
+            bbox,
+            gateOpened: true
+          })
+        }
+      }
+
+      return response.status(200).json({
+        confidence: 0,
+        plate_number: '',
+        bbox: null,
+        gateOpened: false
+      })
+
+    } catch (error) {
+      console.error('ALPR Error:', error)
+      return response.status(500).json({
+        error: 'Failed to process license plate'
+      })
+    }
+  }
+
   public async button({request, response}: HttpContextContract) {
     const urlParams = request.params().params.split('&')
 
@@ -60,14 +147,4 @@ export default class ManlessController {
 
     return response.status(200).json(data)
   }
-
-  public async store({}: HttpContextContract) {}
-
-  public async show({}: HttpContextContract) {}
-
-  public async edit({}: HttpContextContract) {}
-
-  public async update({}: HttpContextContract) {}
-
-  public async destroy({}: HttpContextContract) {}
 }
