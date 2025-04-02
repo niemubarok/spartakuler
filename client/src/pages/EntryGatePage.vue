@@ -1,43 +1,57 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <!-- Show manless or manual interface based on settings -->
-    <template v-if="isManlessMode">
-      <ManlessEntryGate class="full-width q-pa-md" />
-    </template>
-    <template v-else>
-        <OutGatePage/>
-      <!-- <div class="column items-center q-gutter-y-md full-width">
-        <Clock />
-        <Camera 
-          :cameraUrl="cameraUrl"
-          :fileName="'entry'"
-          :isInterval="true"
+  <div >
+    <Suspense>
+      <template v-if="isManlessMode">
+        <ManlessEntryGate 
+          class="full-width q-pa-md" 
+          :key="componentKey"
         />
-      </div> -->
-    </template>
-  </q-page>
+      </template>
+      <template v-else>
+        <OutGatePage :key="componentKey" />
+      </template>
+      
+      <template #fallback>
+        <div class="flex flex-center">
+          <q-spinner size="3em" />
+          <span class="q-ml-md">Loading...</span>
+        </div>
+      </template>
+    </Suspense>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import ManlessEntryGate from 'src/components/ManlessEntryGate.vue'
-import Camera from 'components/Camera.vue'
-import Clock from 'components/Clock.vue'
 import { useSettingsStore } from 'src/stores/settings-store'
 import OutGatePage from 'src/pages/OutGatePage.vue'
 
 const settingsStore = useSettingsStore()
 const isManlessMode = ref(localStorage.getItem('manlessMode') === 'true')
-const cameraUrl = ref('')
+const componentKey = ref(0)
 
-onMounted(() => {
-  cameraUrl.value = settingsStore.cameraInUrl
-})
-
-// Watch for settings changes
-window.addEventListener('storage', (e) => {
+// Force component re-render when mode changes
+const handleModeChange = (e) => {
   if (e.key === 'manlessMode') {
     isManlessMode.value = e.newValue === 'true'
+    componentKey.value++ // Force re-render
   }
+}
+
+onMounted(() => {
+  window.addEventListener('storage', handleModeChange)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleModeChange)
 })
 </script>
+
+<style scoped>
+.entry-gate-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+</style>

@@ -1,11 +1,16 @@
 <template>
   <div class="camera-container">
+    <q-chip
+        style="border-radius:8px; top: 0px; left: 0px; font-size:medium; background-color: rgba(0, 0, 0, 0.5);"
+        class="text-white absolute inset-shadow"
+        :label="label"
+      />
     <div class="connection-indicator" :class="{ 'connected': cameraStatus }">
       <div class="indicator-dot"></div>
     </div>
 
     <div v-if="cameraType === 'usb'" class="rounded-corner camera-view">
-      <video ref="videoRef"></video>
+      <video ref="videoRef" class="rounded-corner"></video>
     </div>
     <div v-else-if="imageSrc" class="camera-view">
       <img
@@ -27,7 +32,7 @@
 </template>
 
 <script setup>
-import { watch, ref, onMounted, onUnmounted, defineExpose, computed } from "vue";
+import { watch, ref, onMounted, onUnmounted, computed } from "vue";
 import ls from "localstorage-slim";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
@@ -55,7 +60,11 @@ const props = defineProps({
   cameraType: {
     type: String,
     default: 'cctv',
-  }
+  },
+  label: {
+    type: String,
+    default: 'Camera',
+  },
 });
 
 const retryCount = ref(0);

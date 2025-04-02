@@ -1,14 +1,14 @@
 <template>
   <div class="manless-entry" :class="{'dark-mode': isDark}">
     <!-- Header Section -->
-    <div class="row q-mb-xs " >
+    <div class="row q-mb-md " >
       <div class="col-12" >
-        <q-card class="header-card q-px-sm q-pt-sm" :class="isDark ? 'bg-dark text-white' : 'bg-primary text-white'" style="height: 50px;">
+        <q-card flat class=" q-px-sm q-pt-sm" :class="isDark ? 'text-white' : 'bg-white text-primary'" style="height: 50px;">
           <!-- <q-card-section> -->
             <div class="row items-center justify-between">
               <div class="text-h5">Manless Entry System</div>
               <div class="row items-center q-gutter-md">
-                <Clock class="text-h6" />
+                <Clock />
                 <q-toggle
                   :model-value="isDark"
                   @update:model-value="toggleDarkMode"
@@ -36,25 +36,29 @@
     </div>
 
     <!-- Camera Section -->
-    <div class="row q-col-gutter-xs q-mb-sm">
+    <div class="row q-col-gutter-xs ">
       <!-- Left side - License Plate Camera -->
       <div class="col-12 col-md-6">
-        <q-card class="camera-card" :class="isDark ? 'bg-dark text-white' : 'bg-white text-dark'">
-          <q-card-section class="plate-camera-container">
-            <div class="row items-center justify-between q-mb-sm">
-              <div class="text-h6">License Plate Camera</div>
+        <q-card flat class="camera-card bg-transparent">
+          <!-- <div class="q-ma-sm">
+          </div> -->
+          <!-- <q-card-section class="plate-camera-container"> -->
+            <!-- <div class="row items-center justify-between q-mb-sm"> -->
+              <!-- <q-badge outline color="dark" text-color="dark" class="text-body1 "  :class="{'text-white': isDark}">License Plate Camera</q-badge> -->
+              <!-- <div class="text-h6">License Plate Camera</div> -->
               <q-btn 
               dense
-              flat 
+              push 
               :loading="isCapturing"
               :disable="isCapturing"
               label="Manual Capture" 
-              :color="isDark ? 'white' : 'primary'"
-              class="text-bold" 
+              color="white"
+              text-color="primary"
+              class="text-bold absolute-bottom-left z-top q-ma-lg" 
               @click="onPlateCaptured" 
               icon="camera"
             />
-            </div>
+            <!-- </div> -->
             <Camera 
               ref="plateCameraRef"
               :cameraUrl="plateCameraUrl"
@@ -66,9 +70,10 @@
               @captured="onPlateCaptured"
               @error="onCameraError"
               class="camera-feed"
+              label="License Plate Camera"
             />
 
-            <div v-if="capturedPlate">
+            <div v-if="plateResult?.plate_number && capturedPlate">
               <q-card  class="plate-detection-overlay bg-dark q-pa-xs" :class="{'bg-white ': isDark}">
                 <q-badge
           style="top: -10px; left: 7px"
@@ -81,15 +86,14 @@
               </q-card>
             </div>
            
-          </q-card-section>
+          <!-- </q-card-section> -->
         </q-card>
       </div>
 
       <!-- Right side - Driver Camera -->
       <div class="col-12 col-md-6">
-        <q-card class="camera-card" :class="isDark ? 'bg-dark text-white' : 'bg-white text-dark'">
-          <q-card-section>
-            <div class="text-h6 q-mb-sm">Driver Camera</div>
+        <q-card flat class="camera-card bg-transparent">
+         
             <Camera 
               ref="driverCameraRef"
               :cameraUrl="driverCameraUrl"
@@ -99,21 +103,21 @@
               :cameraType="ls.get('driverCameraDevice') ? 'usb' : 'cctv'"
               @error="onCameraError"
               class="camera-feed"
+              label="Driver Camera"
             />
-          </q-card-section>
         </q-card>
       </div>
     </div>
 
     <!-- Control Panel Section -->
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md q-mt-sm">
       <!-- Gate Control -->
-      <div class="col-8">
+      <div class="col-8 column justify-between">
         <!-- detected plates -->
 
-        <q-card class="control-card q-mt-md" style="height:17dvh">
+        <q-card class="control-card q-mt-md col" >
           <div>
-            <q-badge style="top: -10px; left: 7px" class="absolute text-body1 text-white "  :class="{'text-white': isDark}">Detected Plates</q-badge>
+            <q-badge  class="absolute text-body2 text-white "  :class="{'text-white': isDark}">Detected Plates</q-badge>
           </div>
           <q-card-section>
         <!-- Plate Detection Overlay -->
@@ -121,26 +125,24 @@
               enter-active-class="animate__animated animate__zoomIn"
               leave-active-class="animate__animated animate__zoomOut"
             >
-            <div v-if="detectedPlates.length" class="row items-center justify-center q-ml-xl">
-              <q-card flat v-for="plate in detectedPlates" :key="plate" class="q-pa-md ">
-                <!-- <div>
-
-                  <q-badge 
-                  floating
-                  :color="plate?.confidence > 0.85 ? 'positive' : 'warning'"
-                  text-color="white"
-                  class="text-bold"
-                  >
-                 
-                </q-badge>
-              </div> -->
-                <div class="row items-center q-gutter-sm">
-              <!-- <div class="text-body1">Detected Plate: </div> -->
-              <ALPRDetectedPlateNumber :key="plate" :plate_number="plate?.plate_number" :badge="plate?.confidence?.toFixed(2)" />
-            </div>
-          </q-card>
-        </div>
-            </transition>
+              <div class="row items-center justify-center q-ml-xl">
+                <template v-if="detectedPlates.length">
+                  <q-card flat v-for="plate in detectedPlates" :key="plate" class="q-pa-md bg-transparent">
+                    <div class="row items-center q-gutter-sm">
+                      <ALPRDetectedPlateNumber :key="plate" :plate_number="plate?.plate_number" :badge="plate?.confidence?.toFixed(2)" />
+                    </div>
+                  </q-card>
+                </template>
+                <template v-else>
+                  <q-card flat class="q-pa-md bg-transparent" v-for="n in 3" :key="n">
+                    <div class="column items-center q-gutter-sm">
+                      <!-- <q-skeleton type="text" width="50px" height="24px" animation="wave" /> -->
+                      <q-skeleton type="text" width="120px" height="10dvh" animation="wave" />
+                    </div>
+                  </q-card>
+                </template>
+              </div>
+        </transition>
             </q-card-section>
             </q-card>
         <q-card class="control-card q-mt-sm">
@@ -149,6 +151,7 @@
             <div class="row items-center justify-between">
               <div class="gate-status text-h5" :class="{'text-positive': gateStatus === 'OPEN', 'text-negative': gateStatus === 'CLOSED'}">
                 <q-chip
+                outline
                   :color="gateStatus === 'OPEN' ? 'positive' : 'negative'"
                   text-color="white"
                   class="text-h6"
@@ -160,6 +163,7 @@
               <div class="row q-gutter-md">
                 <q-btn
                 dense
+                push
                   color="positive"
                   icon="door_front"
                   label="OPEN GATE"
@@ -167,16 +171,17 @@
                   :disable="isProcessing || gateStatus === 'OPEN'"
                   @click="manualOpen"
                   class="text-bold"
-                  size="lg"
+                  size="md"
                 />
                 <q-btn
                 dense
+                push
                   color="primary"
                   icon="settings"
                   label="SETTINGS"
                   @click="openSettings"
                   class="text-bold"
-                  size="lg"
+                  size="md"
                 />
               </div>
             </div>
@@ -188,7 +193,7 @@
       <div class="col-4  q-mt-md">
         <q-card class="log-card q-pt-md" :class="{'bg-dark text-white': isDark}">
           <div>
-            <q-badge style="top: -10px; left: 7px" class="absolute text-body1 text-white "  :class="{'text-white': isDark}">Recent Activity</q-badge>
+            <q-badge style="top: 0px; left: 0px" class="absolute text-body2 text-white "  :class="{'text-white': isDark}">Recent Activity</q-badge>
           </div>
           <q-card-section>
         <q-scroll-area style="height: 25dvh;">
@@ -358,7 +363,7 @@ const detectPlate = async () => {
     );
 
     if (alprResponse.data.length > 0) {
-      const bestMatch = alprResponse.data[0];
+      const bestMatch = alprResponse.data?.[0];
       plateResult.value = bestMatch;
       
       // Set plate image if available in response
@@ -374,7 +379,7 @@ const detectPlate = async () => {
       
       if (bestMatch.confidence >= 0.8) {
         gateStatus.value = 'OPEN';
-        addActivityLog(`Gate opened automatically for plate ${bestMatch.plate_number}`);
+        addActivityLog(`Gate opened automatically for plate ${bestMatch?.plate_number}`);
         
         // Auto close after 30 seconds
         setTimeout(() => {
@@ -474,7 +479,7 @@ const capturedPlate= ref(null)
 const bestConfidenceDetectedPlate = ref(null)
 const addDetectedPlate = (plate) => {
   detectedPlates.value.push(plate)
-  if (detectedPlates.value.length > 3) {
+  if (detectedPlates.value?.length > 3) {
     detectedPlates.value.shift()
   }
 }
@@ -484,14 +489,14 @@ const onPlateCaptured = async () => {
     await detectPlate();
 
     if(i==0){
-       capturedPlate.value = `data:image/jpeg;base64,${plateResult.value.plate_image}`
+       capturedPlate.value = `data:image/jpeg;base64,${plateResult.value?.plate_image}`
     }
     // Add detected plate to the list
     if (plateResult.value) {
       addDetectedPlate(plateResult.value);
       
-      if( plateResult.value.confidence > 0.85) {
-        bestConfidenceDetectedPlate.value = plateResult.value.plate_number
+      if( plateResult.value?.confidence > 0.85) {
+        bestConfidenceDetectedPlate.value = plateResult.value?.plate_number
       }
     }
 
@@ -502,8 +507,6 @@ const onPlateCaptured = async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
- 
-  console.log("🚀 ~ detectedPlates:", detectedPlates.value)
 }
 
 const dataToStore = ref({
@@ -534,7 +537,7 @@ const openSettingsFromError = () => {
 
 onMounted(async () => {
   // Load dark mode preference
-  isDark.value = ls.get('darkMode') || false
+  // isDark.value = ls.get('darkMode') || false
   document.body.classList.toggle('body--dark', isDark.value)
 
   await checkBackendConnection();
@@ -608,7 +611,7 @@ onUnmounted(() => {
 }
 
 .camera-card, .control-card, .log-card, .header-card {
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -673,7 +676,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 16px;
   right: 16px;
-  width: min(300px, 90%);
+  width: min(200px, 90%);
   height: auto;
   pointer-events: none;
   z-index: 100;

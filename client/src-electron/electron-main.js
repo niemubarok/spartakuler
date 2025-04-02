@@ -1,4 +1,4 @@
-import { ipcMain, app, BrowserWindow } from "electron";
+import { ipcMain, app, BrowserWindow, session } from "electron";
 import path from "path";
 import os from "os";
 
@@ -19,12 +19,29 @@ function createWindow() {
     fullscreen: true,
     useContentSize: true,
     webPreferences: {
+      nodeIntegration: true,
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       sandbox: false,
     },
   });
+
+    // Add CSP headers
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+        "default-src 'self'; " +
+        "script-src 'self'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "connect-src 'self' http://127.0.0.1:3333 http://localhost:3333 http://localhost:8000; " +
+        "img-src 'self' data: http://127.0.0.1:* http://localhost:*;"
+      ]
+        }
+      })
+    })
 
   
   ipcMain.on("download-pdf", async (event, arrayBuffer, filename) => {

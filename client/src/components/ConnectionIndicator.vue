@@ -55,7 +55,7 @@ const isDark = inject('isDark', false)
 }
 
 .connection-indicator.connected.light {
-  background-color: rgba(0, 200, 0, 0.2);
+  background-color: rgba(1, 128, 1, 0.89);
   color: #f3f8f3;
 }
 

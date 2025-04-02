@@ -13,8 +13,9 @@ export const useThemeStore = defineStore('theme', {
       ls.set('darkMode', this.isDark)
       document.body.classList.toggle('body--dark', this.isDark)
       
-      const $q = useQuasar()
-      $q.dark.set(this.isDark)
+      
+      
+      useQuasar()?.dark.set(this.isDark)
     },
     
     initDarkMode() {
@@ -23,8 +24,8 @@ export const useThemeStore = defineStore('theme', {
         this.isDark = savedMode
         document.body.classList.toggle('body--dark', this.isDark)
         
-        const $q = useQuasar()
-        $q.dark.set(this.isDark)
+        
+        useQuasar().dark.set(this.isDark)
       }
     }
   }
