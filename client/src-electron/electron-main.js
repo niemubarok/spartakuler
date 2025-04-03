@@ -36,7 +36,7 @@ function createWindow() {
         "default-src 'self'; " +
         "script-src 'self'; " +
         "style-src 'self' 'unsafe-inline'; " +
-        "connect-src 'self' http://127.0.0.1:3333 http://localhost:3333 http://localhost:8000; " +
+        "connect-src 'self' http://127.0.0.1:3333 http://localhost:3333 http://localhost:8000 http://127.0.0.1:8000; " +
         "img-src 'self' data: http://127.0.0.1:* http://localhost:*;"
       ]
         }

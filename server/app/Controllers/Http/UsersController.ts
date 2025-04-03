@@ -1,8 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
 
-import { determineShift } from "App/utils/time-utils";
-
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
     const users = await Database.query() // 👈 gives an instance of select query builder

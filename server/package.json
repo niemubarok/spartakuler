@@ -12,10 +12,15 @@
     "@adonisjs/assembler": "^5.9.6",
     "@japa/preset-adonis": "^1.2.0",
     "@japa/runner": "^2.5.1",
+    "@types/chai": "^5.2.1",
     "@types/proxy-addr": "^2.0.3",
+    "@types/sinon": "^17.0.4",
     "@types/source-map-support": "^0.5.10",
     "adonis-preset-ts": "^2.1.0",
+    "chai": "^5.2.0",
+    "fs-extra": "^11.3.0",
     "pino-pretty": "^10.2.3",
+    "sinon": "^20.0.0",
     "typescript": "~4.6",
     "youch": "^3.3.3",
     "youch-terminal": "^2.2.3"
@@ -24,6 +29,7 @@
     "@adonisjs/core": "^5.9.0",
     "@adonisjs/lucid": "^18.4.2",
     "@adonisjs/repl": "^3.1.11",
+    "@poppinss/file-generator": "^2.1.4",
     "axios": "^1.6.2",
     "crypto": "^1.0.1",
     "js-base64": "^3.7.5",
@@ -31,10 +37,13 @@
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.3",
     "pg": "^8.11.3",
+    "phc-argon2": "^1.1.4",
+    "phc-bcrypt": "^1.0.8",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "request-digest": "^1.0.13",
     "sharp": "^0.33.3",
     "source-map-support": "^0.5.21"
   }
+ 
 }

@@ -36,12 +36,12 @@ api.interceptors.response.use(
   (error) => {
     if (!error.response || error.code === 'ERR_NETWORK') {
       isBackendConnected.value = false
-      Notify.create({
-        type: 'negative',
-        message: 'Backend server connection error. Please check your connection.',
-        position: 'top',
-        timeout: 3000
-      })
+      // Notify.create({
+      //   type: 'negative',
+      //   message: 'Backend server connection error. Please check your connection.',
+      //   position: 'top',
+      //   timeout: 3000
+      // })
     }
     return Promise.reject(error)
   }
@@ -56,12 +56,12 @@ alpr.interceptors.response.use(
   (error) => {
     if (!error.response || error.code === 'ERR_NETWORK') {
       isAlprConnected.value = false
-      Notify.create({
-        type: 'negative',
-        message: 'ALPR server connection error. Please check your connection.',
-        position: 'top',
-        timeout: 3000
-      })
+      // Notify.create({
+      //   type: 'negative',
+      //   message: 'ALPR server connection error. Please check your connection.',
+      //   position: 'top',
+      //   timeout: 3000
+      // })
     }
     return Promise.reject(error)
   }
@@ -72,4 +72,4 @@ export default boot(({ app }) => {
   app.config.globalProperties.$api = api
 })
 
-export { api, alpr }
+export { api, alpr, axios }

@@ -36,92 +36,142 @@
             >
           </q-item-section>
         </q-item>
-        
-        <div v-if="!manlessMode" class="row q-col-gutter-sm justify-center">
-          <q-separator inset />
-          <div v-for="setting in settingItems" class="row">
-            <!-- style="min-width: 20vw" -->
-            <setting-item
-              :icon="setting.icon"
-              :title="setting.title"
-              :label="setting.label() || '-'"
-              :shortcut="setting.shortcut"
+
+        <!-- General Settings Section -->
+        <div class="text-h6 q-mb-md">General Settings</div>
+        <div class="q-pa-md">
+          <!-- Backend URL Settings -->
+          <div class="q-mb-md">
+            <div class="text-subtitle1 q-mb-sm">Backend Settings</div>
+            <div class="row q-col-gutter-md">
+              <div class="col">
+                <q-input
+                  v-model="backendUrl"
+                  label="Backend URL"
+                  @update:model-value="updateBackendUrl"
+                />
+              </div>
+              <div class="col">
+                <q-input
+                  v-model="alprUrl"
+                  label="ALPR Service URL"
+                  @update:model-value="updateAlprUrl"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Parking Location Settings -->
+          <div class="q-mb-md">
+            <div class="text-subtitle1 q-mb-sm">Parking Location</div>
+            <div class="row q-col-gutter-md">
+              <div class="col">
+                <q-select
+                  v-model="selectedLocation"
+                  :options="parkingLocations"
+                  label="Location"
+                  option-label="label"
+                  emit-value
+                  map-options
+                  @update:model-value="updateLocation"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode Selection -->
+          <div class="q-mb-md">
+            <div class="text-subtitle1 q-mb-sm">Operation Mode</div>
+            <q-toggle
+              v-model="manlessMode"
+              label="Enable Manless Mode"
+              color="primary"
+              @change="switchManlessMode"
             />
           </div>
         </div>
 
-        <!-- Add this section to the settings form -->
         <q-separator spaced />
-        
-        <div class="text-h6 q-mb-md">Manless Mode Settings</div>
-        
-        <div class="q-gutter-md">
-          <q-toggle
-            v-model="manlessMode"
-            label="Enable Manless Mode"
-            color="primary"
-            @change="switchManlessMode"
-          />
-     
-        </div>
 
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div class="text-h6 q-mb-md">Camera Settings</div>
-            
-            <!-- License Plate Camera -->
+        <!-- Mode Specific Settings -->
+        <div v-if="manlessMode">
+          <!-- Manless Mode Settings -->
+          <div class="text-h6 q-mb-md">Manless Mode Settings</div>
+          <div class="q-pa-md">
+            <!-- Camera Settings -->
             <div class="q-mb-md">
-              <div class="text-subtitle1 q-mb-sm">License Plate Camera</div>
-              <div class="row q-col-gutter-md">
-                <div class="col">
-                  <q-select
-                    v-model="selectedPlateCam"
-                    :options="cameras"
-                    label="USB Camera"
-                    option-value="deviceId"
-                    option-label="label"
-                    :disable="!manlessMode"
-                    clearable
-                    emit-value
-                    map-options
-                    @update:model-value="updatePlateCamera"
-                  />
+              <div class="text-subtitle1 q-mb-sm">Camera Settings</div>
+              
+              <!-- License Plate Camera -->
+              <div class="q-mb-md">
+                <div class="text-caption q-mb-sm">License Plate Camera</div>
+                <div class="row q-col-gutter-md">
+                  <div class="col">
+                    <q-select
+                      v-model="selectedPlateCam"
+                      :options="cameras"
+                      label="USB Camera"
+                      option-value="deviceId"
+                      option-label="label"
+                      clearable
+                      emit-value
+                      map-options
+                      @update:model-value="updatePlateCamera"
+                    />
+                  </div>
+                  <div class="col">
+                    <q-input
+                      v-model="plateCameraUrl" 
+                      label="CCTV URL"
+                      @update:model-value="updatePlateCameraUrl"
+                    />
+                  </div>
                 </div>
-                <div class="col">
-                  <q-input
-                    v-model="plateCameraUrl" 
-                    label="CCTV URL"
-                    :disable="!manlessMode || selectedPlateCam"
-                  />
+              </div>
+        
+              <!-- Driver Camera -->
+              <div class="q-mb-md">
+                <div class="text-caption q-mb-sm">Driver Camera</div>
+                <div class="row q-col-gutter-md">
+                  <div class="col">
+                    <q-select
+                      v-model="selectedDriverCam"
+                      :options="cameras"
+                      label="USB Camera"
+                      option-value="deviceId"
+                      option-label="label"
+                      clearable
+                      emit-value
+                      map-options
+                      @update:model-value="updateDriverCamera"
+                    />
+                  </div>
+                  <div class="col">
+                    <q-input
+                      v-model="driverCameraUrl"
+                      label="CCTV URL"
+                      @update:model-value="updateDriverCameraUrl"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-      
-            <!-- Driver Camera -->
-            <div class="q-mb-md">
-              <div class="text-subtitle1 q-mb-sm">Driver Camera</div>
-              <div class="row q-col-gutter-md">
-                <div class="col">
-                  <q-select
-                    v-model="selectedDriverCam"
-                    :options="cameras"
-                    label="USB Camera"
-                    option-value="deviceId"
-                    option-label="label"
-                    :disable="!manlessMode"
-                    clearable
-                    emit-value
-                    map-options
-                    @update:model-value="updateDriverCamera"
-                  />
-                </div>
-                <div class="col">
-                  <q-input
-                    v-model="driverCameraUrl"
-                    label="CCTV URL"
-                    :disable="!manlessMode || selectedDriverCam"
-                  />
-                </div>
+          </div>
+        </div>
+
+        <div v-else>
+          <!-- Manual Mode Settings -->
+          <div class="text-h6 q-mb-md">Manual Mode Settings</div>
+          <div class="q-pa-md">
+            <div class="row q-col-gutter-sm justify-center">
+              <q-separator inset />
+              <div v-for="setting in settingItems" class="row">
+                <setting-item
+                  :icon="setting.icon"
+                  :title="setting.title"
+                  :label="setting.label() || '-'"
+                  :shortcut="setting.shortcut"
+                />
               </div>
             </div>
           </div>
@@ -277,7 +327,7 @@ const settingItems = [
   },
 ];
 
-const manlessMode = ref(ls.get('manlessMode')||false)
+const manlessMode = ref(ls.get('manlessMode')||true)
 const plateCameraUrl = ref(ls.get('plateCameraUrl') || '')  
 const driverCameraUrl = ref(ls.get('driverCameraUrl') || '')
 
@@ -286,7 +336,7 @@ const selectedPlateCam = ref(null)
 const selectedDriverCam = ref(null)
 
 watch(manlessMode, async (val) => {
-  localStorage.setItem('manlessMode', val)
+  ls.set('manlessMode', val)
   if(val) {
     await getCameras()
   }
@@ -296,11 +346,11 @@ watch(manlessMode, async (val) => {
 })
 
 watch(plateCameraUrl, (val) => {
-  localStorage.setItem('plateCameraUrl', val)
+  ls.set('plateCameraUrl', val)
 })
 
 watch(driverCameraUrl, (val) => {
-  localStorage.setItem('driverCameraUrl', val)
+  ls.set('driverCameraUrl', val)
 })
 
 const onSaveSettings = () => {
@@ -427,6 +477,7 @@ const updatePlateCamera = (deviceId) => {
   if (deviceId) {
     ls.set('plateCameraDevice', deviceId)
     plateCameraUrl.value = '' // Clear URL if USB camera selected
+    ls.set('plateCameraUrl', '')
   }
 }
 
@@ -434,7 +485,41 @@ const updateDriverCamera = (deviceId) => {
   if (deviceId) {
     ls.set('driverCameraDevice', deviceId)
     driverCameraUrl.value = '' // Clear URL if USB camera selected
+    ls.set('driverCameraUrl', '')
   }
+}
+
+const updatePlateCameraUrl = (url) => {
+  if (url) {
+    selectedPlateCam.value = null // Clear USB camera if URL entered
+    ls.set('plateCameraDevice', null)
+    ls.set('plateCameraUrl', url)
+  }
+}
+
+const updateDriverCameraUrl = (url) => {
+  if (url) {
+    selectedDriverCam.value = null // Clear USB camera if URL entered
+    ls.set('driverCameraDevice', null)
+    ls.set('driverCameraUrl', url)
+  }
+}
+
+const backendUrl = ref(ls.get('API_URL') || 'http://127.0.0.1:3333')
+const alprUrl = ref(ls.get('ALPR_URL') || 'http://127.0.0.1:8000')
+const selectedLocation = ref(null)
+const parkingLocations = ref([])
+
+const updateBackendUrl = (val) => {
+  ls.set('API_URL', val)
+}
+
+const updateAlprUrl = (val) => {
+  ls.set('ALPR_URL', val)
+}
+
+const updateLocation = (val) => {
+  transaksiStore.lokasiPos = val
 }
 
 onMounted(async () => {
@@ -445,6 +530,12 @@ onMounted(async () => {
   if (!manlessMode.value) {
     window.addEventListener("keydown", handleKeyDownOnSettingDialog)
   }
+  
+  // Set initial values
+  backendUrl.value = ls.get('API_URL') || ''
+  alprUrl.value = ls.get('ALPR_URL') || ''
+  parkingLocations.value = await settingsStore.getLocations() || []
+  selectedLocation.value = transaksiStore.lokasiPos
 })
 
 const onDialogHide = () => {

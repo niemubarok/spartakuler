@@ -173,8 +173,8 @@ export default class ReportsController {
       : today.toISOString().split("T")[0].replace(/-/g, "/");
 
     const currentDate = new Date();
-    const yearMonthDay = currentDate.toISOString().split("T")[0];
-    const yearMonth = yearMonthDay.slice(0, 7);
+    // const yearMonthDay = currentDate.toISOString().split("T")[0];
+    // const yearMonth = yearMonthDay.slice(0, 7);
 
     // Get the total revenue
     const totalPendapatan = await Database.from("transaksi_penjualan")

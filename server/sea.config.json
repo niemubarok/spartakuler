@@ -1,0 +1,4 @@
+{
+    "main": "build/server.js",
+    "output": "dist/server.blob"
+  }

@@ -2,6 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import axios from 'axios'
 import FormData from 'form-data'
+import fs from 'fs';
+import path from 'path';
 
 export default class ManlessController {
 
@@ -146,5 +148,84 @@ export default class ManlessController {
     }
 
     return response.status(200).json(data)
+  }
+
+  // public async storeTransaction({ request, response }: HttpContextContract) {
+  //   try {
+  //     const data = request.body();
+
+  //     await Database.table('gate_transactions').insert({
+  //       plate_number: data.plate_number,
+  //       plate_image: data.plate_image,
+  //       driver_image: data.driver_image,
+  //       timestamp: data.timestamp,
+  //       gate_status: data.gate_status,
+  //       location: data.location,
+  //       confidence: data.confidence,
+  //       processing_time: data.processing_time,
+  //       operator: data.operator,
+  //     });
+
+  //     return response.status(200).json({ message: 'Data saved successfully' });
+  //   } catch (error) {
+  //     console.error('Error saving entry data:', error);
+  //     return response.status(500).json({ message: 'Failed to save data', error });
+  //   }
+  // }
+
+  public async storeTransaction({ request, response }: HttpContextContract) {
+    try {
+      const data = request.body();
+      console.log("🚀 ~ ManlessController ~ storeTransaction ~ data:", data)
+
+      const platNumber = JSON.parse(data.detected_plates).map((item: any) => item.plate_number).join(', ');
+      console.log("🚀 ~ ManlessController ~ storeTransaction ~ platNumber:", platNumber)
+      const plateImageFile = request.file('plate_image');
+      const driverImageFile = request.file('driver_image');
+      const id = `${Date.now()}${platNumber.split(',')[0]}`;
+
+
+      let plateImagePath: string | null = null;
+      let driverImagePath: string | null = null;
+
+      if (plateImageFile) {
+        const plateImageName = `${id}.jpg`;
+        plateImagePath = `${plateImageName}`;
+        await plateImageFile.moveToDisk(path.join('images', 'plate'), {
+          name: plateImageName,
+          overwrite: true,
+        });
+      }
+
+      if (driverImageFile) {
+        const driverImageName = `${id}.jpg`;
+        driverImagePath = `${driverImageName}`;
+        await driverImageFile.moveToDisk(path.join('images','driver'), {
+          name: driverImageName,
+          overwrite: true,
+        });
+      }
+
+      
+
+      await Database.table('gate_transactions').insert({
+        id,
+        plate_number: platNumber,
+        plate_image: plateImagePath,
+        driver_image: driverImagePath,
+        entry_time: new Date(),
+        exit_time:  new Date(),
+        parking_fee: 0,
+        gate_status: data.gate_status,
+        location: data.location,
+        processing_time: data.processing_time,
+        operator: data.operator,
+      });
+
+      return response.status(200).json({ message: 'Data saved successfully' });
+    } catch (error) {
+      console.error('Error saving entry data:', error);
+      return response.status(500).json({ message: 'Failed to save data', error });
+    }
   }
 }

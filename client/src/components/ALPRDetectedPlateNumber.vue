@@ -12,6 +12,7 @@
         :label="`C: ${badge} %`"
       />
       <span
+      class="text-dark"
         style="width: 100%; text-align: center; font-weight: bolder; 
         font-size: clamp(0.2rem, 2vw, 2rem);
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);"

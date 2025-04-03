@@ -1,0 +1,25 @@
+{
+    "assets": [
+      "build/**/*",
+      ".adonisrc.json",
+      ".env",
+      "config/**/*",
+      "database/**/*",
+      "app/**/*",
+      "contracts/**/*",
+      "providers/**/*",
+      "start/**/*",
+      "node_modules/@adonisjs/**/*"
+    ],
+    "targets": [
+      "latest-win-x64"
+    ],
+    "outputPath": "dist",
+    "compressed": true,
+    "options": {
+      "commonjs": true
+    },
+    "ignore": [
+      "node_modules/sqlite3/deps/**/*"
+    ]
+  }

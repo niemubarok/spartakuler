@@ -26,9 +26,10 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import ManlessEntryGate from 'src/components/ManlessEntryGate.vue'
 import { useSettingsStore } from 'src/stores/settings-store'
 import OutGatePage from 'src/pages/OutGatePage.vue'
+import ls from 'localstorage-slim'
 
 const settingsStore = useSettingsStore()
-const isManlessMode = ref(localStorage.getItem('manlessMode') === 'true')
+const isManlessMode = ref(ls.get('manlessMode')|| true)
 const componentKey = ref(0)
 
 // Force component re-render when mode changes

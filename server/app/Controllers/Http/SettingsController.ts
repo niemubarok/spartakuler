@@ -13,20 +13,20 @@ export default class SettingsController {
     response.status(200).json(config_pos)
   }
 
-  public async configHardware({request, response}: HttpContextContract) {
+  public async configHardware({}: HttpContextContract) {
   }
 
-  public async softSetting({response}: HttpContextContract) {
+  public async softSetting({}: HttpContextContract) {
   }
 
-  public async logo({response}: HttpContextContract) {
+  public async logo({}: HttpContextContract) {
   }
 
-  public async pesan({response}: HttpContextContract) {
-    const pesan = await Database.from('pesan').select('*').where()
+  public async pesan({}: HttpContextContract) {
+    // const pesan = await Database.from('pesan').select('*').where()
   }
 
-  public async snapshot({response}: HttpContextContract) {
+  public async snapshot({}: HttpContextContract) {
   }
 
   public async destroy({}: HttpContextContract) {}

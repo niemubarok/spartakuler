@@ -25,15 +25,29 @@ export default class TransactionsController {
     imageBuffer: Buffer
   ): Promise<string | null> {
     // Pengecekan apakah imageBuffer ada dan merupakan instance dari Buffer
-    if (!imageBuffer || !(imageBuffer instanceof Buffer)) {
+    if (!imageBuffer) {
       return null;
     }
 
     try {
-      const compressedImage = await sharp(imageBuffer)
-        .resize(512) // Atur ukuran maksimal gambar
-        .jpeg({ quality: 80 }) // Atur kualitas gambar
+      // Check if input is already base64
+      const isBase64 = imageBuffer.toString().match(/^data:image\/[a-z]+;base64,/);
+      if (isBase64) {
+      // If it's base64, decode first, then compress
+      const actualData = imageBuffer.toString().split(',')[1];
+      const imgBuffer = Buffer.from(actualData, 'base64');
+      const compressedImage = await sharp(imgBuffer)
+        .resize(512)
+        .jpeg({ quality: 80 })
         .toBuffer();
+      return `data:image/jpeg;base64,${compressedImage.toString('base64')}`;
+      }
+
+      // If not base64, compress directly
+      const compressedImage = await sharp(imageBuffer)
+      .resize(512)
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
       return compressedImage.toString("base64");
     } catch (error) {
@@ -153,7 +167,7 @@ export default class TransactionsController {
 
     response.status(200).json({ count: transaction.count });
   }
-  public async getPicture({ request, response }: HttpContextContract) {
+  public async getPicture({ request }: HttpContextContract) {
     const no_pol = request.body().no_pol;
     const pic = await Database.rawQuery(
       `SELECT pic_body_masuk FROM transaksi_parkir WHERE  LOWER(no_pol) = LOWER('${no_pol}')`
@@ -311,6 +325,30 @@ export default class TransactionsController {
       }
     } catch (error) {
       return error;
+    }
+  }
+
+  public async saveDataToStore({ request, response }: HttpContextContract) {
+    try {
+      const data = request.body();
+
+      // Insert data into the transaksi_parkir table
+      await Database.table('transaksi_parkir').insert({
+        detected_plates: JSON.stringify(data.detected_plates),
+        plate_image: data.plate_image,
+        driver_image: data.driver_image,
+        timestamp: data.timestamp,
+        gate_status: data.gate_status,
+        location: data.location,
+        confidence_threshold_met: data.confidence_threshold_met,
+        processing_time: data.processing_time,
+        operator: data.operator,
+      });
+
+      response.status(200).json({ message: 'Data saved successfully' });
+    } catch (error) {
+      console.error('Error saving data:', error);
+      response.status(500).json({ message: 'Failed to save data', error });
     }
   }
 }

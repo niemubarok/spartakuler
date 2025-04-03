@@ -190,19 +190,29 @@ module.exports = configure(function (/* ctx */) {
         productName: "Sparta", // Added productName for better identification
         // targets: [
         // {
-         target: "AppImage",
+        //  target: "AppImage",
         // },
           // {
-        //target: "portable", // Added Windows target
-        // nsis: {
-        //   differentialPackage: true,
-        //   differentialPackageId: "SpartaApp-differential",
-        //   createDesktopShortcut: true,
-        //   oneClick: true,
-
-        //   // installerName: "SpartaApp",
-        //   // shortcutName: "SpartaApp",
-        // },
+            win: {
+              target: "nsis",
+              artifactName: "${productName}-Setup-${version}.${ext}",
+              asarUnpack: ['**/*.node'],
+              // Disable signing untuk development
+              signAndEditExecutable: false
+            },
+            
+            // NSIS configuration
+            nsis: {
+              differentialPackage: false,
+              createDesktopShortcut: true,
+              oneClick: true,
+              // Optional settings
+              shortcutName: "Sparta",
+              uninstallDisplayName: "Sparta",
+              // If you need custom installation directory
+              // allowToChangeInstallationDirectory: true
+            }
+        
 
         // win: {
         //   target:"portable ",
