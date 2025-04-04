@@ -178,11 +178,16 @@ export default class ManlessController {
       const data = request.body();
       console.log("🚀 ~ ManlessController ~ storeTransaction ~ data:", data)
 
-      const platNumber = JSON.parse(data.detected_plates).map((item: any) => item.plate_number).join(', ');
-      console.log("🚀 ~ ManlessController ~ storeTransaction ~ platNumber:", platNumber)
+      const detectedPlates = JSON.parse(data.detected_plates).map((item: any) => item.plate_number).join(', ');
+      const bestConfidencePlate = JSON.parse(data.detected_plates).reduce((prev: any, current: any) => {
+        return (prev.confidence > current.confidence) ? prev : current;
+      }
+      ).plate_number;
+      console.log("🚀 ~ ManlessController ~ bestConfidencePlate ~ bestConfidencePlate:", bestConfidencePlate)
+      console.log("🚀 ~ ManlessController ~ storeTransaction ~ platNumber:", detectedPlates)
       const plateImageFile = request.file('plate_image');
       const driverImageFile = request.file('driver_image');
-      const id = `${Date.now()}${platNumber.split(',')[0]}`;
+      const id = `${Date.now()}${detectedPlates.split(',')[0]}`;
 
 
       let plateImagePath: string | null = null;
@@ -208,19 +213,45 @@ export default class ManlessController {
 
       
 
-      await Database.table('gate_transactions').insert({
-        id,
-        plate_number: platNumber,
-        plate_image: plateImagePath,
-        driver_image: driverImagePath,
-        entry_time: new Date(),
-        exit_time:  new Date(),
-        parking_fee: 0,
-        gate_status: data.gate_status,
-        location: data.location,
-        processing_time: data.processing_time,
-        operator: data.operator,
-      });
+      // Determine if this is an entry or exit based on data
+      const isExit = data.transaction_type === 'exit';
+      
+      if (isExit) {
+        // Update existing transaction for exit
+        await Database.from('gate_transactions')
+          .where('plate_number', bestConfidencePlate)
+          .whereNull('exit_time')
+          .orderBy('entry_time', 'desc')
+          .limit(1)
+          .update({
+        exit_time: new Date(),
+        exit_plate_image: plateImagePath,
+        exit_driver_image: driverImagePath,
+        exit_plate_number: bestConfidencePlate,
+        exit_detected_plates: detectedPlates,
+        transaction_status: 1
+          });
+      } else {
+        // Insert new entry transaction
+        await Database.table('gate_transactions').insert({
+          id,
+          entry_detected_plates: detectedPlates,
+          entry_plate_number: bestConfidencePlate,
+          entry_plate_image: plateImagePath,
+          entry_driver_image: driverImagePath,
+          entry_time: new Date(),
+          exit_time: null,
+          exit_plate_image: null,
+          exit_driver_image: null,
+          exit_plate_number: null,
+          exit_detected_plates: null,
+          parking_fee: 0,
+          location: data.location,
+          processing_time: data.processing_time,
+          operator: data.operator,
+          transaction_status: 0,
+        });
+      }
 
       return response.status(200).json({ message: 'Data saved successfully' });
     } catch (error) {

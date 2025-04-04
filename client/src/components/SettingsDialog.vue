@@ -88,6 +88,12 @@
               color="primary"
               @change="switchManlessMode"
             />
+            <q-toggle
+              v-model="enableExitGateMode"
+              label="Enable Exit Gate Mode"
+              color="primary"
+              @change="switchGateModeMode"
+            />
           </div>
         </div>
 
@@ -151,6 +157,33 @@
                       v-model="driverCameraUrl"
                       label="CCTV URL"
                       @update:model-value="updateDriverCameraUrl"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- QR Scanner Camera -->
+              <div class="q-mb-md">
+                <div class="text-caption q-mb-sm">QR Scanner Camera</div>
+                <div class="row q-col-gutter-md">
+                  <div class="col">
+                    <q-select
+                      v-model="selectedScannerCam"
+                      :options="cameras"
+                      label="USB Camera"
+                      option-value="deviceId"
+                      option-label="label"
+                      clearable
+                      emit-value
+                      map-options
+                      @update:model-value="updateScannerCamera"
+                    />
+                  </div>
+                  <div class="col">
+                    <q-input
+                      v-model="scannerCameraUrl"
+                      label="CCTV URL"
+                      @update:model-value="updateScannerCameraUrl"
                     />
                   </div>
                 </div>
@@ -266,6 +299,11 @@ const switchManlessMode = (val) => {
   }
 };
 
+const switchGateModeMode = (val) => {
+  enableExitGateMode.value = val;
+    ls.set("exitGateMode", val);
+};
+
 // ls.config.encrypt = false;
 
 const $q = useQuasar();
@@ -328,12 +366,15 @@ const settingItems = [
 ];
 
 const manlessMode = ref(ls.get('manlessMode')||true)
+const enableExitGateMode = ref(ls.get('exitGateMode')||false)
 const plateCameraUrl = ref(ls.get('plateCameraUrl') || '')  
 const driverCameraUrl = ref(ls.get('driverCameraUrl') || '')
 
 const cameras = ref([])
 const selectedPlateCam = ref(null)
 const selectedDriverCam = ref(null)
+const selectedScannerCam = ref(null)
+const scannerCameraUrl = ref(ls.get('scannerCameraUrl') || '')
 
 watch(manlessMode, async (val) => {
   ls.set('manlessMode', val)
@@ -344,6 +385,9 @@ watch(manlessMode, async (val) => {
     window.addEventListener("keydown", handleKeyDownOnSettingDialog);
   }
 })
+watch(enableExitGateMode, async (val) => {
+  ls.set('exitGateMode', val)
+})
 
 watch(plateCameraUrl, (val) => {
   ls.set('plateCameraUrl', val)
@@ -351,6 +395,10 @@ watch(plateCameraUrl, (val) => {
 
 watch(driverCameraUrl, (val) => {
   ls.set('driverCameraUrl', val)
+})
+
+watch(scannerCameraUrl, (val) => {
+  ls.set('scannerCameraUrl', val)
 })
 
 const onSaveSettings = () => {
@@ -456,12 +504,16 @@ const getCameras = async () => {
     // Restore saved camera selections
     const savedPlateCam = ls.get('plateCameraDevice');
     const savedDriverCam = ls.get('driverCameraDevice');
+    const savedScannerCam = ls.get('scannerCameraDevice');
     
     if (savedPlateCam) {
       selectedPlateCam.value = savedPlateCam;
     }
     if (savedDriverCam) {
       selectedDriverCam.value = savedDriverCam;
+    }
+    if (savedScannerCam) {
+      selectedScannerCam.value = savedScannerCam;
     }
   } catch (error) {
     console.error('Error getting cameras:', error);
@@ -489,6 +541,14 @@ const updateDriverCamera = (deviceId) => {
   }
 }
 
+const updateScannerCamera = (deviceId) => {
+  if (deviceId) {
+    ls.set('scannerCameraDevice', deviceId)
+    scannerCameraUrl.value = '' // Clear URL if USB camera selected
+    ls.set('scannerCameraUrl', '')
+  }
+}
+
 const updatePlateCameraUrl = (url) => {
   if (url) {
     selectedPlateCam.value = null // Clear USB camera if URL entered
@@ -502,6 +562,14 @@ const updateDriverCameraUrl = (url) => {
     selectedDriverCam.value = null // Clear USB camera if URL entered
     ls.set('driverCameraDevice', null)
     ls.set('driverCameraUrl', url)
+  }
+}
+
+const updateScannerCameraUrl = (url) => {
+  if (url) {
+    selectedScannerCam.value = null // Clear USB camera if URL entered
+    ls.set('scannerCameraDevice', null)
+    ls.set('scannerCameraUrl', url)
   }
 }
 

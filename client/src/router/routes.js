@@ -1,3 +1,9 @@
+import ls from 'localstorage-slim'
+
+const isElectron = window && window.electron
+
+const exitGateMode = ls.get('exitGateMode') || false
+
 const routes = [
   {
     path: "/",
@@ -8,7 +14,10 @@ const routes = [
         path: "",
         name: "outgate",
         component: () => {
-          if (window && window.electron) {
+          if (isElectron) {
+            if( exitGateMode) {
+              return import("pages/ExitGatePage.vue");
+            }
             return import("pages/EntryGatePage.vue");
           } else {
             return import("pages/LaporanTransaksiPerHariPage.vue");

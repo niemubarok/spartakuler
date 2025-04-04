@@ -12,7 +12,7 @@
               <Clock />
               <q-toggle :model-value="isDark" @update:model-value="toggleDarkMode" color="yellow" icon="dark_mode"
                 class="text-white" />
-              <ConnectionIndicator :is-connected="isBackendConnected" label="Backend" class="indicator-item" />
+              <ConnectionIndicator :is-connected="isBackendConnected" label="Server" class="indicator-item" />
               <ConnectionIndicator :is-connected="isALPRConnected" label="ALPR" class="indicator-item" icon="videocam"
                 iconOff="videocam_off" />
             </div>
@@ -1296,17 +1296,6 @@ const addDetectedPlate = (plate) => {
   }
 }
 
-const dataToStore = computed(() => ({
-  detected_plates: detectedPlates.value,
-  plate_image: capturedPlate.value,
-  driver_image: capturedDriver.value,
-  timestamp: new Date().toISOString(),
-  gate_status: gateStatus.value,
-  location: 'ENTRY_GATE_1', // Add your location identifier
-  processing_time: detectPlate.value?.processing_time, // Add processing time if available
-  operator: 'SYSTEM' // Or add operator ID if manual control
-}))
-
 const sendDataToBackend = async () => {
   try {
     const formData = new FormData();
@@ -1384,9 +1373,9 @@ const onPlateCaptured = async () => {
 
       addDetectedPlate(plateResult.value);
 
-      if (plateResult.value?.confidence > 0.85) {
-        bestConfidenceDetectedPlate.value = plateResult.value?.plate_number
-      }
+      // if (plateResult.value?.confidence > 0.85) {
+      //   bestConfidenceDetectedPlate.value = plateResult.value?.plate_number
+      // }
     }
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
@@ -1464,6 +1453,57 @@ onUnmounted(() => {
   background-color: rgba(0, 0, 0, 0.6);
   color: white;
   transition: all 0.3s ease;
+}
+
+/* Add pulse animation */
+.connection-indicator::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgb(99, 252, 132);
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 252, 132, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(99, 252, 132, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 252, 132, 0);
+  }
+}
+
+/* Add red color for disconnected state */
+.connection-indicator.disconnected::before {
+  background-color: rgb(255, 82, 82);
+  animation: pulse-red 1.5s ease infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(255, 82, 82, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+  }
 }
 
 .connection-indicator.connected {

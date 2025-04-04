@@ -1,6 +1,7 @@
 <template>
   <div class="camera-container">
     <q-chip
+        v-if="label"
         style="border-radius:8px; top: 0px; left: 0px; font-size:medium; background-color: rgba(0, 0, 0, 0.5);"
         class="text-white absolute inset-shadow"
         :label="label"
@@ -83,7 +84,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    default: 'Camera',
+    default: '',
   },
   manualBase64: {
     type: String,
@@ -97,11 +98,19 @@ const maxRetries = 3;
 const retryDelay = 2000; // 2 seconds
 const notFoundCount = ref(0);
 
-// Get the configured camera device ID based on location
+// Update the computed cameraDeviceId
 const cameraDeviceId = computed(() => {
-  const location = props.cameraLocation === 'plate' ? 'plateCameraDevice' : 'driverCameraDevice';
-  return ls.get(location);
-});
+  switch (props.cameraLocation) {
+    case 'plate':
+      return ls.get('plateCameraDevice')
+    case 'driver':
+      return ls.get('driverCameraDevice')
+    case 'scanner':
+      return ls.get('scannerCameraDevice')
+    default:
+      return undefined
+  }
+})
 
 // Update USB camera initialization to use specific device
 const initUsbCamera = async (deviceId) => {
@@ -136,7 +145,7 @@ const getImage = async () => {
       const canvas = document.createElement('canvas');
       canvas.width = videoRef.value.videoWidth;
       canvas.height = videoRef.value.videoHeight;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(videoRef.value, 0, 0);
       
       // Convert canvas to Blob
@@ -209,7 +218,7 @@ const cropImageFromFile = (file, cropArea) => {
       const image = new Image();
       image.onload = () => {
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
         canvas.width = cropArea.width;
         canvas.height = cropArea.height;
@@ -306,7 +315,7 @@ const setManualBase64 = async (base64String) => {
     image.onload = async () => {
       if (props.cropArea) {
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
         canvas.width = props.cropArea.width;
         canvas.height = props.cropArea.height;
