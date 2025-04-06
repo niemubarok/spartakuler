@@ -14,13 +14,14 @@
                 text-color="primary" class="text-bold absolute-bottom-left z-top q-ma-lg" @click="onPlateCaptured"
                 icon="camera" />
 
-              <Camera ref="plateCameraRef" :cameraUrl="plateCameraUrl" :fileName="'plate'" :isInterval="isAutoCaptureActive"
+              <Camera v-show="!base64String" ref="plateCameraRef" :cameraUrl="plateCameraUrl" :fileName="'plate'" :isInterval="isAutoCaptureActive"
             :intervalTime="3000" cameraLocation="plate" :cameraType="ls.get('plateCameraDevice') ? 'usb' : 'cctv'"
             @captured="onPlateCaptured" @error="onCameraError" class="camera-feed" label="License Plate Camera" />
-              <!-- <Camera ref="plateCameraRef" :manual-base64="base64String" :fileName="'plate'"
+
+              <Camera v-show="base64String" ref="plateCameraRef" :manual-base64="base64String" :fileName="'plate'"
                 :isInterval="isAutoCaptureActive" :intervalTime="3000" cameraLocation="plate"
                 @captured="onPlateCaptured" camera-type="manual" @error="onCameraError" class="camera-feed"
-                label="License Plate Camera" style="margin-top:-2dvh" /> -->
+                label="License Plate Camera" style="margin-top:-2dvh" />
 
               <div v-if="plateResult?.plate_number && capturedPlate">
                 <q-card class="plate-detection-overlay bg-dark q-pa-xs" :class="{ 'bg-white ': isDark }">
@@ -67,12 +68,13 @@
             <div class="column">
               <div class="col q-mb-md q-mt-md">
                 <!-- NOMOR TIKET -->
-                <q-chip square outline class="q-py-lg text-h6 text-dark q-mb-md relative" :class="isDark ? 'text-white' : 'text-dark'" style="width: 90%;" label="">
+                <q-chip square outline class="q-py-lg text-h6 text-dark q-mb-md relative" :class="isDark ? 'text-white' : 'text-dark'" style="width: 90%;" :label="transactionData?.id">
                   <q-badge color="primary" text-color="white" label="No. Tiket " class="q-mb-md absolute-top-left"
                     style="top: -8px; left: 5px" />
                 </q-chip>
                 <!-- PLAT NOMOR  -->
-                <PlatNomor style="transform: scale(1.1)" class="q-mt-md q-ml-md" />
+                <PlatNomor style="transform: scale(1.1)" class="q-mt-md q-ml-md" badge="Entry Plate Number" :plate_number="transactionData?.entry_plate_number"/>
+                <PlatNomor style="transform: scale(1.1)" class="q-mt-md q-ml-md" badge="Exit Plate Number" :plate_number="plateResult?.plate_number"/>
               </div>
              
             </div>
@@ -80,12 +82,12 @@
 
           <div class="col-5 q-pl-md">
             <q-timeline color="grey-6"  layout="dense">
-              <q-timeline-entry title="tanggalMasuk" subtitle="Tanggal Masuk" icon="today" />
+              <q-timeline-entry :title="formatDate(transactionData?.entry_time)" subtitle="Entry Date" icon="today" />
               <!-- side="right" -->
-              <q-timeline-entry title="waktuMasuk" subtitle="Waktu Masuk" icon="schedule" />
+              <q-timeline-entry :title="formatTime(transactionData?.entry_time)" subtitle="Entry Time" icon="schedule" />
               <!-- side="right" -->
 
-              <q-timeline-entry title="transaksiStore.durasi" subtitle="Lama Parkir" icon="timer" />
+              <q-timeline-entry :title="manlessStore.parkingDuration(transactionData?.entry_time)" subtitle="Duration" icon="timer" />
               <!-- side="right" -->
             </q-timeline>
           </div>
@@ -214,9 +216,14 @@ import PlatNomor from './PlatNomor.vue'
 import PlateNumber from './ALPRDetectedPlateNumber.vue'
 import ALPRDetectedPlateNumber from './ALPRDetectedPlateNumber.vue'
 import QRCodeScannerDialog from './QRCodeScannerDialog.vue'
+import { useManlessStore } from 'src/stores/manless-store'
+import { formatDate, formatTime } from 'src/utils/time-util'
+import { useComponentStore } from 'src/stores/component-store'
 
 const themeStore = useThemeStore()
+const manlessStore = useManlessStore()
 const isDark = computed(() => themeStore.isDark)
+const componentStore = useComponentStore()
 
 // Get external attributes
 const attrs = useAttrs()
@@ -374,6 +381,8 @@ const detectPlate = async () => {
 };
 
 const manualOpen = async () => {
+  await componentStore.openGate()
+  return
   try {
     isProcessing.value = true
     error.value = null
@@ -381,6 +390,7 @@ const manualOpen = async () => {
     // await alpr.post('/transactions/manual-open-gate', {
     //   gateId: '01'
     // })
+
 
     gateStatus.value = 'OPEN'
     addActivityLog('Gate opened manually by operator')
@@ -513,13 +523,14 @@ const onPlateCaptured = async () => {
 
 
   // Continue with plate detection
-  for (let i = 0; i < 3; i++) {
+  // for (let i = 0; i < 3; i++) {
     await detectPlate();
-    if (i == 0) {
-      capturedPlate.value = `data:image/jpeg;base64,${plateResult.value?.plate_image}`
-    }
-
+    // if (i == 0) {
+      
     if (plateResult.value) {
+      base64String.value = `data:image/jpeg;base64,${plateResult.value?.plate_image}`
+    // }
+      console.log("🚀 ~ onPlateCaptured ~ base64String.value:", base64String.value)
 
       if (plateResult.value?.confidence >= 0.8) {
         if (gateStatus.value === 'CLOSED') {
@@ -537,17 +548,17 @@ const onPlateCaptured = async () => {
         }, 30000);
       }
 
-      addDetectedPlate(plateResult.value);
+      // addDetectedPlate(plateResult.value);
 
       if (plateResult.value?.confidence > 0.85) {
         bestConfidenceDetectedPlate.value = plateResult.value?.plate_number
       }
-    }
+    // }
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   // Send data to backend after detection
-  await sendDataToBackend();
+  // await sendDataToBackend();
 }
 
 
@@ -574,9 +585,13 @@ const openSettingsFromError = () => {
 }
 
 const showQRScanner = ref(false)
+const transactionData = ref(null)
 
-const onQRCodeScanned = (result) => {
+const onQRCodeScanned =async (result) => {
   console.log("🚀 ~ onQRCodeScanned ~ result:", result)
+  transactionData.value = await manlessStore.getTransactionByPlateNumber("1862")
+  await onPlateCaptured()
+  // await manlessStore.getTransactionByPlateNumber("1862")
   // Handle the scanned QR code result
   // For example, you could set it as the ticket number:
   // transaksiStore.nomorTiket = result
@@ -584,6 +599,7 @@ const onQRCodeScanned = (result) => {
 }
 
 onMounted(async () => {
+  console.log("🚀 ~ onMounted ~ transactionData.value:", transactionData.value)
   // Load dark mode preference
   // isDark.value = ls.get('darkMode') || false
   document.body.classList.toggle('body--dark', isDark.value)
@@ -600,6 +616,8 @@ onMounted(async () => {
   // Add initial log
   addActivityLog('Manless system initialized')
 })
+
+
 
 // Clean up on component destroy
 onUnmounted(() => {

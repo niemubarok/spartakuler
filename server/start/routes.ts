@@ -111,6 +111,7 @@ Route.group(() => {
     Route.get("/longrange/:params", "ManlessController.button");
     Route.get("/card/:params", "ManlessController.card");
     Route.post("/detect-plate", "ManlessController.detectPlate"); // Add new ALPR endpoint
+    Route.post("/transaction/by/plate-number", "ManlessController.getTransaction"); // Add new ALPR endpoint
     Route.post('/store', 'ManlessController.storeTransaction'); // Add new route for saving entry data
     Route.get("/:params", "ManlessController.button");
   }).prefix("manless");

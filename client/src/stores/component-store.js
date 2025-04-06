@@ -42,6 +42,7 @@ export const useComponentStore = defineStore("component", {
     }),
     morphGroupModel: ref("btn"),
     miniMode: ref(false),
+    serialInput: ref(""),
   }),
   actions: {
     async getAvailableCameras() {
@@ -104,12 +105,15 @@ export const useComponentStore = defineStore("component", {
     },
     async openGate() {
       // console.log("port", port);
+      // port.close();
       // console.log("window", window.electron);
       await port.open();
       await port.write("*OUT1ON#");
 
       //
-      // port.close();
+      setTimeout(() => {
+        port.close();
+      }, 1000);
     },
     async closeGate() {
       // const { serialport } = window.electron;
@@ -117,6 +121,27 @@ export const useComponentStore = defineStore("component", {
       // port.open();
       port.write("*OUT1OFF#");
       await port.close();
+    },
+
+    async listenSerial() {
+      if (!port) return;
+      try {
+        console.log("🚀 ~ listenSerial ~ isPortOpened:", port.isPortOpened())
+        if (port.isPortOpened()=== false) {
+          console.log("🚀 ~ listenSerial ~ port.open()")
+          await port.open();
+        }
+        
+        // Gunakan event listener untuk data yang masuk
+        port.read((data) => {
+          console.log("🚀 ~ port.read ~ data:", data)
+          this.serialInput = data.toString();
+          console.log('Serial data received:', this.serialInput);
+        });
+    
+      } catch (err) {
+        console.error('Error opening serial port:', err);
+      }
     },
     nextMorph() {
       console.log("nextMorph");

@@ -2,8 +2,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import axios from 'axios'
 import FormData from 'form-data'
-import fs from 'fs';
 import path from 'path';
+import os from 'os'
+import { existsSync, mkdirSync } from 'fs'
 
 export default class ManlessController {
 
@@ -150,113 +151,120 @@ export default class ManlessController {
     return response.status(200).json(data)
   }
 
-  // public async storeTransaction({ request, response }: HttpContextContract) {
-  //   try {
-  //     const data = request.body();
-
-  //     await Database.table('gate_transactions').insert({
-  //       plate_number: data.plate_number,
-  //       plate_image: data.plate_image,
-  //       driver_image: data.driver_image,
-  //       timestamp: data.timestamp,
-  //       gate_status: data.gate_status,
-  //       location: data.location,
-  //       confidence: data.confidence,
-  //       processing_time: data.processing_time,
-  //       operator: data.operator,
-  //     });
-
-  //     return response.status(200).json({ message: 'Data saved successfully' });
-  //   } catch (error) {
-  //     console.error('Error saving entry data:', error);
-  //     return response.status(500).json({ message: 'Failed to save data', error });
-  //   }
-  // }
-
   public async storeTransaction({ request, response }: HttpContextContract) {
     try {
-      const data = request.body();
-      console.log("🚀 ~ ManlessController ~ storeTransaction ~ data:", data)
-
-      const detectedPlates = JSON.parse(data.detected_plates).map((item: any) => item.plate_number).join(', ');
+      const data = request.body()
+      const detectedPlates = JSON.parse(data.detected_plates).map((item: any) => item.plate_number).join(', ')
       const bestConfidencePlate = JSON.parse(data.detected_plates).reduce((prev: any, current: any) => {
-        return (prev.confidence > current.confidence) ? prev : current;
-      }
-      ).plate_number;
-      console.log("🚀 ~ ManlessController ~ bestConfidencePlate ~ bestConfidencePlate:", bestConfidencePlate)
-      console.log("🚀 ~ ManlessController ~ storeTransaction ~ platNumber:", detectedPlates)
-      const plateImageFile = request.file('plate_image');
-      const driverImageFile = request.file('driver_image');
-      const id = `${Date.now()}${detectedPlates.split(',')[0]}`;
+        return (prev.confidence > current.confidence) ? prev : current
+      }).plate_number
 
+      const plateImageFile = request.file('plate_image')
+      const driverImageFile = request.file('driver_image')
+      const id = `${Date.now()}${detectedPlates.split(',')[0]}`
 
-      let plateImagePath: string | null = null;
-      let driverImagePath: string | null = null;
+      let plateImagePath: string | null = null
+      let driverImagePath: string | null = null
 
       if (plateImageFile) {
-        const plateImageName = `${id}.jpg`;
-        plateImagePath = `${plateImageName}`;
-        await plateImageFile.moveToDisk(path.join('images', 'plate'), {
-          name: plateImageName,
-          overwrite: true,
-        });
+        const plateImageName = `${id}.jpg`
+        try {
+          await plateImageFile.moveToDisk('uploads', {
+            name: path.join('images', 'plate', data.transaction_type === 'exit' ? 'exit' : 'entry', plateImageName),
+            overwrite: true,
+          })
+          plateImagePath = plateImageName
+        } catch (error) {
+          console.error('Error saving plate image:', error)
+        }
       }
 
       if (driverImageFile) {
-        const driverImageName = `${id}.jpg`;
-        driverImagePath = `${driverImageName}`;
-        await driverImageFile.moveToDisk(path.join('images','driver'), {
-          name: driverImageName,
-          overwrite: true,
-        });
+        const driverImageName = `${id}.jpg`
+        try {
+          await driverImageFile.moveToDisk('uploads', {
+            name: path.join('images', 'driver', data.transaction_type === 'exit' ? 'exit' : 'entry', driverImageName),
+            overwrite: true,
+          })
+          driverImagePath = driverImageName
+        } catch (error) {
+          console.error('Error saving driver image:', error)
+        }
       }
 
-      
-
       // Determine if this is an entry or exit based on data
-      const isExit = data.transaction_type === 'exit';
-      
-      if (isExit) {
-        // Update existing transaction for exit
-        await Database.from('gate_transactions')
-          .where('plate_number', bestConfidencePlate)
-          .whereNull('exit_time')
-          .orderBy('entry_time', 'desc')
-          .limit(1)
-          .update({
+      const isExit = data.transaction_type === 'exit'
+
+      const entryData = {
+        id,
+        entry_detected_plates: detectedPlates,
+        entry_plate_number: bestConfidencePlate,
+        entry_plate_image: plateImagePath,
+        entry_driver_image: driverImagePath,
+        entry_time: new Date(),
+        exit_time: null,
+        exit_plate_image: null,
+        exit_driver_image: null,
+        exit_plate_number: null,
+        exit_detected_plates: null,
+        parking_fee: 0,
+        location: data.location,
+        processing_time: data.processing_time,
+        operator: data.operator,
+        transaction_status: 0,
+      }
+
+      const exitData = {
         exit_time: new Date(),
         exit_plate_image: plateImagePath,
         exit_driver_image: driverImagePath,
         exit_plate_number: bestConfidencePlate,
         exit_detected_plates: detectedPlates,
-        transaction_status: 1
-          });
-      } else {
-        // Insert new entry transaction
-        await Database.table('gate_transactions').insert({
-          id,
-          entry_detected_plates: detectedPlates,
-          entry_plate_number: bestConfidencePlate,
-          entry_plate_image: plateImagePath,
-          entry_driver_image: driverImagePath,
-          entry_time: new Date(),
-          exit_time: null,
-          exit_plate_image: null,
-          exit_driver_image: null,
-          exit_plate_number: null,
-          exit_detected_plates: null,
-          parking_fee: 0,
-          location: data.location,
-          processing_time: data.processing_time,
-          operator: data.operator,
-          transaction_status: 0,
-        });
+        transaction_status: 1,
       }
 
-      return response.status(200).json({ message: 'Data saved successfully' });
+      if (isExit) {
+        await Database.from('gate_transactions')
+          .where('plate_number', bestConfidencePlate)
+          .whereNull('exit_time')
+          .orderBy('entry_time', 'desc')
+          .limit(1)
+          .update(exitData)
+      } else {
+        await Database.table('gate_transactions').insert(entryData)
+      }
+
+      return response.status(200).json({ message: 'Data saved successfully' })
     } catch (error) {
-      console.error('Error saving entry data:', error);
-      return response.status(500).json({ message: 'Failed to save data', error });
+      console.error('Error saving entry data:', error)
+      return response.status(500).json({ message: 'Failed to save data', error })
+    }
+  }
+
+  public async getTransaction({ request, response }: HttpContextContract) {
+
+    const plateNumber = request.body()?.plate_number
+    console.log("🚀 ~ ManlessController ~ getTransaction ~ plateNumber:", plateNumber)
+    try {
+      const query = Database.from('gate_transactions')
+        .select('*')
+        .where('entry_plate_number','like', `%${plateNumber}%`)
+        .whereNull('exit_time')
+        .where('transaction_status', 0)
+        .orderBy('entry_time', 'desc')
+        .limit(1)
+      console.log("🚀 ~ ManlessController ~ getTransaction ~ query:", query)
+      
+      const transactions = await query
+      console.log("🚀 ~ ManlessController ~ getTransaction ~ transactions:", transactions)
+
+      return response.status(200).json(transactions)
+    } catch (error) {
+      console.error('Error fetching transactions:', error)
+      return response.status(500).json({ 
+        message: 'Failed to fetch transactions',
+        error
+      })
     }
   }
 }

@@ -1,3 +1,4 @@
+import os  from 'os';
 /**
  * Config source: https://git.io/JBt3o
  *
@@ -8,6 +9,7 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { driveConfig } from '@adonisjs/core/build/config'
 import Application from '@ioc:Adonis/Core/Application'
+import path from 'path';
 
 /*
 |--------------------------------------------------------------------------
@@ -53,7 +55,11 @@ export default driveConfig({
       | files.
       |
       */
-      root: Application.tmpPath('uploads'),
+      // root: Application.tmpPath('uploads'),
+      root: os.platform() === 'win32'
+        ? path.join('C:\\parkir')
+        : path.join(os.homedir(), 'parkir'),
+      // root: path.join(__dirname, '..', 'uploads'),
 
       /*
       |--------------------------------------------------------------------------

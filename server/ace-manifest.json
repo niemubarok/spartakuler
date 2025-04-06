@@ -7,7 +7,7 @@
       },
       "commandPath": "./commands/CreateUploadsSymlink",
       "commandName": "create:uploads:symlink",
-      "description": "Creates symlink for uploads directory",
+      "description": "Creates symlink for uploads directory and sets permissions",
       "args": [],
       "aliases": [],
       "flags": []

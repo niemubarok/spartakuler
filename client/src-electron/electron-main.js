@@ -16,6 +16,8 @@ function createWindow() {
     icon: path.resolve(__dirname, "icons/icon.png"), // tray icon
     // width: 1000,
     // height: 600,
+    
+    maximizable: false,
     fullscreen: true,
     useContentSize: true,
     webPreferences: {
@@ -26,6 +28,9 @@ function createWindow() {
       sandbox: false,
     },
   });
+
+    // mainWindow.setMenu(null);
+    // mainWindow.setMenuBarVisibility(false); 
 
     // Add CSP headers
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -57,6 +62,51 @@ function createWindow() {
       console.log("Error writing file", err);
     }
   });
+
+ipcMain.on('print-struk', (event, data) => {
+  const html = getStrukHTML(data)
+
+  const printWindow = new BrowserWindow({
+    show: false,
+    webPreferences: { offscreen: true }
+  })
+
+  printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
+
+  printWindow.webContents.on('did-finish-load', () => {
+    printWindow.webContents.print({
+      silent: true,
+      printBackground: true,
+      deviceName: 'EPSON TM-T82' // ganti nama printer kamu
+    }, (success, err) => {
+      if (!success) console.log('Print failed:', err)
+      printWindow.close()
+    })
+  })
+})
+
+function getStrukHTML(data) {
+  return `
+    <!DOCTYPE html>
+    <html><head><meta charset="UTF-8"><style>
+    body { font-family: 'Courier New'; font-size: 12px; width: 250px; padding: 10px; }
+    .center { text-align: center; } .bold { font-weight: bold; } .line { border-top: 1px dashed black; margin: 5px 0; }
+    .row { display: flex; justify-content: space-between; }
+    </style></head><body>
+    <div class="center bold">PARKIR OTOMATIS<br>PT. SINERGI INFORMATIKA</div>
+    <div class="line"></div>
+    <div class="row"><div>No Tiket</div><div>${data.ticketNo}</div></div>
+    <div class="row"><div>Tanggal</div><div>${data.date}</div></div>
+    <div class="row"><div>Jam Masuk</div><div>${data.time}</div></div>
+    <div class="row"><div>Plat</div><div>${data.plate}</div></div>
+    <div class="row"><div>Jenis</div><div>${data.type}</div></div>
+    <div class="line"></div>
+    <div class="center">Silakan simpan tiket ini<br>Untuk keluar parkir</div>
+    <div class="center" style="margin-top: 10px;">Terima Kasih</div>
+    </body></html>
+  `
+}
+
 
   // let grantedDeviceThroughPermHandler;
   mainWindow.webPreferences = {

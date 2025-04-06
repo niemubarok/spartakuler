@@ -45,6 +45,38 @@ export const getTime = () => {
   };
 };
 
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+export const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+export const calculateParkingTime = (entryTime, exitTime) => {
+  const entry = new Date(entryTime);
+  const exit = exitTime ? new Date(exitTime) : new Date();
+  const diffInMilliseconds = exit - entry;
+
+  const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+  
+  return {
+    hours,
+    minutes,
+    totalMinutes: hours * 60 + minutes,
+    totalHours: Math.ceil(hours + minutes/60)
+  };
+};
+
 export const setTime = (h, m, s) => {
   const currentDate = new Date();
   currentDate.setHours(h, m, s);

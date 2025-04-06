@@ -11,15 +11,15 @@
       <q-badge
         style="top: -10px; left: 7px"
         class="bg-dark text-white absolute-top-left inset-shadow"
-        label="Plat Nomor"
+        :label="badge"
       />
       <span
         class="full-width text-center text-weight-bolder"
         style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)"
       >
         {{
-          transaksiStore.platNomor
-            ? transaksiStore.platNomor.replace(/(\D)(\d+)(\D)/, "$1 $2 $3")
+          plate_number
+            ? plate_number.replace(/(\D)(\d+)(\D)/, "$1 $2 $3")
             : ""
         }}
       </span>
@@ -29,6 +29,15 @@
 
 <script setup>
 import { useTransaksiStore } from "src/stores/transaksi-store";
-
+const props = defineProps({
+  plate_number: {
+    type: String,
+    required: true,
+  },
+  badge: {
+    type: String,
+    default: "ALPR",
+  },
+});
 const transaksiStore = useTransaksiStore();
 </script>

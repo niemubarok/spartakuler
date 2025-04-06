@@ -265,24 +265,41 @@ function createSerialPort(portName) {
     baudRate: 9600,
     autoOpen: false,
   });
+
+  const read = (callback) => {
+    console.log("🚀 ~ listening to port")
+    // Perbaikan: Langsung gunakan data dari event
+    instance.on('data', (data) => {
+      console.log("🚀 ~ instance.on ~ data:", data.toString())
+      if (data) {
+        callback(data.toString());
+      }
+    });
+
+    instance.on('error', (err) => {
+      console.error('Serial port error:', err);
+    });
+  };
+
   const open = async () => {
     instance.open();
   };
 
   const write = async (data) => {
-    // instance.open();
     instance.write(data);
-    // instance.close();
   };
-
-  const data = instance.on("data", (data) => {
-    return data;
-  });
 
   const close = async () => {
     instance.close();
   };
-  return { instance, write, close, open, data };
+
+  const isPortOpened = () => {
+    console.log("isPortOpened", instance.isOpen);
+    return instance.isOpen;
+  };
+
+  // Hapus definisi data yang redundant
+  return { instance, write, close, open, read, isPortOpened };
 }
 
 // function getSerialPortList() {

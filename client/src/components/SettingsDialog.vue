@@ -76,6 +76,9 @@
                   @update:model-value="updateLocation"
                 />
               </div>
+
+              <q-btn color="primary" icon="check" label="Serial Port" @click="componentStore.selectSerialPortDialogModel = true" />
+              
             </div>
           </div>
 
